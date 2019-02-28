@@ -1,4 +1,5 @@
 $msBuild = "msbuild"
+$onWindows = $false
 try
 {
     & $msBuild /version
@@ -21,11 +22,16 @@ catch
     }
 
     Write-Host "Likely on Windows."
+    $onWindows = $true
 }
 
 Write-Host "MSBuild found. Compile the projects."
 
 $solution = "SharpSnmpLib.Samples.sln"
+if ($onWindows)
+{
+    $solution = "SharpSnmpLib.Samples.Windows.sln"
+}
 
 & $msBuild $solution /p:Configuration=Release /t:restore
 & $msBuild $solution /p:Configuration=Release /t:clean
