@@ -1,8 +1,8 @@
-<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
     <AssemblyName>SharpSnmpLib.Engine</AssemblyName>
     <RootNamespace>Lextm.SharpSnmpLib</RootNamespace>
-    <TargetFrameworks>netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid44</TargetFrameworks> 
+    <TargetFrameworks>netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid80</TargetFrameworks> 
     <PackageId>Lextm.SharpSnmpLib.Engine</PackageId>
     <Title>#SNMP Library</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -24,9 +24,9 @@
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">True</PublicSign>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <AssemblyVersion>11.0.0.0</AssemblyVersion>
-    <FileVersion>11.0.0.0</FileVersion>
-    <Version>11.0.0</Version>
+    <AssemblyVersion>11.1.0.0</AssemblyVersion>
+    <FileVersion>11.1.0.0</FileVersion>
+    <Version>11.1.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net452' ">win</RuntimeIdentifier>
   </PropertyGroup>
@@ -48,16 +48,13 @@
     <Reference Include="Xamarin.iOS" />
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'monoandroid44'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'monoandroid80'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SharpSnmpLib\SharpSnmpLib.csproj" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.1.0" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
-    <Exec Command="..\sign2.bat &quot;$(TargetPath)&quot;" />
-  </Target>
 </Project>

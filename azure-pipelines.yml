@@ -17,14 +17,16 @@ jobs:
   steps:
   - script: |
       set -e
-      sed -i -e 's/netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid44/netcoreapp2.1;netstandard1.3/' SharpSnmpLib/SharpSnmpLib.csproj
-      sed -i -e 's/netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid44/netcoreapp2.1;netstandard1.3/' SharpSnmpLib.Engine/SharpSnmpLib.Engine.csproj
+      sed -i -e 's/netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid80/netcoreapp2.1;netstandard1.3/' SharpSnmpLib.Engine/SharpSnmpLib.Engine.csproj
       sed -i -e 's/netstandard1.3;net452/netstandard1.3/' SharpSnmpLib.BouncyCastle/SharpSnmpLib.BouncyCastle.csproj
       sed -i -e 's/netcoreapp2.1;net452/netcoreapp2.1/' Tests/CSharpCore/Tests.NetStandard.csproj
-      dotnet build SharpSnmpLib.NetStandard.macOS.sln --configuration $(buildConfiguration)
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --filter "FullyQualifiedName~Lextm.SharpSnmpLib.Integration.TrapDaemonTestFixture" --framework netcoreapp2.1
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --filter "FullyQualifiedName~Lextm.SharpSnmpLib.Integration.DaemonTestFixture" --framework netcoreapp2.1
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --filter "FullyQualifiedName~Lextm.SharpSnmpLib.Unit" --framework netcoreapp2.1
+      dotnet build SharpSnmpLib.Samples.sln --configuration $(buildConfiguration)
+      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp2.1 --logger trx
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/*.trx'
 
 - job: macOS
 
@@ -41,14 +43,16 @@ jobs:
       sudo sysctl -w net.inet.udp.maxdgram=65535
       export CI=true
       set -e
-      sed -i -e 's/netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid44/netcoreapp2.1;netstandard1.3/' SharpSnmpLib/SharpSnmpLib.csproj
-      sed -i -e 's/netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid44/netcoreapp2.1;netstandard1.3/' SharpSnmpLib.Engine/SharpSnmpLib.Engine.csproj
+      sed -i -e 's/netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid80/netcoreapp2.1;netstandard1.3/' SharpSnmpLib.Engine/SharpSnmpLib.Engine.csproj
       sed -i -e 's/netstandard1.3;net452/netstandard1.3/' SharpSnmpLib.BouncyCastle/SharpSnmpLib.BouncyCastle.csproj
       sed -i -e 's/netcoreapp2.1;net452/netcoreapp2.1/' Tests/CSharpCore/Tests.NetStandard.csproj
-      dotnet build SharpSnmpLib.NetStandard.macOS.sln --configuration $(buildConfiguration)
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --filter "FullyQualifiedName~Lextm.SharpSnmpLib.Integration.TrapDaemonTestFixture" --framework netcoreapp2.1
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --filter "FullyQualifiedName~Lextm.SharpSnmpLib.Integration.DaemonTestFixture" --framework netcoreapp2.1
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --filter "FullyQualifiedName~Lextm.SharpSnmpLib.Unit" --framework netcoreapp2.1
+      dotnet build SharpSnmpLib.Samples.sln --configuration $(buildConfiguration)
+      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp2.1 --logger trx
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/*.trx'
 
 - job: Windows
 
@@ -63,8 +67,8 @@ jobs:
   steps:
   - script: |
       build.release.bat
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp2.1 --logger trx-netcore --collect "Code coverage"
-      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework net452 --logger trx-net --collect "Code coverage"
+      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp2.1 --logger trx --collect "Code coverage"
+      dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework net452 --logger trx --collect "Code coverage"
   - task: PublishTestResults@2
     condition: succeededOrFailed()
     inputs:

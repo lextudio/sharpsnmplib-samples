@@ -24,22 +24,15 @@
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">True</PublicSign>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <AssemblyVersion>11.0.0.0</AssemblyVersion>
-    <FileVersion>11.0.0.0</FileVersion>
-    <Version>11.0.0</Version>
+    <AssemblyVersion>11.1.0.0</AssemblyVersion>
+    <FileVersion>11.1.0.0</FileVersion>
+    <Version>11.1.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net452' ">win</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.2" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.1.0" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SharpSnmpLib\SharpSnmpLib.csproj" />
-  </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
-    <Exec Command="..\sign2.bat &quot;$(TargetPath)&quot;" />
-  </Target>
 </Project>
