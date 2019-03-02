@@ -1,9 +1,10 @@
-﻿using System.Net;
-using Lextm.SharpSnmpLib.Messaging;
+﻿using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using Moq;
+using System.Net;
 using Xunit;
+using IListenerBinding = Lextm.SharpSnmpLib.Pipeline.IListenerBinding;
 
 namespace Lextm.SharpSnmpLib.Unit.Pipeline
 {

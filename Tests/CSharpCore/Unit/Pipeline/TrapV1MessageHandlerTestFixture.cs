@@ -7,13 +7,14 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Net;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Pipeline;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Net;
 using Xunit;
+using IListenerBinding = Lextm.SharpSnmpLib.Pipeline.IListenerBinding;
 
 namespace Lextm.SharpSnmpLib.Unit.Pipeline
 {

@@ -8,7 +8,6 @@
 '
 Imports System.Net
 Imports Lextm.SharpSnmpLib
-Imports Lextm.SharpSnmpLib.Messaging
 Imports Lextm.SharpSnmpLib.Pipeline
 Imports Lextm.SharpSnmpLib.Security
 

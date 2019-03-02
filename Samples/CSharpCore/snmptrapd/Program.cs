@@ -6,12 +6,12 @@
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
-using System;
-using System.Net;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Pipeline;
 using Lextm.SharpSnmpLib.Security;
-using Lextm.SharpSnmpLib.Messaging;
+using System;
+using System.Net;
+using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
 
 namespace SnmpTrapD
 {

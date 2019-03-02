@@ -6,13 +6,15 @@
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
-using System;
-using System.Net;
 using Lextm.SharpSnmpLib;
-using Lextm.SharpSnmpLib.Pipeline;
-using Lextm.SharpSnmpLib.Security;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Objects;
+using Lextm.SharpSnmpLib.Pipeline;
+using Lextm.SharpSnmpLib.Security;
+using System;
+using System.Net;
+using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
+using MessageReceivedEventArgs = Lextm.SharpSnmpLib.Pipeline.MessageReceivedEventArgs;
 
 namespace SnmpD
 {

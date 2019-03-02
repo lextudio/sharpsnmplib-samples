@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
 
 namespace Lextm.SharpSnmpLib.Integration
 {

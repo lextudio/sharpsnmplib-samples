@@ -1,12 +1,13 @@
 ﻿using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Pipeline;
 using Lextm.SharpSnmpLib.Security;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using System;
+using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
 
 namespace Lextm.SharpSnmpLib.Integration
 {
