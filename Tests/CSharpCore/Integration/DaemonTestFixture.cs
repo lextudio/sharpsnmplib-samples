@@ -18,6 +18,8 @@ namespace Lextm.SharpSnmpLib.Integration
     public class DaemonTestFixture
     {
         private static readonly NumberGenerator Port = new NumberGenerator(40000, 45000);
+        private const string oidIdentifier = "1.3.6.1.2.1.1.1.0";
+        private const string communityPublic = "public";
         private const int MaxTimeout = 5 * 60 * 1000; // 5 minutes
 
         private SnmpEngine CreateEngine(bool timeout = false, bool max255chars = false)
@@ -74,8 +76,8 @@ namespace Lextm.SharpSnmpLib.Integration
             var getbulk = new GetBulkMessageHandler();
             var getbulkMapping = new HandlerMapping("v2,v3", "GETBULK", getbulk);
 
-            var v1 = new Version1MembershipProvider(new OctetString("public"), new OctetString("public"));
-            var v2 = new Version2MembershipProvider(new OctetString("public"), new OctetString("public"));
+            var v1 = new Version1MembershipProvider(new OctetString(communityPublic), new OctetString(communityPublic));
+            var v2 = new Version2MembershipProvider(new OctetString(communityPublic), new OctetString(communityPublic));
             var v3 = new Version3MembershipProvider();
             var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
             var handlerFactory = new MessageHandlerFactory(new[]
@@ -164,8 +166,8 @@ namespace Lextm.SharpSnmpLib.Integration
             try
             {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public"),
-                    new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) });
+                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
+                    new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
 
                 var users1 = new UserRegistry();
                 var response = await message.GetResponseAsync(serverEndPoint, users1, socket);
@@ -192,8 +194,8 @@ namespace Lextm.SharpSnmpLib.Integration
             try
             {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public"),
-                    new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) });
+                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
+                    new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
 
                 const int time = 1500;
                 var response = message.GetResponse(time, serverEndPoint, socket);
@@ -228,7 +230,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 ReportMessage report = discovery.GetResponse(timeout, serverEndPoint);
 
                 var expected = Messenger.NextRequestId;
-                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("authen"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) }, priv, Messenger.MaxMessageSize, report);
+                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("authen"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, priv, Messenger.MaxMessageSize, report);
 
                 var source = Observable.Defer(() =>
                 {
@@ -278,7 +280,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 ReportMessage report = discovery.GetResponse(timeout, serverEndPoint);
 
                 var expected = Messenger.NextRequestId;
-                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("authen"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) }, priv, Messenger.MaxMessageSize, report);
+                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("authen"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, priv, Messenger.MaxMessageSize, report);
                 ISnmpMessage reply = request.GetResponse(timeout, serverEndPoint);
                 ISnmpPdu snmpPdu = reply.Pdu();
                 Assert.Equal(SnmpType.ResponsePdu, snmpPdu.TypeCode);
@@ -321,12 +323,12 @@ namespace Lextm.SharpSnmpLib.Integration
                     signal.Set();
                 };
                 discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
-                    new OctetString("public"), timeout);
+                    new OctetString(communityPublic), timeout);
                 Assert.True(signal.WaitOne(wait));
 
                 signal.Reset();
                 discoverer.Discover(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
-                    new OctetString("public"), timeout);
+                    new OctetString(communityPublic), timeout);
                 Assert.True(signal.WaitOne(wait));
 
                 signal.Reset();
@@ -374,7 +376,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 var source = Observable.Defer(async () =>
                 {
                     await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
-                        new OctetString("public"), timeout);
+                        new OctetString(communityPublic), timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
                     {
@@ -434,7 +436,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 var source = Observable.Defer(async () =>
                 {
                     await discoverer.DiscoverAsync(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
-                        new OctetString("public"), timeout);
+                        new OctetString(communityPublic), timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
                     {
@@ -552,8 +554,8 @@ namespace Lextm.SharpSnmpLib.Integration
             {
                 for (int index = start; index < end; index++)
                 {
-                    GetRequestMessage message = new GetRequestMessage(index, VersionCode.V2, new OctetString("public"),
-                        new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) });
+                    GetRequestMessage message = new GetRequestMessage(index, VersionCode.V2, new OctetString(communityPublic),
+                        new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
                     Stopwatch watch = new Stopwatch();
@@ -599,8 +601,8 @@ namespace Lextm.SharpSnmpLib.Integration
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 for (int index = start; index < end; index++)
                 {
-                    GetRequestMessage message = new GetRequestMessage(0, VersionCode.V2, new OctetString("public"),
-                        new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) });
+                    GetRequestMessage message = new GetRequestMessage(0, VersionCode.V2, new OctetString(communityPublic),
+                        new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
                     var response =
@@ -656,8 +658,8 @@ namespace Lextm.SharpSnmpLib.Integration
                         Parallel.For(start, end, index =>
                             {
                                 GetRequestMessage message = new GetRequestMessage(index, VersionCode.V2,
-                                    new OctetString("public"),
-                                    new List<Variable> {new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) });
+                                    new OctetString(communityPublic),
+                                    new List<Variable> {new Variable(new ObjectIdentifier(oidIdentifier)) });
                                 // Comment below to reveal wrong sequence number issue.
                                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram,
                                     ProtocolType.Udp);
@@ -710,8 +712,8 @@ namespace Lextm.SharpSnmpLib.Integration
                     {
                         try
                         {
-                            var result = Messenger.Get(VersionCode.V2, serverEndPoint, new OctetString("public"),
-                                new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0")) }, timeout);
+                            var result = Messenger.Get(VersionCode.V2, serverEndPoint, new OctetString(communityPublic),
+                                new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, timeout);
                             Assert.Equal(1, result.Count);
                         }
                         catch (Exception)
@@ -742,7 +744,7 @@ namespace Lextm.SharpSnmpLib.Integration
             try
             {
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public"),
+                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
                     new List<Variable> { new Variable(new ObjectIdentifier("1.5.2")) });
 
                 const int time = 1500;
@@ -785,7 +787,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
                 var string_toolong = new Variable((new Max255CharsObject()).Variable.Id, new OctetString(new string('x', 256)));
-                SetRequestMessage message = new SetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public"),
+                SetRequestMessage message = new SetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
                     new List<Variable> { string_toolong });
 
                 var resp = message.GetResponse(1500, serverEndPoint, socket);
@@ -793,12 +795,40 @@ namespace Lextm.SharpSnmpLib.Integration
                 Assert.Equal(1, resp.Pdu().ErrorIndex.ToInt32());
 
                 var wrong_type = new Variable((new Max255CharsObject()).Variable.Id, new Integer32(666));
-                message = new SetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public"),
+                message = new SetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
                     new List<Variable> { wrong_type });
 
                 resp = message.GetResponse(1500, serverEndPoint, socket);
                 Assert.Equal(ErrorCode.WrongType, resp.Pdu().ErrorStatus.ToErrorCode());
                 Assert.Equal(1, resp.Pdu().ErrorIndex.ToInt32());
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+        
+        [Fact]
+        public void TestWrongCommunityV12()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+                var identifier = new Variable(new ObjectIdentifier(oidIdentifier));
+                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public2"),
+                    new List<Variable> { identifier });
+
+                Assert.Throws<Messaging.TimeoutException>(() => message.GetResponse(1500, serverEndPoint, socket));
             }
             finally
             {
@@ -830,7 +860,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 GetRequestMessage message = new GetRequestMessage(
                     0x4bed,
                     VersionCode.V2,
-                    new OctetString("public"),
+                    new OctetString(communityPublic),
                     list);
 
                 Assert.True(message.ToBytes().Length > 10000);
@@ -875,7 +905,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 var result = Messenger.Walk(
                     VersionCode.V1,
                     serverEndPoint,
-                    new OctetString("public"),
+                    new OctetString(communityPublic),
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
                     time,
@@ -907,7 +937,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 var result = await Messenger.WalkAsync(
                     VersionCode.V1,
                     serverEndPoint,
-                    new OctetString("public"),
+                    new OctetString(communityPublic),
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
                     WalkMode.WithinSubtree);
@@ -942,7 +972,7 @@ namespace Lextm.SharpSnmpLib.Integration
                     var result = Messenger.BulkWalk(
                         VersionCode.V2,
                         serverEndPoint,
-                        new OctetString("public"),
+                        new OctetString(communityPublic),
                         OctetString.Empty,
                         new ObjectIdentifier("1.3.6.1.2.1.1"),
                         list,
@@ -990,7 +1020,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 var result = await Messenger.BulkWalkAsync(
                     VersionCode.V2,
                     serverEndPoint,
-                    new OctetString("public"),
+                    new OctetString(communityPublic),
                     OctetString.Empty,
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
