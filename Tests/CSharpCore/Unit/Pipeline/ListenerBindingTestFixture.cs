@@ -8,7 +8,7 @@
  */
 
 using System.Net;
-using Lextm.SharpSnmpLib.Messaging;
+using Lextm.SharpSnmpLib.Pipeline;
 using Xunit;
 
 namespace Lextm.SharpSnmpLib.Unit.Pipeline
