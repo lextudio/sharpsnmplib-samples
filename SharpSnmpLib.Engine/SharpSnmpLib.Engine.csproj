@@ -56,6 +56,6 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.1.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.2.0" />
   </ItemGroup>
 </Project>
