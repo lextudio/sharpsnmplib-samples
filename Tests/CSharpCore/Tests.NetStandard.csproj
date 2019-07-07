@@ -10,8 +10,6 @@
     <OutputType Condition="'$(TargetFramework)'!='net46'">Exe</OutputType>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netcoreapp2.1;net46</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.1</TargetFrameworks>
-    <OutputType Condition="'$(TargetFramework)'!='net46'">Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.1;net46</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.resx" />
