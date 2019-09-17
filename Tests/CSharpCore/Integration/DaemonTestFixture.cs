@@ -184,6 +184,35 @@ namespace Lextm.SharpSnmpLib.Integration
         }
 
         [Fact]
+        public async Task TestResponseAsyncIPv6()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp);
+                GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
+                    new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
+
+                var users1 = new UserRegistry();
+                var response = await message.GetResponseAsync(serverEndPoint, users1, socket);
+                Assert.Equal(SnmpType.ResponsePdu, response.TypeCode());
+                Assert.Equal(message.RequestId(), response.RequestId());
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
         public void TestResponse()
         {
             var engine = CreateEngine();
