@@ -25,15 +25,15 @@
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">True</PublicSign>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <AssemblyVersion>11.2.0.0</AssemblyVersion>
-    <FileVersion>11.2.0.0</FileVersion>
-    <Version>11.2.0</Version>
+    <AssemblyVersion>11.3.0.0</AssemblyVersion>
+    <FileVersion>11.3.0.0</FileVersion>
+    <Version>11.3.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net452' ">win</RuntimeIdentifier>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.5" />
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.2.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
   </ItemGroup>
 </Project>

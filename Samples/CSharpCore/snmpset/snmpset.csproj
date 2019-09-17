@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Mono.Options.Core" Version="1.0.0" />
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.2.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
   </ItemGroup>
 
 </Project>

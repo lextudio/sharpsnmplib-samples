@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.2.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
   </ItemGroup>
 
   <ItemGroup>

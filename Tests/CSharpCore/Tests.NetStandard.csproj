@@ -29,7 +29,7 @@
     <None Include="sharpsnmplib.tests.snk" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.2.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
     <PackageReference Include="System.Reactive.Linq" Version="4.1.5" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">

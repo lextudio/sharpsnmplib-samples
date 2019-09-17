@@ -25,9 +25,9 @@
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">True</PublicSign>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <AssemblyVersion>11.2.0.0</AssemblyVersion>
-    <FileVersion>11.2.0.0</FileVersion>
-    <Version>11.2.0</Version>
+    <AssemblyVersion>11.3.0.0</AssemblyVersion>
+    <FileVersion>11.3.0.0</FileVersion>
+    <Version>11.3.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net452' ">win</RuntimeIdentifier>
     <AndroidUseIntermediateDesignerFile>False</AndroidUseIntermediateDesignerFile>
@@ -57,6 +57,6 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.2.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
   </ItemGroup>
 </Project>
