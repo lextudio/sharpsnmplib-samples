@@ -14,14 +14,25 @@ catch
     $instance = Get-VSSetupInstance -All
     $installDir = $instance.installationPath
     Write-Host "Found VS in " + $installDir
-    $msBuild = $installDir + '\MSBuild\15.0\Bin\MSBuild.exe'
+    $msBuild = $installDir + '\MSBuild\Current\Bin\MSBuild.exe'
     if (![System.IO.File]::Exists($msBuild))
     {
-        Write-Host "MSBuild doesn't exist. Exit."
-        exit 1
+        $msBuild = $installDir + '\MSBuild\15.0\Bin\MSBuild.exe'
+        if (![System.IO.File]::Exists($msBuild))
+        {
+            Write-Host "MSBuild doesn't exist on Windows. Exit."
+            exit 1
+        }
+        else
+        {
+            Write-Host "Likely on Windows with VS2017."
+        }
+    }
+    else
+    {
+        Write-Host "Likely on Windows with VS2019."
     }
 
-    Write-Host "Likely on Windows."
     $onWindows = $true
 }
 
