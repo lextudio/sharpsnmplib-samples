@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>snmpsendtrap</RootNamespace>
     <AssemblyName>snmpsendtrap</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -72,7 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib">
-      <Version>11.3.0</Version>
+      <Version>12.0.0-alpha1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

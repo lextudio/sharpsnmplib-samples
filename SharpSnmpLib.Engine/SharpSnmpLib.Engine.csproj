@@ -2,8 +2,8 @@
   <PropertyGroup>
     <AssemblyName>SharpSnmpLib.Engine</AssemblyName>
     <RootNamespace>Lextm.SharpSnmpLib</RootNamespace>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netcoreapp2.1;netstandard1.3;net452;xamarin.ios10;monoandroid80</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.1;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netcoreapp3.1;netcoreapp3.0;netcoreapp2.1;netstandard2.0;net471;xamarin.ios10;monoandroid80</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp3.1;netcoreapp3.0;netcoreapp2.1;netstandard2.0</TargetFrameworks>
     <PackageId>Lextm.SharpSnmpLib.Engine</PackageId>
     <Title>#SNMP Library</Title>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -25,23 +25,24 @@
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">True</PublicSign>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <AssemblyVersion>11.3.0.0</AssemblyVersion>
-    <FileVersion>11.3.0.0</FileVersion>
-    <Version>11.3.0</Version>
+    <AssemblyVersion>12.0.0.0</AssemblyVersion>
+    <FileVersion>12.0.0.0</FileVersion>
+    <Version>12.0.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net452' ">win</RuntimeIdentifier>
+    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net471' ">win</RuntimeIdentifier>
     <AndroidUseIntermediateDesignerFile>False</AndroidUseIntermediateDesignerFile>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.0.0-alpha2" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.3' OR '$(TargetFramework)'=='netcoreapp2.1'">
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0' OR '$(TargetFramework)'=='netcoreapp3.1'">
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Net.NetworkInformation" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net452'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net471'">
     <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'xamarin.ios10'">
@@ -55,8 +56,5 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
   </ItemGroup>
 </Project>

@@ -19,7 +19,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NET452
+#if NET471
 using System.Configuration;
 #endif
 using System.Diagnostics.CodeAnalysis;
@@ -227,7 +227,7 @@ namespace Lextm.SharpSnmpLib.Pipeline
             {
                 if (_timeIncluded == null)
                 {
-#if NET452
+#if NET471
                     object setting = ConfigurationManager.AppSettings["TimeIncluded"];
                     _timeIncluded = setting != null && Convert.ToBoolean(setting.ToString(), CultureInfo.InvariantCulture);
 #else

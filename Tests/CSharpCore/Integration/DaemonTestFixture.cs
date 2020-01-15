@@ -600,7 +600,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 engine.Listener.AddBinding(new IPEndPoint(IPAddress.Loopback, index));
             }
 
-#if NET46
+#if NET471
             // IMPORTANT: need to set min thread count so as to boost performance.
             int minWorker, minIOC;
             // Get the current settings.
@@ -698,7 +698,7 @@ namespace Lextm.SharpSnmpLib.Integration
                     engine.Listener.ClearBindings();
                     var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
                     engine.Listener.AddBinding(serverEndPoint);
-#if NET46
+#if NET471
                     // IMPORTANT: need to set min thread count so as to boost performance.
                     int minWorker, minIOC;
                     // Get the current settings.

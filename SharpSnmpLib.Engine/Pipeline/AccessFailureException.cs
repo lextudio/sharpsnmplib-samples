@@ -63,7 +63,7 @@ namespace Lextm.SharpSnmpLib.Pipeline
             : base(message, inner) 
         {
         }
-#if NET452
+#if NET471
         /// <summary>
         /// Creates a <see cref="AccessFailureException"/> instance.
         /// </summary>

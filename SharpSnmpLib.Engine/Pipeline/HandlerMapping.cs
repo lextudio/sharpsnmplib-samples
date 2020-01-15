@@ -30,7 +30,7 @@ namespace Lextm.SharpSnmpLib.Pipeline
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public sealed class HandlerMapping
     {
-#if !NET452
+#if !NET471
         /// <summary>
         /// .NET standard 1.3 only helper.
         /// </summary>
@@ -111,7 +111,7 @@ namespace Lextm.SharpSnmpLib.Pipeline
 
         private static IMessageHandler CreateMessageHandler(string assemblyName, string type)
         {
-#if NET452
+#if NET471
             foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                 let name = assembly.GetName().Name
                                 where string.Compare(name, assemblyName, StringComparison.OrdinalIgnoreCase) == 0

@@ -29,7 +29,7 @@ namespace Lextm.SharpSnmpLib.Objects
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Descr")]
     public sealed class SysDescr : ScalarObject
     {
-#if NET452
+#if NET471
         private readonly OctetString _description =
             new OctetString(string.Format(CultureInfo.InvariantCulture, "#SNMP Agent on {0}", Environment.OSVersion));
 #else

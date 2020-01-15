@@ -445,17 +445,9 @@ namespace Lextm.SharpSnmpLib.Pipeline
                 return;
             }
 
-            var buffer = response.ToBytes();
-            var info = SocketExtension.EventArgsFactory.Create();
-
             try
             {
-                info.RemoteEndPoint = receiver;
-                info.SetBuffer(buffer, 0, buffer.Length);
-                using (var awaitable1 = new SocketAwaitable(info))
-                {
-                    await _socket.SendToAsync(awaitable1);
-                }
+                await _socket.SendToAsync(new ArraySegment<byte>(response.ToBytes()), SocketFlags.None, receiver);
             }
             catch (SocketException ex)
             {
@@ -533,18 +525,12 @@ namespace Lextm.SharpSnmpLib.Pipeline
 
                 int count;
                 var reply = new byte[_bufferSize];
-                var args = SocketExtension.EventArgsFactory.Create();
                 try
                 {
                     EndPoint remote = _socket.AddressFamily == AddressFamily.InterNetwork ? new IPEndPoint(IPAddress.Any, 0) : new IPEndPoint(IPAddress.IPv6Any, 0);
-                    args.RemoteEndPoint = remote;
-                    args.SetBuffer(reply, 0, _bufferSize);
-                    using (var awaitable = new SocketAwaitable(args))
-                    {
-                        count = await _socket.ReceiveMessageFromAsync(awaitable);
-                    }
-
-                    await Task.Factory.StartNew(() => HandleMessage(reply, count, (IPEndPoint)args.RemoteEndPoint));
+                    var result = await _socket.ReceiveMessageFromAsync(new ArraySegment<byte>(reply), SocketFlags.None, remote);
+                    count = result.ReceivedBytes;
+                    await Task.Factory.StartNew(() => HandleMessage(reply, count, (IPEndPoint)result.RemoteEndPoint));
                 }
                 catch (SocketException ex)
                 {

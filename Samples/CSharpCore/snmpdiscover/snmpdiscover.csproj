@@ -2,11 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="11.3.0" />
-  </ItemGroup>
 
 </Project>
