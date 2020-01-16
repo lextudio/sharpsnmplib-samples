@@ -19,7 +19,13 @@ jobs:
     displayName: 'Install .NET Core sdk'
     inputs:
       packageType: sdk
-      version: 3.1.100
+      version: 2.1.803
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+  - task: UseDotNet@2
+    displayName: 'Install .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 3.1.101
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       set -e
@@ -44,11 +50,17 @@ jobs:
     buildConfiguration: 'Release'
 
   steps:
+- task: UseDotNet@2
+    displayName: 'Install .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 2.1.803
+      installationPath: $(Agent.ToolsDirectory)/dotnet
   - task: UseDotNet@2
     displayName: 'Install .NET Core sdk'
     inputs:
       packageType: sdk
-      version: 3.1.100
+      version: 3.1.101
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       sudo sysctl -w net.inet.udp.maxdgram=65535
@@ -79,7 +91,13 @@ jobs:
     displayName: 'Install .NET Core sdk'
     inputs:
       packageType: sdk
-      version: 3.1.100
+      version: 2.1.803
+      installationPath: $(Agent.ToolsDirectory)/dotnet
+  - task: UseDotNet@2
+    displayName: 'Install .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 3.1.101
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       build.release.bat
