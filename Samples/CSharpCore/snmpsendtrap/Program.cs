@@ -113,7 +113,7 @@ namespace SnmpSendTrap
                         VersionCode.V3,
                         528732060,
                         1905687779,
-                        new OctetString("privacy"),
+                        new OctetString("trap"),
                         new ObjectIdentifier("1.3.6"),
                         0,
                         new List<Variable>(),

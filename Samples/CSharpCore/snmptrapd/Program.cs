@@ -11,6 +11,7 @@ using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
 
@@ -27,11 +28,25 @@ namespace SnmpTrapD
 
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
-            users.Add(new OctetString("authen"), new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication"))));
+            users.Add(
+                new OctetString("authen"), 
+                new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication"))));
             if (DESPrivacyProvider.IsSupported)
             {
-                users.Add(new OctetString("privacy"), new DESPrivacyProvider(new OctetString("privacyphrase"),
-                                                                            new MD5AuthenticationProvider(new OctetString("authentication"))));
+                users.Add(
+                    new OctetString("privacy"),
+                    new DESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication"))));
+
+                // for snmpsendtrap testing
+                users.Add(new OctetString("trap"),
+                    new DESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication")))
+                    {
+                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
+                    });
             }
 
             if (AESPrivacyProviderBase.IsSupported)
