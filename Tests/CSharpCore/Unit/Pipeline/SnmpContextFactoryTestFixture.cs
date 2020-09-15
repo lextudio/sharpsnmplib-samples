@@ -1,12 +1,13 @@
 ﻿using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using Moq;
 using System.Net;
 using Xunit;
-using IListenerBinding = Lextm.SharpSnmpLib.Pipeline.IListenerBinding;
+using IListenerBinding = Samples.Pipeline.IListenerBinding;
+using Lextm.SharpSnmpLib;
 
-namespace Lextm.SharpSnmpLib.Unit.Pipeline
+namespace Samples.Unit.Pipeline
 {
     public class SnmpContextFactoryTestFixture
     {

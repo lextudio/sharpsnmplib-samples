@@ -8,12 +8,12 @@
  */
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
+using Listener = Samples.Pipeline.Listener;
 
 namespace SnmpTrapD
 {

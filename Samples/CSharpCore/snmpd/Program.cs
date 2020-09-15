@@ -8,13 +8,13 @@
  */
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Objects;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Objects;
+using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using System;
 using System.Net;
-using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
-using MessageReceivedEventArgs = Lextm.SharpSnmpLib.Pipeline.MessageReceivedEventArgs;
+using Listener = Samples.Pipeline.Listener;
+using MessageReceivedEventArgs = Samples.Pipeline.MessageReceivedEventArgs;
 
 namespace SnmpD
 {

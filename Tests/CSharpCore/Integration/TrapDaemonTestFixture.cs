@@ -1,5 +1,5 @@
 ﻿using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using System;
 using System.Collections.Generic;
@@ -7,9 +7,10 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
+using Listener = Samples.Pipeline.Listener;
+using Lextm.SharpSnmpLib;
 
-namespace Lextm.SharpSnmpLib.Integration
+namespace Samples.Integration
 {
     public class TrapDaemonTestFixture
     {

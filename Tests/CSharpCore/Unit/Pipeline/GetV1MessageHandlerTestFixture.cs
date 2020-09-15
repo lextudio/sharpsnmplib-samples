@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Net;
 using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Objects;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Objects;
+using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using Moq;
 using Xunit;
+using Lextm.SharpSnmpLib;
 
-namespace Lextm.SharpSnmpLib.Unit.Pipeline
+namespace Samples.Unit.Pipeline
 {
     public class GetV1MessageHandlerTestFixture
     {

@@ -7,12 +7,14 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
-namespace Lextm.SharpSnmpLib.Unit.Security
+namespace Samples.Unit.Security
 {
     using System;
     using System.Collections.Generic;
     using Xunit;
+    using Lextm.SharpSnmpLib;
     using Lextm.SharpSnmpLib.Security;
+    using Samples.BouncyCastle;
 
     public class DESPrivacyProviderTestFixture
     {
@@ -52,7 +54,7 @@ namespace Lextm.SharpSnmpLib.Unit.Security
             }
             else
             {
-                priv = new BouncyCastle.BouncyCastleDESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication")));
+                priv = new BouncyCastleDESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication")));
             }
 
             var parameters = new SecurityParameters(
@@ -126,7 +128,7 @@ namespace Lextm.SharpSnmpLib.Unit.Security
             }
             else
             {
-                priv = new BouncyCastle.BouncyCastleDESPrivacyProvider(new OctetString("passtest"), new MD5AuthenticationProvider(new OctetString("testpass")));
+                priv = new BouncyCastleDESPrivacyProvider(new OctetString("passtest"), new MD5AuthenticationProvider(new OctetString("testpass")));
             }
 
             Scope scope = new Scope(engineId, OctetString.Empty, new GetRequestPdu(0x3A25, new List<Variable> { new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.3.0")) }));

@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\SharpSnmpLib.Engine\SharpSnmpLib.Engine.csproj" />
+    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
   </ItemGroup>
 
 </Project>

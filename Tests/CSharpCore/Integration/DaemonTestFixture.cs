@@ -1,6 +1,6 @@
 ﻿using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Objects;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Objects;
+using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
 using System;
 using System.Collections.Generic;
@@ -11,9 +11,11 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
+using Listener = Samples.Pipeline.Listener;
+using Lextm.SharpSnmpLib;
+using TimeoutException = Lextm.SharpSnmpLib.Messaging.TimeoutException;
 
-namespace Lextm.SharpSnmpLib.Integration
+namespace Samples.Integration
 {
     public class DaemonTestFixture
     {
@@ -299,7 +301,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 })
                 .RetryWithBackoffStrategy(
                     retryCount: 4,
-                    retryOnError: e => e is Messaging.TimeoutException
+                    retryOnError: e => e is TimeoutException
                 );
 
                 source.Subscribe(reply =>
@@ -440,14 +442,14 @@ namespace Lextm.SharpSnmpLib.Integration
                     var result = signal.WaitOne(wait);
                     if (!result)
                     {
-                        throw new Messaging.TimeoutException();
+                        throw new TimeoutException();
                     }
 
                     return Observable.Return(result);
                 })
                 .RetryWithBackoffStrategy(
                     retryCount: 4,
-                    retryOnError: e => e is Messaging.TimeoutException
+                    retryOnError: e => e is TimeoutException
                 );
 
                 source.Subscribe(result =>
@@ -500,14 +502,14 @@ namespace Lextm.SharpSnmpLib.Integration
                     var result = signal.WaitOne(wait);
                     if (!result)
                     {
-                        throw new Messaging.TimeoutException();
+                        throw new TimeoutException();
                     }
 
                     return Observable.Return(result);
                 })
                 .RetryWithBackoffStrategy(
                     retryCount: 4,
-                    retryOnError: e => e is Messaging.TimeoutException
+                    retryOnError: e => e is TimeoutException
                 );
 
                 source.Subscribe(result =>
@@ -561,14 +563,14 @@ namespace Lextm.SharpSnmpLib.Integration
                     var result = signal.WaitOne(wait);
                     if (!result)
                     {
-                        throw new Messaging.TimeoutException();
+                        throw new TimeoutException();
                     }
 
                     return Observable.Return(result);
                 })
                 .RetryWithBackoffStrategy(
                     retryCount: 4,
-                    retryOnError: e => e is Messaging.TimeoutException
+                    retryOnError: e => e is TimeoutException
                 );
 
                 source.Subscribe(result =>
@@ -744,7 +746,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 })
                 .RetryWithBackoffStrategy(
                     retryCount: 4,
-                    retryOnError: e => e is Messaging.TimeoutException
+                    retryOnError: e => e is TimeoutException
                 );
 
             source.Subscribe(result => { ending.Set(); });
@@ -811,7 +813,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 var timer = new Stopwatch();
                 timer.Start();
                 //IMPORTANT: test against an agent that doesn't exist.
-                Assert.Throws<Messaging.TimeoutException>(() => message.GetResponse(time, serverEndPoint, socket));
+                Assert.Throws<TimeoutException>(() => message.GetResponse(time, serverEndPoint, socket));
                 timer.Stop();
 
                 long elapsedMilliseconds = timer.ElapsedMilliseconds;
@@ -888,7 +890,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString("public2"),
                     new List<Variable> { identifier });
 
-                Assert.Throws<Messaging.TimeoutException>(() => message.GetResponse(1500, serverEndPoint, socket));
+                Assert.Throws<TimeoutException>(() => message.GetResponse(1500, serverEndPoint, socket));
             }
             finally
             {
@@ -1045,7 +1047,7 @@ namespace Lextm.SharpSnmpLib.Integration
                 })
                 .RetryWithBackoffStrategy(
                     retryCount: 4,
-                    retryOnError: e => e is Messaging.TimeoutException
+                    retryOnError: e => e is TimeoutException
                 );
 
                 source.Subscribe(result =>

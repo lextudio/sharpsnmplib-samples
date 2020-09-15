@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Lextm.SharpSnmpLib.Agent.Properties {
+namespace Samples.Agent.Properties {
     using System;
     
     

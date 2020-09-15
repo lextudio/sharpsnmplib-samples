@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 using Xunit;
 
-namespace Lextm.SharpSnmpLib.Unit.Pipeline
+namespace Samples.Unit.Pipeline
 {
     public class TrapV2MessageReceivedEventArgsTestFixture
     {

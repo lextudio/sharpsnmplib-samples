@@ -27,14 +27,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "snmpd", "Samples\CSharpCore
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.NetStandard", "Tests\CSharpCore\Tests.NetStandard.csproj", "{70C9264C-9376-4CDD-A4A6-1D1315FACEA1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpSnmpLib.BouncyCastle", "SharpSnmpLib.BouncyCastle\SharpSnmpLib.BouncyCastle.csproj", "{D9404B36-10AC-48B1-BC74-2D3D12892C62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.BouncyCastle", "Samples.BouncyCastle\Samples.BouncyCastle.csproj", "{D9404B36-10AC-48B1-BC74-2D3D12892C62}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{07037203-3748-498C-B851-D216D4723311}"
 	ProjectSection(SolutionItems) = preProject
 		global.json = global.json
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpSnmpLib.Engine", "SharpSnmpLib.Engine\SharpSnmpLib.Engine.csproj", "{114D0D49-19D3-47AA-B314-B0611F8A0327}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Engine", "Samples.Engine\Samples.Engine.csproj", "{114D0D49-19D3-47AA-B314-B0611F8A0327}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

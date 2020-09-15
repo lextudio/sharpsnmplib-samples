@@ -7,12 +7,14 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
-namespace Lextm.SharpSnmpLib.Unit.Security
+namespace Samples.Unit.Security
 {
     using System;
     using System.Collections.Generic;
     using Xunit;
     using Lextm.SharpSnmpLib.Security;
+    using Samples.BouncyCastle;
+    using Lextm.SharpSnmpLib;
 
     public class AES256PrivacyProviderTestFixture
     {
@@ -134,7 +136,7 @@ namespace Lextm.SharpSnmpLib.Unit.Security
             }
             else
             {
-                priv = new BouncyCastle.BouncyCastleAES256PrivacyProvider(new OctetString("passtest"),
+                priv = new BouncyCastleAES256PrivacyProvider(new OctetString("passtest"),
                     new MD5AuthenticationProvider(new OctetString("testpass")));
             }
 

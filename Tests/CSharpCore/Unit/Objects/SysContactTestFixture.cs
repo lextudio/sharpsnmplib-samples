@@ -1,8 +1,9 @@
 ﻿using System;
-using Lextm.SharpSnmpLib.Objects;
+using Lextm.SharpSnmpLib;
+using Samples.Objects;
 using Xunit;
 
-namespace Lextm.SharpSnmpLib.Unit.Objects
+namespace Samples.Unit.Objects
 {
     public class SysContactTestFixture
     {

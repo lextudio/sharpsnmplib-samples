@@ -145,9 +145,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\SharpSnmpLib.Engine\SharpSnmpLib.Engine.csproj">
+    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj">
       <Project>{114d0d49-19d3-47aa-b314-b0611f8a0327}</Project>
-      <Name>SharpSnmpLib.Engine</Name>
+      <Name>Samples.Engine</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -7,10 +7,10 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 using Xunit;
 
-namespace Lextm.SharpSnmpLib.Unit.Pipeline
+namespace Samples.Unit.Pipeline
 {
     /// <summary>
     /// Description of EngineGroupTestFixture.

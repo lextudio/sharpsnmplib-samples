@@ -7,7 +7,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
-namespace Lextm.SharpSnmpLib.Agent
+namespace Samples.Agent
 {
     partial class MainForm
     {

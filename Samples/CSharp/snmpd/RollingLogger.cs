@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Lextm.SharpSnmpLib.Messaging;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 
-namespace Lextm.SharpSnmpLib.Agent
+namespace Samples.Agent
 {
     /// <summary>
     /// Logger class, who logs message processed to the rolling log file.

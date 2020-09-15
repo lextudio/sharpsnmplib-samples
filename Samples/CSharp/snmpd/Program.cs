@@ -9,7 +9,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace Lextm.SharpSnmpLib.Agent
+namespace Samples.Agent
 {
     /// <summary>
     /// Class with program entry point.

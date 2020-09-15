@@ -8,10 +8,10 @@
  */
 
 using System.Net;
-using Lextm.SharpSnmpLib.Pipeline;
+using Samples.Pipeline;
 using Xunit;
 
-namespace Lextm.SharpSnmpLib.Unit.Pipeline
+namespace Samples.Unit.Pipeline
 {
     /// <summary>
     /// Description of ListenerBindingTestFixture.

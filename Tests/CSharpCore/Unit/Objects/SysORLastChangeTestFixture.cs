@@ -7,11 +7,12 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
-using Lextm.SharpSnmpLib.Objects;
-using Lextm.SharpSnmpLib.Pipeline;
+using Lextm.SharpSnmpLib;
+using Samples.Objects;
+using Samples.Pipeline;
 using Xunit;
 
-namespace Lextm.SharpSnmpLib.Unit.Objects
+namespace Samples.Unit.Objects
 {
     public class SysORLastChangeTestFixture
     {
