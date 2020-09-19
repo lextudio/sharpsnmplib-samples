@@ -6,9 +6,11 @@
  * 
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
-using Lextm.SharpSnmpLib.Messaging;
+
 using Samples.Objects;
 using Samples.Pipeline;
+using Lextm.SharpSnmpLib;
+using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
 using RemObjects.Mono.Helpers;
 using System;
