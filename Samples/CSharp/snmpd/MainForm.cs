@@ -19,7 +19,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Windows.Forms;
-using Listener = Lextm.SharpSnmpLib.Pipeline.Listener;
+using Listener = Samples.Pipeline.Listener;
 
 namespace Samples.Agent
 {

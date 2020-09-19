@@ -8,7 +8,7 @@
 '
 Imports System.Net
 Imports Lextm.SharpSnmpLib
-Imports Lextm.SharpSnmpLib.Pipeline
+Imports Samples.Pipeline
 Imports Lextm.SharpSnmpLib.Security
 
 Module Program
