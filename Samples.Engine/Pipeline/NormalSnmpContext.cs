@@ -55,7 +55,7 @@ namespace Samples.Pipeline
                 Request.Parameters.UserName,
                 status,
                 index,
-                Request.Pdu().Variables);
+                DecoratedVariables);
             if (TooBig)
             {
                 GenerateTooBig();

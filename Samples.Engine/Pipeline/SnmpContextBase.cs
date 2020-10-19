@@ -140,5 +140,24 @@ namespace Samples.Pipeline
         /// Generates too big message.
         /// </summary>
         public abstract void GenerateTooBig();
+
+        protected IList<Variable> DecoratedVariables
+        {
+            get
+            {
+                if (Request.TypeCode() == SnmpType.TrapV2Pdu)
+                {
+                    var pdu = (TrapV2Pdu)Request.Pdu();
+                    return pdu.Decorate(Request.Variables());
+                }
+                else if (Request.TypeCode() == SnmpType.InformRequestPdu)
+                {
+                    var pdu = (InformRequestPdu)Request.Pdu();
+                    return pdu.Decorate(Request.Variables());
+                }
+
+                return Request.Variables();
+            }
+        }
     }
 }

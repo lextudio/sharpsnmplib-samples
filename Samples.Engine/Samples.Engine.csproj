@@ -11,7 +11,7 @@
     <AndroidUseIntermediateDesignerFile>False</AndroidUseIntermediateDesignerFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.1.0" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.2.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0' OR '$(TargetFramework)'=='netcoreapp3.1'">
