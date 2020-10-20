@@ -21,12 +21,6 @@ jobs:
       packageType: sdk
       version: 2.1.803
       installationPath: $(Agent.ToolsDirectory)/dotnet
-  - task: UseDotNet@2
-    displayName: 'Install .NET Core sdk'
-    inputs:
-      packageType: sdk
-      version: 3.1.101
-      installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       set -e
       sudo pwsh -file patch-winfx.ps1
