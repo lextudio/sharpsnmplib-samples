@@ -48,12 +48,29 @@ namespace SnmpTrapD
                         EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
                     });
             }
+            else
+            {
+                Console.WriteLine("DES privacy is not supported by .NET Core natively.");
+            }
 
             if (AESPrivacyProviderBase.IsSupported)
             {
                 users.Add(new OctetString("aes"), new AESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
                 users.Add(new OctetString("aes192"), new AES192PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
                 users.Add(new OctetString("aes256"), new AES256PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
+
+                // for snmpsendtrap testing
+                users.Add(new OctetString("trapAES"),
+                    new AESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication")))
+                    {
+                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
+                    });
+            }
+            else
+            {
+                Console.WriteLine("AES privacy is not supported by .NET Core natively.");
             }
 
             var trapv1 = new TrapV1MessageHandler();

@@ -67,8 +67,8 @@ namespace Samples.Pipeline
                     defaultPair.AuthenticationProvider.CleanDigest,
                     defaultPair.Salt),
                 new Scope(
-                    Request.Scope.ContextEngineId,
-                    Request.Scope.ContextName,
+                    Request.Scope?.ContextEngineId ?? OctetString.Empty,
+                    Request.Scope?.ContextName ?? OctetString.Empty,
                     new ReportPdu(
                         Request.RequestId(),
                         ErrorCode.NoError,
