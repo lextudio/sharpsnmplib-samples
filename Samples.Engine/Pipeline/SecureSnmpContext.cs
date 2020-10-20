@@ -67,8 +67,8 @@ namespace Samples.Pipeline
                     defaultPair.AuthenticationProvider.CleanDigest,
                     defaultPair.Salt),
                 new Scope(
-                    Group.EngineId,
-                    OctetString.Empty,
+                    Request.Scope.ContextEngineId,
+                    Request.Scope.ContextName,
                     new ReportPdu(
                         Request.RequestId(),
                         ErrorCode.NoError,
@@ -101,8 +101,8 @@ namespace Samples.Pipeline
                         privacy.AuthenticationProvider.CleanDigest,
                         privacy.Salt),
                     new Scope(
-                        Group.EngineId,
-                        OctetString.Empty,
+                        Request.Scope.ContextEngineId,
+                        Request.Scope.ContextName,
                         new ResponsePdu(
                             Request.RequestId(),
                             status,
@@ -139,8 +139,8 @@ namespace Samples.Pipeline
                     privacy.AuthenticationProvider.CleanDigest,
                     privacy.Salt),
                 new Scope(
-                    Group.EngineId,
-                    OctetString.Empty,
+                    Request.Scope.ContextEngineId,
+                    Request.Scope.ContextName,
                     new ResponsePdu(
                         Request.RequestId(),
                         ErrorCode.TooBig,
@@ -258,8 +258,8 @@ namespace Samples.Pipeline
                     OctetString.Empty,
                     OctetString.Empty),
                 new Scope(
-                    Group.EngineId,
-                    OctetString.Empty,
+                    Request.Scope.ContextEngineId,
+                    Request.Scope.ContextName,
                     new ReportPdu(
                         Request.RequestId(),
                         ErrorCode.NoError,
@@ -296,8 +296,8 @@ namespace Samples.Pipeline
                     privacy.AuthenticationProvider.CleanDigest,
                     privacy.Salt),
                 new Scope(
-                    Group.EngineId,
-                    OctetString.Empty,
+                    Request.Scope.ContextEngineId,
+                    Request.Scope.ContextName,
                     new ResponsePdu(
                         Request.RequestId(),
                         ErrorCode.NoError,
