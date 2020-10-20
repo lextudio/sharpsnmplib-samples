@@ -50,7 +50,21 @@ namespace SnmpTrapD
             }
             else
             {
-                Console.WriteLine("DES privacy is not supported by .NET Core natively.");
+                Console.WriteLine("DES privacy is not supported by .NET Core natively. Switched to BouncyCastle implementation.");
+                users.Add(
+                    new OctetString("privacy"),
+                    new Samples.BouncyCastle.BouncyCastleDESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication"))));
+
+                // for snmpsendtrap testing
+                users.Add(new OctetString("trap"),
+                    new Samples.BouncyCastle.BouncyCastleDESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication")))
+                    {
+                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
+                    });
             }
 
             if (AESPrivacyProviderBase.IsSupported)
@@ -70,7 +84,19 @@ namespace SnmpTrapD
             }
             else
             {
-                Console.WriteLine("AES privacy is not supported by .NET Core natively.");
+                Console.WriteLine("AES privacy is not supported by .NET Core natively. Switched to BouncyCastle implementation.");
+                users.Add(new OctetString("aes"), new Samples.BouncyCastle.BouncyCastleAESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
+                users.Add(new OctetString("aes192"), new Samples.BouncyCastle.BouncyCastleAES192PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
+                users.Add(new OctetString("aes256"), new Samples.BouncyCastle.BouncyCastleAES256PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
+
+                // for snmpsendtrap testing
+                users.Add(new OctetString("trapAES"),
+                    new Samples.BouncyCastle.BouncyCastleAESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication")))
+                    {
+                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
+                    });
             }
 
             var trapv1 = new TrapV1MessageHandler();

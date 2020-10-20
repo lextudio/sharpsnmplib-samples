@@ -75,6 +75,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Samples.BouncyCastle\Samples.BouncyCastle.csproj">
+      <Project>{d9404b36-10ac-48b1-bc74-2d3d12892c62}</Project>
+      <Name>Samples.BouncyCastle</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj">
       <Project>{114d0d49-19d3-47aa-b314-b0611f8a0327}</Project>
       <Name>Samples.Engine</Name>
