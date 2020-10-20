@@ -29,6 +29,7 @@ jobs:
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       set -e
+      sudo pwsh -file patch-winfx.ps1
       dotnet build SharpSnmpLib.Samples.sln --configuration $(buildConfiguration)
       dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp2.1 --logger trx
       dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp3.1 --logger trx
@@ -65,6 +66,7 @@ jobs:
       sudo sysctl -w net.inet.udp.maxdgram=65535
       export CI=true
       set -e
+      sudo pwsh -file patch-winfx.ps1
       dotnet build SharpSnmpLib.Samples.sln --configuration $(buildConfiguration)
       dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp2.1 --logger trx
       dotnet test Tests/CSharpCore/Tests.NetStandard.csproj --configuration $(buildConfiguration) --no-build --framework netcoreapp3.1 --logger trx
