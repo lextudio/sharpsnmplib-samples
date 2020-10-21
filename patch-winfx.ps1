@@ -1,9 +1,10 @@
-$output = dotnet --info | grep "Base Path:"
-Write-Host $output
+[CmdletBinding()]
+param(
+    [Parameter(Position = 0)]
+    [string] $Path
+)
 
-$comma = $output.LastIndexOf(':')
-$path = $output.SubString($comma + 1).Trim()
-Write-Host $path
+Write-Host $Ppath
 
 $winfx = "$path/Sdks/Microsoft.NET.Sdk.WindowsDesktop/targets/Microsoft.WinFX.props"
 if (-not (Test-Path $winfx)) {
