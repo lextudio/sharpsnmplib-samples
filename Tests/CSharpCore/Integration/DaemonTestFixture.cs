@@ -359,7 +359,7 @@ namespace Samples.Integration
         }
 
         [Fact]
-        public void TestDiscoverer()
+        public void TestDiscovererV1()
         {
             if (Environment.GetEnvironmentVariable("CI") == "true")
             {
@@ -377,6 +377,7 @@ namespace Samples.Integration
             try
             {
                 var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
                 var discoverer = new Discoverer();
                 discoverer.AgentFound += (sender, args)
                     =>
@@ -384,19 +385,152 @@ namespace Samples.Integration
                     Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
                     signal.Set();
                 };
-                discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
-                    new OctetString(communityPublic), timeout);
-                Assert.True(signal.WaitOne(wait));
 
-                signal.Reset();
-                discoverer.Discover(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
-                    new OctetString(communityPublic), timeout);
-                Assert.True(signal.WaitOne(wait));
+                var source = Observable.Defer(() =>
+                {
+                    discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                        new OctetString(communityPublic), timeout);
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
 
-                signal.Reset();
-                discoverer.Discover(VersionCode.V3, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port), null,
-                    timeout);
-                Assert.True(signal.WaitOne(wait));
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void TestDiscovererV2()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(() =>
+                {
+                    discoverer.Discover(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                        new OctetString(communityPublic), timeout);
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void TestDiscovererV3()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(() =>
+                {
+                    discoverer.Discover(VersionCode.V3, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                        null, timeout);
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
             }
             finally
             {
