@@ -688,7 +688,7 @@ namespace Samples.Integration
         }
 
         [Theory]
-        [InlineData(32)]
+        [InlineData(16)]
         public void TestResponsesFromSingleSourceWithMultipleThreads(int count)
         {
             var ending = new AutoResetEvent(false);
