@@ -20,6 +20,12 @@ jobs:
     inputs:
       packageType: sdk
       version: 2.1.803
+      installationPath: $(Agent.ToolsDirectory)/dotnet2.1
+  - task: UseDotNet@2
+    displayName: 'Install .NET Core sdk'
+    inputs:
+      packageType: sdk
+      version: 3.1.402
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       set -e
@@ -54,10 +60,9 @@ jobs:
     displayName: 'Install .NET Core sdk'
     inputs:
       packageType: sdk
-      version: 3.1.101
+      version: 3.1.402
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
-      sudo sysctl -w net.inet.udp.maxdgram=65535
       export CI=true
       set -e
       sudo pwsh -file patch-winfx.ps1
@@ -91,7 +96,7 @@ jobs:
     displayName: 'Install .NET Core sdk'
     inputs:
       packageType: sdk
-      version: 3.1.101
+      version: 3.1.402
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       build.release.bat
