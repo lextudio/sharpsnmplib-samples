@@ -386,6 +386,169 @@ namespace Samples.Integration
             }
         }
 
+        [Fact]
+        public async Task TestInformV2HandlerWithV3Message()
+        {
+            var manualEvent = new ManualResetEventSlim();
+            // TODO: this is a hack. review it later.
+            var users = new UserRegistry();
+            users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
+            users.Add(new OctetString("authen"),
+                new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication"))));
+            if (DESPrivacyProvider.IsSupported)
+            {
+                users.Add(new OctetString("privacy"), new DESPrivacyProvider(new OctetString("privacyphrase"),
+                                                                             new MD5AuthenticationProvider(new OctetString("authentication"))));
+            }
+
+            var count = 0;
+
+            var trapv1 = new TrapV1MessageHandler();
+            var trapv1Mapping = new HandlerMapping("v1", "TRAPV1", trapv1);
+
+            var trapv2 = new TrapV2MessageHandler();
+            var trapv2Mapping = new HandlerMapping("v2,v3", "TRAPV2", trapv2);
+
+            var inform = new InformRequestMessageHandler();
+            inform.MessageReceived += (sender, args) =>
+            {
+                count++;
+                manualEvent.Set();
+            };
+            var informMapping = new HandlerMapping("v2,v3", "INFORM", inform);
+
+            var store = new ObjectStore();
+            var v1 = new Version1MembershipProvider(new OctetString("public"), new OctetString("public"));
+            var v2 = new Version2MembershipProvider(new OctetString("public"), new OctetString("public"));
+            var v3 = new Version3MembershipProvider();
+            var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
+            var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
+
+            var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
+            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup());
+            var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
+            engine.Listener.AddBinding(daemonEndPoint);
+            engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
+            engine.Listener.MessageReceived += (sender, e) => { Console.WriteLine(e.Message); };
+            engine.Start();
+
+            try
+            {
+                Discovery discovery = Messenger.GetNextDiscovery(SnmpType.InformRequestPdu);
+                ReportMessage report = discovery.GetResponse(2000, daemonEndPoint);
+                await Messenger.SendInformAsync(1,
+                    VersionCode.V3,
+                    daemonEndPoint,
+                    new OctetString("neither"),
+                    OctetString.Empty,
+                    new ObjectIdentifier("1.3.6.1"),
+                    500,
+                    new List<Variable>(),
+                    DefaultPrivacyProvider.DefaultPair,
+                    report);
+                manualEvent.Wait();
+
+                Assert.Equal(1, count);
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public async Task TestInformV2HandlerWithV3MessageDES()
+        {
+            var manualEvent = new ManualResetEventSlim();
+            // TODO: this is a hack. review it later.
+            var users = new UserRegistry();
+            users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
+            users.Add(new OctetString("authen"),
+                new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication"))));
+            if (DESPrivacyProvider.IsSupported)
+            {
+                users.Add(
+                    new OctetString("privacy"), 
+                    new DESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication"))));
+            }
+            else
+            {
+                users.Add(
+                    new OctetString("privacy"),
+                    new BouncyCastle.BouncyCastleDESPrivacyProvider(
+                        new OctetString("privacyphrase"),
+                        new MD5AuthenticationProvider(new OctetString("authentication"))));
+            }
+
+            var count = 0;
+
+            var trapv1 = new TrapV1MessageHandler();
+            var trapv1Mapping = new HandlerMapping("v1", "TRAPV1", trapv1);
+
+            var trapv2 = new TrapV2MessageHandler();
+            var trapv2Mapping = new HandlerMapping("v2,v3", "TRAPV2", trapv2);
+
+            var inform = new InformRequestMessageHandler();
+            inform.MessageReceived += (sender, args) =>
+            {
+                count++;
+                manualEvent.Set();
+            };
+            var informMapping = new HandlerMapping("v2,v3", "INFORM", inform);
+
+            var store = new ObjectStore();
+            var v1 = new Version1MembershipProvider(new OctetString("public"), new OctetString("public"));
+            var v2 = new Version2MembershipProvider(new OctetString("public"), new OctetString("public"));
+            var v3 = new Version3MembershipProvider();
+            var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
+            var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
+
+            var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
+            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup());
+            var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
+            engine.Listener.AddBinding(daemonEndPoint);
+            engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
+            engine.Listener.MessageReceived += (sender, e) => { Console.WriteLine(e.Message); };
+            engine.Start();
+
+            try
+            {
+                Discovery discovery = Messenger.GetNextDiscovery(SnmpType.InformRequestPdu);
+                ReportMessage report = discovery.GetResponse(2000, daemonEndPoint);
+                await Messenger.SendInformAsync(1,
+                    VersionCode.V3,
+                    daemonEndPoint,
+                    new OctetString("privacy"),
+                    OctetString.Empty,
+                    new ObjectIdentifier("1.3.6.1"),
+                    500,
+                    new List<Variable>(),
+                    DESPrivacyProvider.IsSupported
+                        ? (IPrivacyProvider)new DESPrivacyProvider(
+                            new OctetString("privacyphrase"),
+                            new MD5AuthenticationProvider(new OctetString("authentication")))
+                        : new BouncyCastle.BouncyCastleDESPrivacyProvider(
+                            new OctetString("privacyphrase"),
+                            new MD5AuthenticationProvider(new OctetString("authentication"))),
+                    report);
+                manualEvent.Wait();
+
+                Assert.Equal(1, count);
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
         class TestLogger : ILogger
         {
             public EventHandler Handler;

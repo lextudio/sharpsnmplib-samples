@@ -122,6 +122,7 @@ namespace SnmpTrapD
             using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup()))
             {
                 engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 162));
+                engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception catched: {e.Exception}");
                 engine.Start();
                 Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
                 Console.WriteLine("Press any key to stop . . . ");
