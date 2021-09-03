@@ -89,6 +89,7 @@ jobs:
     inputs:
       packageType: sdk
       version: 6.0.x
+      includePreviewVersions: true
       installationPath: $(Agent.ToolsDirectory)/dotnet
   - script: |
       build.release.bat
