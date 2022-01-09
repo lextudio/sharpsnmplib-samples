@@ -601,6 +601,7 @@ namespace Samples.Integration
                 }
             }
         }
+
         [Fact]
         public void TestDiscovererAsyncV2()
         {
@@ -955,7 +956,7 @@ namespace Samples.Integration
 
                 // FIXME: these values are valid on my machine openSUSE 11.2. (lex)
                 // This test case usually fails on Windows, as strangely WinSock API call adds an extra 500-ms.
-                if (SnmpMessageExtension.IsRunningOnMono)
+                if (SnmpMessageExtension.IsRunningOnMono())
                 {
                     Assert.True(elapsedMilliseconds <= time + 100);
                 }

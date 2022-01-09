@@ -264,7 +264,7 @@ namespace Samples.Agent
                 return;
             }
 
-            if (SnmpMessageExtension.IsRunningOnMono && PlatformSupport.Platform != PlatformType.Windows &&
+            if (SnmpMessageExtension.IsRunningOnMono() && PlatformSupport.Platform != PlatformType.Windows &&
                 Mono.Unix.Native.Syscall.getuid() != 0 && int.Parse(txtPort.Text, CultureInfo.InvariantCulture) < 1024)
             {
                 MessageBox.Show(@"On Linux this application must be run as root for port < 1024.");
