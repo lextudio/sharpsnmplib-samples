@@ -724,6 +724,217 @@ namespace Samples.Integration
             }
         }
 
+#if NET6_0
+        [Fact]
+        public void TestDiscovererAsyncV1Cancelled()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(async () =>
+                {
+                    var cancellationTokenSource = new CancellationTokenSource();
+                    cancellationTokenSource.CancelAfter(timeout);
+                    try
+                    {
+                        await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                            new OctetString(communityPublic), cancellationTokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void TestDiscovererAsyncV2Cancelled()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(async () =>
+                {                    
+                    var cancellationTokenSource = new CancellationTokenSource();
+                    cancellationTokenSource.CancelAfter(timeout);
+                    try
+                    {
+                        await discoverer.DiscoverAsync(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                            new OctetString(communityPublic), cancellationTokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void TestDiscovererAsyncV3Cancelled()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(async () =>
+                {
+                    var cancellationTokenSource = new CancellationTokenSource();
+                    cancellationTokenSource.CancelAfter(timeout);
+                    try
+                    {
+                        await discoverer.DiscoverAsync(VersionCode.V3, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                            null, cancellationTokenSource.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+#endif
         [Theory]
         [InlineData(32)]
         public async Task TestResponsesFromMultipleSources(int count)
