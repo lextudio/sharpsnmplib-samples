@@ -14,12 +14,14 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using Listener = Samples.Pipeline.Listener;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SnmpTrapD
 {
     internal static class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             if (args.Length != 0)
             {
@@ -120,16 +122,17 @@ namespace SnmpTrapD
             var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine)))
-            {
-                engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 162));
-                engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception occurred: {e.Exception}");
-                engine.Start();
-                Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
-                Console.WriteLine("Press any key to stop . . . ");
-                Console.Read();
-                engine.Stop();
-            }
+            using var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine));
+            engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 162));
+            engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception occurred: {e.Exception}");
+            engine.Start();
+            Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
+            Console.WriteLine("Press Ctrl+C to stop . . . ");
+            var cancellationTokenSource = new CancellationTokenSource();
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => cancellationTokenSource.Cancel();
+            Console.CancelKeyPress += (s, e) => cancellationTokenSource.Cancel();
+            await Task.Delay(-1, cancellationTokenSource.Token).ContinueWith(t => { });
+            engine.Stop();
         }
 
         private static void WatcherInformRequestReceived(object sender, InformRequestMessageReceivedEventArgs e)
