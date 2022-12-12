@@ -58,7 +58,7 @@ namespace SnmpGet
                                                                                            throw new ArgumentException("no such security mode: " + v);
                                                                                        }
                                                                                    })
-                .Add("a:", "Authentication method (MD5 or SHA)", delegate (string v) { authentication = v; })
+                .Add("a:", "Authentication method (MD5, SHA, SHA256, SHA384, or SHA512)", delegate (string v) { authentication = v; })
                 .Add("A:", "Authentication passphrase", delegate (string v) { authPhrase = v; })
                 .Add("x:", "Privacy method", delegate (string v) { privacy = v; })
                 .Add("X:", "Privacy passphrase", delegate (string v) { privPhrase = v; })
@@ -271,6 +271,21 @@ namespace SnmpGet
             if (authentication.ToUpperInvariant() == "SHA")
             {
                 return new SHA1AuthenticationProvider(new OctetString(phrase));
+            }
+
+            if (authentication.ToUpperInvariant() == "SHA256")
+            {
+                return new SHA256AuthenticationProvider(new OctetString(phrase));
+            }
+
+            if (authentication.ToUpperInvariant() == "SHA384")
+            {
+                return new SHA384AuthenticationProvider(new OctetString(phrase));
+            }
+
+            if (authentication.ToUpperInvariant() == "SHA512")
+            {
+                return new SHA512AuthenticationProvider(new OctetString(phrase));
             }
 
             throw new ArgumentException("unknown name", nameof(authentication));

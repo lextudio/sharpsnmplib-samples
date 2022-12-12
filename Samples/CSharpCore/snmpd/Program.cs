@@ -27,6 +27,7 @@ namespace SnmpD
                 return;
             }
 
+            var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
             var store = new ObjectStore();
             store.Add(new SysDescr());
             store.Add(new SysObjectId());
@@ -41,18 +42,48 @@ namespace SnmpD
             store.Add(new IfTable());
 
             var users = new UserRegistry();
-            users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
-            users.Add(new OctetString("authen"), new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication"))));
+            users.Add(new OctetString("usr-none-none"), DefaultPrivacyProvider.DefaultPair);
+            users.Add(new OctetString("usr-md5-none"), new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha-none"), new DefaultPrivacyProvider(new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha256-none"), new DefaultPrivacyProvider(new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha384-none"), new DefaultPrivacyProvider(new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha512-none"), new DefaultPrivacyProvider(new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             if (DESPrivacyProvider.IsSupported)
             {
-                users.Add(new OctetString("privacy"), new DESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
+                users.Add(new OctetString("usr-md5-des"), new DESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             }
 
+            users.Add(new OctetString("usr-md5-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha256-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha384-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha512-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             if (AESPrivacyProviderBase.IsSupported)
             {
-                users.Add(new OctetString("aes"), new AESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-                users.Add(new OctetString("aes192"), new AES192PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-                users.Add(new OctetString("aes256"), new AES256PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
+                users.Add(new OctetString("usr-md5-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-md5-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-md5-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-md5-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             }
 
             var getv1 = new GetV1MessageHandler();
@@ -92,17 +123,16 @@ namespace SnmpD
             });
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup()))
-            {
-                engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 161));
-                engine.Listener.ExceptionRaised += Engine_ExceptionRaised;
-                engine.Listener.MessageReceived += RequestReceived;
-                engine.Start();
-                Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
-                Console.WriteLine("Press any key to stop . . . ");
-                Console.Read();
-                engine.Stop();
-            }
+            using var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine161));
+            engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 161));
+            engine.Listener.ExceptionRaised += Engine_ExceptionRaised;
+            engine.Listener.MessageReceived += RequestReceived;
+            engine.Start();
+            Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
+
+            Console.WriteLine("Press any key to stop . . . ");
+            Console.Read();
+            engine.Stop();
         }
 
         private static void Engine_ExceptionRaised(object sender, ExceptionRaisedEventArgs e)

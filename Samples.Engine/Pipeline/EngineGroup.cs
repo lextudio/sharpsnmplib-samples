@@ -28,10 +28,7 @@ namespace Samples.Pipeline
     /// </summary>
     public sealed class EngineGroup
     {
-        // TODO: make engine ID configurable from outside and unique.
-        private readonly OctetString _engineId =
-            new OctetString(new byte[] { 128, 0, 31, 136, 128, 233, 99, 0, 0, 214, 31, 244 });
-        
+        private OctetString _engineId;
         private readonly DateTime _start;
         private uint _counterNotInTimeWindow;
         private uint _counterUnknownEngineId;
@@ -43,8 +40,14 @@ namespace Samples.Pipeline
         /// <summary>
         /// Initializes a new instance of the <see cref="EngineGroup"/> class.
         /// </summary>
-        public EngineGroup()
+        public EngineGroup(byte[] id)
         {
+            if (id == null)
+            {
+                throw new ArgumentNullException(nameof(id));
+            }
+
+            _engineId = new OctetString(id);
             _start = DateTime.UtcNow;
         }
         

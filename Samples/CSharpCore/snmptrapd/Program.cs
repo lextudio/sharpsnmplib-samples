@@ -26,6 +26,7 @@ namespace SnmpTrapD
                 return;
             }
 
+            var idEngine = ByteTool.Convert("8000000001020304");
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
             users.Add(
@@ -119,10 +120,10 @@ namespace SnmpTrapD
             var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup()))
+            using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine)))
             {
                 engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 162));
-                engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception catched: {e.Exception}");
+                engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception occurred: {e.Exception}");
                 engine.Start();
                 Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
                 Console.WriteLine("Press any key to stop . . . ");
