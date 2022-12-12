@@ -15,12 +15,14 @@ using System;
 using System.Net;
 using Listener = Samples.Pipeline.Listener;
 using MessageReceivedEventArgs = Samples.Pipeline.MessageReceivedEventArgs;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SnmpD
 {
     internal static class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             if (args.Length != 0)
             {
@@ -130,8 +132,11 @@ namespace SnmpD
             engine.Start();
             Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
 
-            Console.WriteLine("Press any key to stop . . . ");
-            Console.Read();
+            Console.WriteLine("Press Ctrl+C to stop . . . ");
+            var cancellationTokenSource = new CancellationTokenSource();
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => cancellationTokenSource.Cancel();
+            Console.CancelKeyPress += (s, e) => cancellationTokenSource.Cancel();
+            await Task.Delay(-1, cancellationTokenSource.Token).ContinueWith(t => { });
             engine.Stop();
         }
 
