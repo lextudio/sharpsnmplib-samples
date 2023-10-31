@@ -42,6 +42,11 @@ namespace SnmpD
             store.Add(new SysORTable());
             store.Add(new IfNumber());
             store.Add(new IfTable());
+            store.Add(new IpNetToMediaTable());
+            //store.Add(new EntPhysicalTable());
+            // store.Add(new Counter64Test());
+            store.Add(new CompDescr());
+            store.Add(new PowerVoltage());
 
             var users = new UserRegistry();
             users.Add(new OctetString("usr-none-none"), DefaultPrivacyProvider.DefaultPair);

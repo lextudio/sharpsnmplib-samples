@@ -218,7 +218,7 @@ namespace SnmpWalk
                     }
 
                     Discovery discovery = Messenger.GetNextDiscovery(SnmpType.GetBulkRequestPdu);
-                    ReportMessage report = discovery.GetResponse(timeout, receiver);
+                    ReportMessage report = discovery.GetResponse(timeout, receiver, dump);
                     Messenger.BulkWalk(version, receiver, new OctetString(user), new OctetString(string.IsNullOrWhiteSpace(contextName) ? string.Empty : contextName),  test, result, timeout, maxRepetitions, mode, priv, report);
                 }
 

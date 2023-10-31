@@ -151,7 +151,7 @@ Module Program
             Dim receiver As New IPEndPoint(ip, 161)
             If version <> VersionCode.V3 Then
                 Dim message As New GetNextRequestMessage(0, version, New OctetString(community), vList)
-                Dim response As ISnmpMessage = message.GetResponse(timeout, receiver)
+                Dim response As ISnmpMessage = message.GetResponse(timeout, receiver, dump)
                 If response.Pdu.ErrorStatus.ToInt32() <> 0 Then
                     ' != ErrorCode.NoError
                     Throw ErrorException.Create("error in response", receiver.Address, response)
@@ -178,12 +178,12 @@ Module Program
                 priv = New DefaultPrivacyProvider(auth)
             End If
 
-            Dim report As ReportMessage = Messenger.GetNextDiscovery(SnmpType.GetNextRequestPdu).GetResponse(timeout, receiver)
+            Dim report As ReportMessage = Messenger.GetNextDiscovery(SnmpType.GetNextRequestPdu).GetResponse(timeout, receiver, dump)
 
             Dim request As New GetNextRequestMessage(VersionCode.V3, Messenger.NextMessageId, Messenger.NextRequestId, New OctetString(user), New OctetString(IF(string.IsNullOrWhiteSpace(contextName), String.Empty, contextName)), vList, priv, Messenger.MaxMessageSize, _
              report)
 
-            Dim reply As ISnmpMessage = request.GetResponse(timeout, receiver)
+            Dim reply As ISnmpMessage = request.GetResponse(timeout, receiver, dump)
             If dump Then
                 Console.WriteLine("Request message bytes:")
                 Console.WriteLine(ByteTool.Convert(request.ToBytes()))
@@ -207,7 +207,7 @@ Module Program
                 ' according to RFC 3414, send a second request to sync time.
                 request = New GetNextRequestMessage(VersionCode.V3, Messenger.NextMessageId, Messenger.NextRequestId, New OctetString(user), New OctetString(IF(string.IsNullOrWhiteSpace(contextName), String.Empty, contextName)), vList, priv, Messenger.MaxMessageSize, _
              reply)
-                reply = request.GetResponse(timeout, receiver)
+                reply = request.GetResponse(timeout, receiver, dump)
             ElseIf reply.Pdu.ErrorStatus.ToInt32() <> 0 Then
                 ' != ErrorCode.NoError
                 Throw ErrorException.Create("error in response", receiver.Address, reply)

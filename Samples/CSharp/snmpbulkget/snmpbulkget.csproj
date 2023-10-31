@@ -67,6 +67,9 @@
     <Compile Include="..\..\CSharpCore\snmpbulkget\Program.cs">
       <Link>Program.cs</Link>
     </Compile>
+    <Compile Include="..\..\CSharpCore\DumpHelper.cs">
+      <Link>DumpHelper.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

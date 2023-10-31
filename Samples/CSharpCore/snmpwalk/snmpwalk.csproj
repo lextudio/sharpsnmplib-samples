@@ -10,4 +10,10 @@
     <PackageReference Include="Mono.Options.Core" Version="1.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\DumpHelper.cs">
+      <Link>DumpHelper.cs</Link>
+    </Compile>
+  </ItemGroup>
+
 </Project>

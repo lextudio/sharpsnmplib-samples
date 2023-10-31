@@ -30,76 +30,48 @@ namespace SnmpTrapD
 
             var idEngine = ByteTool.Convert("8000000001020304");
             var users = new UserRegistry();
-            users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
-            users.Add(
-                new OctetString("authen"), 
-                new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication"))));
+            users.Add(new OctetString("usr-none-none"), DefaultPrivacyProvider.DefaultPair);
+            users.Add(new OctetString("usr-md5-none"), new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha-none"), new DefaultPrivacyProvider(new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha256-none"), new DefaultPrivacyProvider(new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha384-none"), new DefaultPrivacyProvider(new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha512-none"), new DefaultPrivacyProvider(new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             if (DESPrivacyProvider.IsSupported)
             {
-                users.Add(
-                    new OctetString("privacy"),
-                    new DESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication"))));
-
-                // for snmpsendtrap testing
-                users.Add(new OctetString("trap"),
-                    new DESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication")))
-                    {
-                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
-                    });
-            }
-            else
-            {
-                Console.WriteLine("DES privacy is not supported by .NET Core natively. Switched to BouncyCastle implementation.");
-                users.Add(
-                    new OctetString("privacy"),
-                    new Samples.BouncyCastle.BouncyCastleDESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication"))));
-
-                // for snmpsendtrap testing
-                users.Add(new OctetString("trap"),
-                    new Samples.BouncyCastle.BouncyCastleDESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication")))
-                    {
-                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
-                    });
+                users.Add(new OctetString("usr-md5-des"), new DESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-des"), new DESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             }
 
+            users.Add(new OctetString("usr-md5-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha256-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha384-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+            users.Add(new OctetString("usr-sha512-3des"), new TripleDESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             if (AESPrivacyProviderBase.IsSupported)
             {
-                users.Add(new OctetString("aes"), new AESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-                users.Add(new OctetString("aes192"), new AES192PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-                users.Add(new OctetString("aes256"), new AES256PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-
-                // for snmpsendtrap testing
-                users.Add(new OctetString("trapAES"),
-                    new AESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication")))
-                    {
-                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
-                    });
-            }
-            else
-            {
-                Console.WriteLine("AES privacy is not supported by .NET Core natively. Switched to BouncyCastle implementation.");
-                users.Add(new OctetString("aes"), new Samples.BouncyCastle.BouncyCastleAESPrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-                users.Add(new OctetString("aes192"), new Samples.BouncyCastle.BouncyCastleAES192PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-                users.Add(new OctetString("aes256"), new Samples.BouncyCastle.BouncyCastleAES256PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
-
-                // for snmpsendtrap testing
-                users.Add(new OctetString("trapAES"),
-                    new Samples.BouncyCastle.BouncyCastleAESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication")))
-                    {
-                        EngineIds = new List<OctetString> { new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")) }
-                    });
+                users.Add(new OctetString("usr-md5-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-md5-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-md5-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-md5-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new MD5AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA1AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha256-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA256AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha384-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA384AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes128"), new AESPrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes192"), new AES192PrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
+                users.Add(new OctetString("usr-sha512-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             }
 
             var trapv1 = new TrapV1MessageHandler();

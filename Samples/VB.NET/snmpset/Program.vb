@@ -216,12 +216,12 @@ Module Program
                 priv = New DefaultPrivacyProvider(auth)
             End If
 
-            Dim report As ReportMessage = Messenger.GetNextDiscovery(SnmpType.SetRequestPdu).GetResponse(timeout, receiver)
+            Dim report As ReportMessage = Messenger.GetNextDiscovery(SnmpType.SetRequestPdu).GetResponse(timeout, receiver, dump)
 
             Dim request As New SetRequestMessage(VersionCode.V3, Messenger.NextMessageId, Messenger.NextRequestId, New OctetString(user), New OctetString(IF(string.IsNullOrWhiteSpace(contextName), String.Empty, contextName)), vList, priv, Messenger.MaxMessageSize,
                                                  report)
 
-            Dim reply As ISnmpMessage = request.GetResponse(timeout, receiver)
+            Dim reply As ISnmpMessage = request.GetResponse(timeout, receiver, dump)
             If dump Then
                 Console.WriteLine("Request message bytes:")
                 Console.WriteLine(ByteTool.Convert(request.ToBytes()))
@@ -245,7 +245,7 @@ Module Program
                 ' according to RFC 3414, send a second request to sync time.
                 request = New SetRequestMessage(VersionCode.V3, Messenger.NextMessageId, Messenger.NextRequestId, New OctetString(user), New OctetString(IF(string.IsNullOrWhiteSpace(contextName), String.Empty, contextName)), vList, priv, Messenger.MaxMessageSize,
                                                  reply)
-                reply = request.GetResponse(timeout, receiver)
+                reply = request.GetResponse(timeout, receiver, dump)
             ElseIf reply.Pdu.ErrorStatus.ToInt32() <> 0 Then
                 ' != ErrorCode.NoError
                 Throw ErrorException.Create("error in response", receiver.Address, reply)

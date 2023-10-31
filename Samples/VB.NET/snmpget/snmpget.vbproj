@@ -115,6 +115,9 @@
     <Compile Include="..\..\..\lib\SharedAssemblyInfo.vb">
       <Link>SharedAssemblyInfo.vb</Link>
     </Compile>
+    <Compile Include="..\DumpHelper.vb">
+      <Link>DumpHelper.vb</Link>
+    </Compile>
     <Compile Include="Program.vb" />
     <Compile Include="Properties\AssemblyInfo.vb" />
     <Import Include="Microsoft.VisualBasic" />
