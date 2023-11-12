@@ -26,7 +26,8 @@ namespace Samples.Integration
 
         private SnmpEngine CreateEngine(bool timeout = false, bool max255chars = false)
         {
-            // TODO: this is a hack. review it later.
+            var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
+            // TODO: this is a hack. review it later.            
             var store = new ObjectStore();
             store.Add(new SysDescr());
             store.Add(new SysObjectId());
@@ -96,7 +97,7 @@ namespace Samples.Integration
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
             var listener = new Listener { Users = users };
             listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unexpected exception"); };
-            return new SnmpEngine(pipelineFactory, listener, new EngineGroup());
+            return new SnmpEngine(pipelineFactory, listener, new EngineGroup(idEngine161));
         }
 
         private class TimeoutObject : ScalarObject

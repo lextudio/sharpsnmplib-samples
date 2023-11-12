@@ -20,6 +20,7 @@ namespace Samples.Integration
         public async Task TestTrapV2HandlerWithV2Message()
         {
             var manualEvent = new ManualResetEventSlim();
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             // TODO: this is a hack. review it later.
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
@@ -55,7 +56,7 @@ namespace Samples.Integration
             var handlerFactory = new MessageHandlerFactory(new[] {trapv1Mapping, trapv2Mapping, informMapping});
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            var engine = new SnmpEngine(pipelineFactory, new Listener {Users = users}, new EngineGroup());
+            var engine = new SnmpEngine(pipelineFactory, new Listener {Users = users}, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
             engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
@@ -84,18 +85,18 @@ namespace Samples.Integration
         {
             var manualEvent = new ManualResetEventSlim();
             // TODO: this is a hack. review it later.
-            var engineId = new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449"));
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
             users.Add(new OctetString("authen"),
                 new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication")))
                 {
-                    EngineIds = new[] { engineId }
+                    EngineIds = new List<OctetString> { new OctetString(engineId) }
                 });
             if (DESPrivacyProvider.IsSupported)
             {
                 users.Add(new OctetString("privacy"), new DESPrivacyProvider(new OctetString("privacyphrase"),
-                                                                             new MD5AuthenticationProvider(new OctetString("authentication"))));
+                    new MD5AuthenticationProvider(new OctetString("authentication"))));
             }
 
             var count = 0;
@@ -122,7 +123,7 @@ namespace Samples.Integration
             var handlerFactory = new MessageHandlerFactory(new[] {trapv1Mapping, trapv2Mapping, informMapping});
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            var engine = new SnmpEngine(pipelineFactory, new Listener {Users = users}, new EngineGroup());
+            var engine = new SnmpEngine(pipelineFactory, new Listener {Users = users}, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
             engine.Start();
@@ -141,7 +142,7 @@ namespace Samples.Integration
                     new List<Variable>(),
                     privacy,
                     0x10000,
-                    engineId,
+                    new OctetString(engineId),
                     0,
                     0);
                 await trap.SendAsync(daemonEndPoint);
@@ -163,7 +164,7 @@ namespace Samples.Integration
         {
             var manualEvent = new ManualResetEventSlim();
             // TODO: this is a hack. review it later.
-            var engineId = new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449"));
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
             users.Add(new OctetString("authen"),
@@ -197,7 +198,7 @@ namespace Samples.Integration
             logger.Handler = (obj, args) => { manualEvent.Set(); };
 
             var pipelineFactory = new SnmpApplicationFactory(logger, store, membership, handlerFactory);
-            var group = new EngineGroup();
+            var group = new EngineGroup(engineId);
             var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, group);
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
@@ -240,13 +241,13 @@ namespace Samples.Integration
         {
             var manualEvent = new ManualResetEventSlim();
             // TODO: this is a hack. review it later.
-            var engineId = new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449"));
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
             users.Add(new OctetString("authen"),
                 new DefaultPrivacyProvider(new MD5AuthenticationProvider(new OctetString("authentication")))
                 {
-                    EngineIds = new[] { engineId }
+                    EngineIds = new[] { new OctetString(engineId) }
                 });
             if (DESPrivacyProvider.IsSupported)
             {
@@ -277,7 +278,7 @@ namespace Samples.Integration
             logger.Handler = (obj, args) => { manualEvent.Set(); };
 
             var pipelineFactory = new SnmpApplicationFactory(logger, store, membership, handlerFactory);
-            var group = new EngineGroup();
+            var group = new EngineGroup(engineId);
             var engine = new SnmpEngine(pipelineFactory, new Listener {Users = users}, group);
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
@@ -319,6 +320,7 @@ namespace Samples.Integration
         public async Task TestInformV2HandlerWithV2Message()
         {
             var manualEvent = new ManualResetEventSlim();
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             // TODO: this is a hack. review it later.
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
@@ -354,7 +356,7 @@ namespace Samples.Integration
             var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup());
+            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
             engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
@@ -390,6 +392,7 @@ namespace Samples.Integration
         public async Task TestInformV2HandlerWithV3Message()
         {
             var manualEvent = new ManualResetEventSlim();
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             // TODO: this is a hack. review it later.
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
@@ -425,7 +428,7 @@ namespace Samples.Integration
             var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup());
+            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
             engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
@@ -463,6 +466,7 @@ namespace Samples.Integration
         public async Task TestInformV2HandlerWithV3MessageDES()
         {
             var manualEvent = new ManualResetEventSlim();
+            var engineId = ByteTool.Convert("80001F8880E9630000D61FF449");
             // TODO: this is a hack. review it later.
             var users = new UserRegistry();
             users.Add(new OctetString("neither"), DefaultPrivacyProvider.DefaultPair);
@@ -509,7 +513,7 @@ namespace Samples.Integration
             var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup());
+            var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
             engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };

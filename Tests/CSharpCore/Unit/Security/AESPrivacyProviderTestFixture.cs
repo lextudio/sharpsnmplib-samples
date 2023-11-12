@@ -47,58 +47,6 @@ namespace Samples.Unit.Security
             }
         }
 
-        /*
-        [Fact]
-        public void TestDecrypt2()
-        {
-            // TODO: copied from DES. Need to change the data to match AES.
-            byte[] encrypted =
-                ByteTool.Convert(
-                    "04 38 A4 F9 78 15 2B 14 45 F7 4F C5 B2 1C 82 72 9A 0B D9 EE C1 17 3E E1 26 0D 8B D4 7B 0F D7 35 06 1B E2 14 0D 4A 9B CA BF EF 18 6B 53 B9 FA 70 95 D0 15 38 C5 77 96 85 61 40");
-            var privacy = new AESPrivacyProvider(new OctetString("privacyphrase"),
-                new MD5AuthenticationProvider(new OctetString("authentication")));
-            var parameters = new SecurityParameters(
-                new OctetString(ByteTool.Convert("80001F8880E9630000D61FF449")),
-                Integer32.Zero,
-                Integer32.Zero,
-                new OctetString("lextm"),
-                OctetString.Empty,
-                new OctetString(ByteTool.Convert("0000000069D39B2A")));
-            var data = privacy.Decrypt(DataFactory.CreateSnmpData(encrypted),
-                parameters);
-            Assert.Equal(SnmpType.Sequence, data.TypeCode);
-
-            byte[] net =
-                ByteTool.Convert(
-                    "04 38 A4 F9 78 15 2B 14 45 F7 4F C5 B2 1C 82 72 9A 0B D9 EE C1 17 3E E1 26 0D 8B D4 7B 0F D7 35 06 1B E2 14 0D 4A 9B CA BF EF 18 6B 53 B9 FA 70 95 D0 5D AF 04 5A 68 B5 DA 73");
-            var netData = privacy.Decrypt(DataFactory.CreateSnmpData(net), parameters);
-            Assert.Equal(SnmpType.Sequence, netData.TypeCode);
-
-            Assert.Equal(ByteTool.Convert(netData.ToBytes()), ByteTool.Convert(data.ToBytes()));
-        }
-
-
-        [Fact]
-        public void TestDecrypt()
-        {
-            // TODO: copied from DES. Need to change the data to match AES.
-            byte[] encrypted = ByteTool.Convert("4B  4F 10 3B 73  E1 E4 BD 91  32 1B CB 41" +
-                                                "1B A1 C1 D1  1D 2D B7 84  16 CA 41 BF  B3 62 83 C4" +
-                                                "29 C5 A4 BC  32 DA 2E C7  65 A5 3D 71  06 3C 5B 56" +
-                                                "FB 04 A4");
-            byte[] real = AESPrivacyProvider.Decrypt(encrypted,
-                new byte[]
-                {
-                    0x37, 0xc6, 0x4c, 0xad, 0x49, 0x37, 0xfe, 0xda, 0x57, 0xc8, 0x48, 0x53, 0x47, 0x2a, 0x2e, 0xc0
-                },
-                0, 0, new byte[] {0x00, 0x00, 0x00, 0x01, 0x44, 0x2c, 0xa3, 0xb5});
-            byte[] expected =
-                ByteTool.Convert(
-                    "30  2D  04 0D 80 00 1F 88 80  E9 63 00 00  D6 1F F4 49 04 00 A0 1A 02 02 3A 25  02 01 00 02  01 00 30 0E  30 0C 06 08 2B 06 01 02  01 01 03 00  05 00 01");
-            Assert.Equal(expected, real);
-        }
-//*/
-
         [Fact]
         public void TestEncrypt()
         {
@@ -155,6 +103,45 @@ namespace Samples.Unit.Security
 
             ISnmpData decrypted = priv.Decrypt(data, parameters);
             Assert.Equal(ByteTool.Convert(original.ToBytes()), ByteTool.Convert(decrypted.ToBytes()));
+        }
+
+        [Fact]
+        public void TestEncrypt3()
+        {
+            byte[] received =
+                ByteTool.Convert(
+                    "04 35 CC AE 0C FA 1E 41  CC DD F8 BA  49 27 7E 47  C9 8D 73 63 3B 1A CE 56  97 2D CB 0A  2D DF A1 AC  0F B0 8E 3B 25 EF F1 B6  3B 76 3F 74  84 7C E6 C0  DC AE DE EC D9 9E 5F");
+            OctetString engineId = new OctetString(ByteTool.Convert("80 00 1F 88 80  38 92 B3 6C  6C 89 40 65  00 00 00 00"));
+
+            IPrivacyProvider priv;
+            if (AESPrivacyProviderBase.IsSupported)
+            {
+                priv = new AESPrivacyProvider(new OctetString("privkey1"),
+                    new SHA1AuthenticationProvider(new OctetString("authkey1")));
+            }
+            else
+            {
+                priv = new BouncyCastleAESPrivacyProvider(new OctetString("privkey1"),
+                    new SHA1AuthenticationProvider(new OctetString("authkey1")));
+            }
+
+            Scope scope = new Scope(engineId, OctetString.Empty,
+                new GetRequestPdu(282716518,
+                    new List<Variable> {new Variable(new ObjectIdentifier("1.3.6.1.2.1.1.1.0"))}));
+            SecurityParameters parameters = new SecurityParameters(engineId, new Integer32(0x0B), new Integer32(0x176),
+                new OctetString("usr-sha-aes"), new OctetString(new byte[12]),
+                new OctetString(ByteTool.Convert("FA 24 36 97  A4 79 E6 35")));
+            var original = scope.GetData(VersionCode.V3);
+            ISnmpData data = priv.Encrypt(original, parameters);
+            Assert.Equal(SnmpType.OctetString, data.TypeCode);
+            var encrypted = ByteTool.Convert(data.ToBytes());
+            //Assert.Equal(ByteTool.Convert(received), encrypted);
+
+            ISnmpData decrypted_received = priv.Decrypt(DataFactory.CreateSnmpData(received), parameters);
+            var recovered_received = ByteTool.Convert(decrypted_received.ToBytes());
+            var recovered_encrypted = ByteTool.Convert(priv.Decrypt(data, parameters).ToBytes());
+            Assert.Equal(recovered_received, recovered_encrypted);
+            //Assert.Equal(ByteTool.Convert(original.ToBytes()), ByteTool.Convert(decrypted.ToBytes()));
         }
     }
 }
