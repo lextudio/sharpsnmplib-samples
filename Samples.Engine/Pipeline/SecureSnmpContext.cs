@@ -23,7 +23,6 @@ using System;
 using System.Configuration;
 using System.Globalization;
 #endif
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
@@ -94,7 +93,7 @@ namespace Samples.Pipeline
                         new Integer32(Messenger.MaxMessageSize),
                         privacy.ToSecurityLevel()),
                     new SecurityParameters(
-                        Group.EngineId,
+                        Request.Parameters.EngineId,
                         new Integer32(time[0]),
                         new Integer32(time[1]),
                         userName,
@@ -132,7 +131,7 @@ namespace Samples.Pipeline
                     new Integer32(Messenger.MaxMessageSize),
                     privacy.ToSecurityLevel()),
                 new SecurityParameters(
-                    Group.EngineId,
+                    Request.Parameters.EngineId,
                     new Integer32(time[0]),
                     new Integer32(time[1]),
                     userName,
@@ -161,7 +160,6 @@ namespace Samples.Pipeline
         /// Handles the membership.
         /// </summary>
         /// <returns></returns>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", Justification = "Reviewed. Suppression is OK here.")]
         public override bool HandleMembership()
         {
             var request = Request;
@@ -174,12 +172,6 @@ namespace Samples.Pipeline
                 return false;
             }
 
-            if (typeCode != SnmpType.TrapV2Pdu && parameters.EngineId != Group.EngineId)
-            {
-                HandleDiscovery();
-                return true;
-            }
-
             var user = Users.Find(parameters.UserName);
             if (user == null) 
             {
@@ -187,8 +179,15 @@ namespace Samples.Pipeline
                 return false;
             }
 
-            if (typeCode == SnmpType.TrapV2Pdu && (user.EngineIds == null || !user.EngineIds.Contains(parameters.EngineId)))
+            if (parameters.EngineId.GetRaw().Length == 0)
             {
+                HandleDiscovery();
+                return true;
+            }
+
+            if (parameters.EngineId != Group.EngineId && (user.EngineIds == null || !user.EngineIds.Contains(parameters.EngineId)))
+            {
+                // sender is security engine and not in user's engine id list.
                 HandleFailure(Group.UnknownEngineId);
                 return false;
             }
@@ -258,7 +257,7 @@ namespace Samples.Pipeline
                     OctetString.Empty,
                     OctetString.Empty),
                 new Scope(
-                    Request.Scope.ContextEngineId,
+                    Group.EngineId,
                     Request.Scope.ContextName,
                     new ReportPdu(
                         Request.RequestId(),
@@ -289,7 +288,7 @@ namespace Samples.Pipeline
                     new Integer32(Messenger.MaxMessageSize),
                     privacy.ToSecurityLevel()),
                 new SecurityParameters(
-                    Group.EngineId,
+                    Request.Parameters.EngineId,
                     new Integer32(time[0]),
                     new Integer32(time[1]),
                     userName,
