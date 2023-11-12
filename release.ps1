@@ -1,9 +1,19 @@
+[CmdletBinding()]
+param(
+    [Parameter(Position = 0)]
+    [string] $Configuration = 'Release'
+)
+
 $msBuild = "msbuild"
-$onWindows = $false
 try
 {
     & $msBuild /version
     Write-Host "Likely on Linux/macOS."
+    $solution = "SharpSnmpLib.Samples.sln"
+
+    & dotnet restore $solution -c $Configuration
+    & dotnet clean $solution -c $Configuration
+    & dotnet build $solution -c $Configuration
 }
 catch
 {
@@ -33,20 +43,15 @@ catch
         Write-Host "Likely on Windows with VS2019."
     }
 
-    $onWindows = $true
-}
+    Write-Host "MSBuild found. Compile the projects."
 
-Write-Host "MSBuild found. Compile the projects."
-
-$solution = "SharpSnmpLib.Samples.sln"
-if ($onWindows)
-{
     $solution = "SharpSnmpLib.Samples.Windows.sln"
+
+    & $msBuild $solution /p:Configuration=$Configuration /t:restore
+    & $msBuild $solution /p:Configuration=$Configuration /t:clean
+    & $msBuild $solution /p:Configuration=$Configuration
 }
 
-& $msBuild $solution /p:Configuration=Release /t:restore
-& $msBuild $solution /p:Configuration=Release /t:clean
-& $msBuild $solution /p:Configuration=Release
 if ($LASTEXITCODE -ne 0)
 {
     Write-Host "Compilation failed. Exit."
