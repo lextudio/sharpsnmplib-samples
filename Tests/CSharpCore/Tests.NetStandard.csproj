@@ -29,6 +29,7 @@
     <None Include="sharpsnmplib.tests.snk" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AltCover" Version="8.2.833" />
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.2" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
