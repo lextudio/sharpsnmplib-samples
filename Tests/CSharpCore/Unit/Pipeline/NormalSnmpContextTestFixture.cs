@@ -1,12 +1,12 @@
 ﻿using Lextm.SharpSnmpLib.Messaging;
 using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
-using Moq;
 using System.Collections.Generic;
 using System.Net;
 using Xunit;
 using IListenerBinding = Samples.Pipeline.IListenerBinding;
 using Lextm.SharpSnmpLib;
+using NSubstitute;
 
 namespace Samples.Unit.Pipeline
 {
@@ -16,10 +16,9 @@ namespace Samples.Unit.Pipeline
         public void Test()
         {
             var message = new GetRequestMessage(0, VersionCode.V1, new OctetString("public"), new List<Variable>());
-            var bindingMock = new Mock<IListenerBinding>();
-            bindingMock.Setup(foo => foo.SendResponse(It.IsAny<ISnmpMessage>(), It.IsAny<EndPoint>()));
+            var bindingSubstitute = Substitute.For<IListenerBinding>();
             var context = new NormalSnmpContext(message, new IPEndPoint(IPAddress.Loopback, 0),
-                                                new UserRegistry(), bindingMock.Object);
+                                                new UserRegistry(), bindingSubstitute);
             context.GenerateResponse(new List<Variable>());
             Assert.NotNull(context.Response);
             context.SendResponse();
@@ -33,7 +32,7 @@ namespace Samples.Unit.Pipeline
 
             context.GenerateResponse(list);
             Assert.Equal(ErrorCode.TooBig, context.Response.Pdu().ErrorStatus.ToErrorCode());
-            bindingMock.Verify(foo => foo.SendResponse(It.IsAny<ISnmpMessage>(), It.IsAny<EndPoint>()), Times.AtMostOnce);
+            bindingSubstitute.Received(1).SendResponse(Arg.Any<ISnmpMessage>(), Arg.Any<EndPoint>());
         }
     }
 }

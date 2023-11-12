@@ -5,9 +5,9 @@ using Lextm.SharpSnmpLib.Messaging;
 using Samples.Objects;
 using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
-using Moq;
 using Xunit;
 using Lextm.SharpSnmpLib;
+using NSubstitute;
 
 namespace Samples.Unit.Pipeline
 {
@@ -68,11 +68,12 @@ namespace Samples.Unit.Pipeline
         public void GenError()
         {
             var handler = new GetMessageHandler();
-            var mock = new Mock<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.2.0"));
-            mock.Setup(foo => foo.Data).Throws<Exception>();
-            mock.Setup(foo => foo.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.2.0"))).Returns(mock.Object);
+            var substitute = Substitute.For<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.2.0"));
+            substitute.Data.Returns(x => { throw new Exception(); });
+            substitute.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.2.0")).Returns(substitute);
             var store = new ObjectStore();
-            store.Add(mock.Object);
+            store.Add(substitute);
+
             var context = SnmpContextFactory.Create(
                 new GetRequestMessage(
                     300,
@@ -96,11 +97,13 @@ namespace Samples.Unit.Pipeline
         public void NoSuchObject()
         {
             var handler = new GetMessageHandler();
-            var mock = new Mock<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.2.0"));
-            mock.Setup(foo => foo.Data).Throws<AccessFailureException>();
-            mock.Setup(foo => foo.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.2.0"))).Returns(mock.Object);
+            var substitute = Substitute.For<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.2.0"));
+            substitute.Data.Returns(x => { throw new AccessFailureException(); });
+            substitute.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.2.0")).Returns(substitute);
+
             var store = new ObjectStore();
-            store.Add(mock.Object);
+            store.Add(substitute);
+
             var context = SnmpContextFactory.Create(
                 new GetRequestMessage(
                     300,

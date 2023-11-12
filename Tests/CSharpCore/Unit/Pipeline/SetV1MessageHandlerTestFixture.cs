@@ -5,9 +5,9 @@ using Lextm.SharpSnmpLib.Messaging;
 using Samples.Objects;
 using Samples.Pipeline;
 using Lextm.SharpSnmpLib.Security;
-using Moq;
 using Xunit;
 using Lextm.SharpSnmpLib;
+using NSubstitute;
 
 namespace Samples.Unit.Pipeline
 {
@@ -17,12 +17,18 @@ namespace Samples.Unit.Pipeline
         public void BadValue()
         {
             var handler = new SetV1MessageHandler();
-            var mock = new Mock<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"));
-            mock.Setup(foo => foo.Data).Throws<Exception>();
-            mock.Setup(foo => foo.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"))).Returns(mock.Object);
-            mock.SetupSet(foo => foo.Data = new Integer32(400)).Throws<ArgumentException>();
+            var substitute = Substitute.For<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"));
+            substitute.Data.Returns(x => { throw new Exception(); });
+            substitute.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.4.0")).Returns(substitute);
+
+            // NSubstitute does not have a direct equivalent to Moq's SetupSet for throwing exceptions.
+            // You can use When..Do to achieve similar behavior.
+            substitute.When(x => x.Data = Arg.Is<Integer32>(val => val.ToInt32() == 400))
+                     .Do(x => { throw new ArgumentException(); });
+
             var store = new ObjectStore();
-            store.Add(mock.Object);
+            store.Add(substitute);
+
             var context = SnmpContextFactory.Create(
                 new SetRequestMessage(
                     300,
@@ -46,12 +52,18 @@ namespace Samples.Unit.Pipeline
         public void GenError()
         {
             var handler = new SetV1MessageHandler();
-            var mock = new Mock<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"));
-            mock.Setup(foo => foo.Data).Throws<Exception>();
-            mock.Setup(foo => foo.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"))).Returns(mock.Object);
-            mock.SetupSet(foo => foo.Data = new OctetString("test")).Throws<Exception>();
+            var substitute = Substitute.For<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"));
+            substitute.Data.Returns(x => { throw new Exception(); });
+            substitute.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.4.0")).Returns(substitute);
+
+            // NSubstitute does not have a direct equivalent to Moq's SetupSet for throwing exceptions.
+            // You would typically handle this logic in your test or by using a When..Do construct.
+            substitute.When(x => x.Data = Arg.Any<OctetString>())
+                .Do(x => { throw new Exception(); });
+
             var store = new ObjectStore();
-            store.Add(mock.Object);
+            store.Add(substitute);
+
             var context = SnmpContextFactory.Create(
                 new SetRequestMessage(
                     300,
@@ -127,12 +139,18 @@ namespace Samples.Unit.Pipeline
         public void NoSuchName2()
         {
             var handler = new SetV1MessageHandler();
-            var mock = new Mock<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"));
-            mock.Setup(foo => foo.Data).Throws<AccessFailureException>();
-            mock.Setup(foo => foo.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"))).Returns(mock.Object);
-            mock.SetupSet(foo => foo.Data = new OctetString("test")).Throws<AccessFailureException>();
+            var substitute = Substitute.For<ScalarObject>(new ObjectIdentifier("1.3.6.1.2.1.1.4.0"));
+            substitute.Data.Returns(x => { throw new AccessFailureException(); });
+            substitute.MatchGet(new ObjectIdentifier("1.3.6.1.2.1.1.4.0")).Returns(substitute);
+
+            // NSubstitute does not have a direct equivalent to Moq's SetupSet for throwing exceptions.
+            // You can use When..Do to achieve similar behavior.
+            substitute.When(x => x.Data = Arg.Is<OctetString>(val => val.Equals(new OctetString("test"))))
+                     .Do(x => { throw new AccessFailureException(); });
+
             var store = new ObjectStore();
-            store.Add(mock.Object);
+            store.Add(substitute);
+
             var context = SnmpContextFactory.Create(
                 new SetRequestMessage(
                     300,

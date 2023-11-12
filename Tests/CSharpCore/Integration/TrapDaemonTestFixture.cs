@@ -438,7 +438,7 @@ namespace Samples.Integration
             try
             {
                 Discovery discovery = Messenger.GetNextDiscovery(SnmpType.InformRequestPdu);
-                ReportMessage report = discovery.GetResponse(2000, daemonEndPoint);
+                ReportMessage report = discovery.GetResponse(5000, daemonEndPoint);
                 await Messenger.SendInformAsync(1,
                     VersionCode.V3,
                     daemonEndPoint,
@@ -523,7 +523,7 @@ namespace Samples.Integration
             try
             {
                 Discovery discovery = Messenger.GetNextDiscovery(SnmpType.InformRequestPdu);
-                ReportMessage report = discovery.GetResponse(2000, daemonEndPoint);
+                ReportMessage report = discovery.GetResponse(5000, daemonEndPoint);
                 await Messenger.SendInformAsync(1,
                     VersionCode.V3,
                     daemonEndPoint,

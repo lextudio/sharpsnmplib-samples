@@ -30,13 +30,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.2" />
+    <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'!='net471'">

@@ -9,13 +9,13 @@
 
 using Lextm.SharpSnmpLib.Messaging;
 using Samples.Pipeline;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using Xunit;
 using IListenerBinding = Samples.Pipeline.IListenerBinding;
 using Lextm.SharpSnmpLib;
+using NSubstitute;
 
 namespace Samples.Unit.Pipeline
 {
@@ -24,24 +24,28 @@ namespace Samples.Unit.Pipeline
         [Fact]
         public void Test()
         {
-            var mock = new Mock<ISnmpContext>();
-            var mock2 = new Mock<IListenerBinding>();
+            var substitute = Substitute.For<ISnmpContext>();
+            var substitute2 = Substitute.For<IListenerBinding>();
             IList<Variable> v = new List<Variable>();
             var message = new InformRequestMessage(0, VersionCode.V1, new OctetString("community"), new ObjectIdentifier("1.3.6"), 0, v);
-            mock.Setup(foo => foo.Binding).Returns(mock2.Object);
-            mock.Setup(foo => foo.Request).Returns(message);
-            mock.Setup(foo => foo.Sender).Returns(new IPEndPoint(IPAddress.Any, 0));
-            mock.Setup(foo => foo.CopyRequest(ErrorCode.NoError, 0)).Verifiable("this must be called");
+            substitute.Binding.Returns(substitute2);
+            substitute.Request.Returns(message);
+            substitute.Sender.Returns(new IPEndPoint(IPAddress.Any, 0));
+
+            substitute.When(x => x.CopyRequest(ErrorCode.NoError, 0)).Do(x => { /* this must be called */ });
+
             var handler = new InformRequestMessageHandler();
             Assert.Throws<ArgumentNullException>(() => handler.Handle(null, null));
-            Assert.Throws<ArgumentNullException>(() => handler.Handle(mock.Object, null));
+            Assert.Throws<ArgumentNullException>(() => handler.Handle(substitute, null));
+
             handler.MessageReceived += delegate(object args, InformRequestMessageReceivedEventArgs e)
-                                           {
-                                               Assert.Equal(mock2.Object, e.Binding);
-                                               Assert.Equal(message, e.InformRequestMessage);
-                                               Assert.True(new IPEndPoint(IPAddress.Any, 0).Equals(e.Sender));
-                                           }; 
-            handler.Handle(mock.Object, new ObjectStore());
+            {
+                Assert.Equal(substitute2, e.Binding);
+                Assert.Equal(message, e.InformRequestMessage);
+                Assert.True(new IPEndPoint(IPAddress.Any, 0).Equals(e.Sender));
+            };
+
+            handler.Handle(substitute, new ObjectStore());
         }
     }
 }
