@@ -14,6 +14,7 @@ Imports Lextm.SharpSnmpLib.Security
 Module Program
     Public Sub Main(ByVal args As String())
         If args.Length = 0 Then
+            Dim idEngine = ByteTool.Convert("8000000001020304")
             Dim users As UserRegistry = New UserRegistry()
             users.Add(New OctetString("neither"), DefaultPrivacyProvider.DefaultPair)
             users.Add(New OctetString("authen"), New DefaultPrivacyProvider(New MD5AuthenticationProvider(New OctetString("authentication"))))
@@ -41,7 +42,7 @@ Module Program
             Dim membership As ComposedMembershipProvider = New ComposedMembershipProvider(New IMembershipProvider() {v, v2, v3})
             Dim handlerFactory As MessageHandlerFactory = New MessageHandlerFactory(New HandlerMapping() {trapv1Mapping, trapv2Mapping, informMapping})
             Dim pipelineFactory As SnmpApplicationFactory = New SnmpApplicationFactory(store, membership, handlerFactory)
-            Using engine As SnmpEngine = New SnmpEngine(pipelineFactory, New Listener() With {.Users = users}, New EngineGroup())
+            Using engine As SnmpEngine = New SnmpEngine(pipelineFactory, New Listener() With {.Users = users}, New EngineGroup(idEngine))
                 engine.Listener.AddBinding(New IPEndPoint(IPAddress.Any, 162))
                 engine.Start()
                 Console.WriteLine("#SNMP is available at https://sharpsnmp.com")

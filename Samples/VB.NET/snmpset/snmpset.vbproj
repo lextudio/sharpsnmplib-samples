@@ -158,7 +158,7 @@
       <Version>6.12.0.148</Version>
     </PackageReference>
     <PackageReference Include="Lextm.SharpSnmpLib">
-      <Version>12.5.0-beta5</Version>
+      <Version>12.5.2</Version>
     </PackageReference>
   </ItemGroup>
 </Project>

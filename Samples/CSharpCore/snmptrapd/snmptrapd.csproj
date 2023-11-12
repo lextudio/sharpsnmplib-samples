@@ -3,10 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.0-beta5" />
+    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.2" />
   </ItemGroup>
 
   <ItemGroup>

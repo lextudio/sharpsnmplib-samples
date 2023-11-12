@@ -35,6 +35,7 @@ namespace Samples.Agent
 
         public MainForm()
         {
+            var idEngine = ByteTool.Convert("8000000001020304");
             // TODO: this is a hack. review it later.
             var store = new ObjectStore();
             store.Add(new SysDescr());
@@ -102,7 +103,7 @@ namespace Samples.Agent
             });
 
             var pipelineFactory = new SnmpApplicationFactory(new RollingLogger(), store, membership, handlerFactory);
-            _engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup());
+            _engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine));
             _engine.ExceptionRaised += (sender, e) => MessageBox.Show(e.Exception.ToString());
 
             InitializeComponent();
