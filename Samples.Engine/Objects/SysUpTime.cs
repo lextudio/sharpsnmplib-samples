@@ -26,7 +26,6 @@ namespace Samples.Objects
     /// <summary>
     /// sysUpTime object.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "UpTime")]
     public sealed class SysUpTime : ScalarObject
     {
         /// <summary>

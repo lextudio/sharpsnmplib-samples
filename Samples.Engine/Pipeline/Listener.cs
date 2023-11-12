@@ -46,13 +46,11 @@ namespace Samples.Pipeline
         /// <summary>
         /// Error message for non IP v4 OS.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Pv")]
         public const string ErrorIPv4NotSupported = "cannot use IP v4 as the OS does not support it";
 
         /// <summary>
         /// Error message for non IP v6 OS.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Pv")]
         public const string ErrorIPv6NotSupported = "cannot use IP v6 as the OS does not support it";
 
         /// <summary>

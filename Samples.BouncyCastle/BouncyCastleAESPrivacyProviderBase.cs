@@ -33,7 +33,6 @@ namespace Samples.BouncyCastle
     /// <summary>
     /// Privacy provider base for AES.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "AES", Justification = "definition")]
     public abstract class BouncyCastleAESPrivacyProviderBase : IPrivacyProvider
     {
         private readonly SaltGenerator _salt = new SaltGenerator();

@@ -31,7 +31,6 @@ namespace Samples.Pipeline
         /// Initializes a new instance of the <see cref="ScalarObject"/> class.
         /// </summary>
         /// <param name="id">The ID.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         protected ScalarObject(ObjectIdentifier id)
         {
             Id = id;
@@ -41,7 +40,6 @@ namespace Samples.Pipeline
         /// Initializes a new instance of the <see cref="ScalarObject"/> class.
         /// </summary>
         /// <param name="dots">The ID string.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         protected ScalarObject(string dots)
             : this(new ObjectIdentifier(dots))
         {
@@ -52,7 +50,6 @@ namespace Samples.Pipeline
         /// </summary>
         /// <param name="dots">The ID string.</param>
         /// <param name="index">The index.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         protected ScalarObject(string dots, int index)
             : this(string.Format(CultureInfo.InvariantCulture, dots, index))
         {

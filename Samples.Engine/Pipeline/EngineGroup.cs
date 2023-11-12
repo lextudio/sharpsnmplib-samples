@@ -71,7 +71,6 @@ namespace Samples.Pipeline
         /// Gets the engine time.
         /// </summary>
         /// <value>The engine time.</value>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         [Obsolete("Please use EngineTimeData")]
         public int EngineTime { get; set; }
 

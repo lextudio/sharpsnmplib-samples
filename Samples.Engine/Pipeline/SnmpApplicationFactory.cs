@@ -24,7 +24,6 @@ namespace Samples.Pipeline
     /// <summary>
     /// SNMP application factory, who holds all pipeline instances.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public sealed class SnmpApplicationFactory
     {
         private readonly ILogger _logger;
@@ -78,7 +77,7 @@ namespace Samples.Pipeline
 
             if (result == null)
             {
-                result = new SnmpApplication(this, _logger, _store, _membershipProvider, _factory);              
+                result = new SnmpApplication(this, _logger, _store, _membershipProvider, _factory);
             }
 
             result.Init(context);

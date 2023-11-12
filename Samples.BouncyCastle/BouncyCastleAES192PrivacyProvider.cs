@@ -26,7 +26,6 @@ namespace Samples.BouncyCastle
     /// <summary>
     /// Privacy provider for AES 192.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "AES", Justification = "definition")]
     public sealed class BouncyCastleAES192PrivacyProvider : BouncyCastleAESPrivacyProviderBase
     {
         /// <summary>

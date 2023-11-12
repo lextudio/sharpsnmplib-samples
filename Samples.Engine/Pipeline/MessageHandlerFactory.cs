@@ -35,7 +35,6 @@ namespace Samples.Pipeline
     /// <summary>
     /// Message handler factory.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public sealed class MessageHandlerFactory
     {
         private readonly HandlerMapping[] _mappings;

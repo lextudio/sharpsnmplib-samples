@@ -18,10 +18,8 @@
 // DEALINGS IN THE SOFTWARE.
 #if !NETFX_CORE
 using System;
-using System.Globalization;
 using System.IO;
 
-using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -32,12 +30,11 @@ namespace Lextm.SharpSnmpLib.Security
     /// Authentication provider using SHA-224.
     /// </summary>
     /// <remarks>Defined in https://tools.ietf.org/html/rfc7630#page-3.</remarks>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SHA", Justification = "definition")]
     public sealed class BouncyCastleSHA224AuthenticationProvider : IAuthenticationProvider
     {
         private const int Sha224KeyCacheCapacity = 100;
         private static readonly CryptoKeyCache Sha224KeyCache = new CryptoKeyCache(Sha224KeyCacheCapacity);
-        private static readonly Object Sha224KeyCacheLock = new object();
+        private static readonly object Sha224KeyCacheLock = new object();
 
         private readonly byte[] _password;
 

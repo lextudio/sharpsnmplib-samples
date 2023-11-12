@@ -26,7 +26,6 @@ namespace Samples.Pipeline
     /// <summary>
     /// SNMP object store, who holds all implemented SNMP objects in the agent.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public class ObjectStore
     {
         /// <summary>The internal list of objects holding the data.</summary>

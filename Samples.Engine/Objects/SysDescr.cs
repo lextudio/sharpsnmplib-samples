@@ -27,7 +27,6 @@ namespace Samples.Objects
     /// <summary>
     /// sysDescr object.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Descr")]
     public sealed class SysDescr : ScalarObject
     {
 #if NET471

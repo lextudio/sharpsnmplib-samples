@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -383,8 +382,6 @@ namespace Samples.Pipeline
             ExceptionRaised?.Invoke(this, new ExceptionRaisedEventArgs(exception));
         }
 
-
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void HandleMessage(byte[] buffer, int count, IPEndPoint remote)
         {
             IList<ISnmpMessage> messages = null;
@@ -394,8 +391,9 @@ namespace Samples.Pipeline
             }
             catch (Exception ex)
             {
+                var bytes = buffer.AsSpan().Slice(0, count).ToArray();
                 var exception = new MessageFactoryException("Invalid message bytes found. Use tracing to analyze the bytes.", ex);
-                exception.SetBytes(buffer);
+                exception.SetBytes(bytes);
                 HandleException(exception);
             }
 

@@ -27,7 +27,6 @@ namespace Samples.Objects
     {
         private readonly ISnmpData _data;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         public SysORIndex(int index)
             : base("1.3.6.1.2.1.1.9.1.1.{0}", index)
         {

@@ -33,7 +33,6 @@ namespace Samples.Pipeline
     /// <summary>
     /// SNMP engine, who is the core of an SNMP entity (manager or agent).
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public sealed class SnmpEngine : IDisposable
     {
         private readonly SnmpApplicationFactory _factory;
@@ -154,8 +153,7 @@ namespace Samples.Pipeline
                 return Listener.Active;
             }
         }
-        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions")]
+
         private void ListenerExceptionRaised(object sender, ExceptionRaisedEventArgs e)
         {
             var handler = ExceptionRaised;

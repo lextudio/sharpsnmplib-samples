@@ -27,7 +27,6 @@ namespace Samples.Pipeline
     /// <summary>
     /// Handler mapping class, who is used to map incoming messages to their handlers.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public sealed class HandlerMapping
     {
 #if !NET471
@@ -47,7 +46,6 @@ namespace Samples.Pipeline
         /// <param name="version">The version.</param>
         /// <param name="command">The command.</param>
         /// <param name="handler">The handler.</param>
-        [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1027:TabsMustNotBeUsed", Justification = "Reviewed. Suppression is OK here.")]
         public HandlerMapping(string version, string command, IMessageHandler handler)
         {
             if (version == null)
