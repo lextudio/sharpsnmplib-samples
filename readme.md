@@ -1,9 +1,8 @@
 \#SNMP Library Samples
 ======================
-[![Join the chat at https://gitter.im/sharpsnmplib](https://img.shields.io/gitter/room/sharpsnmplib/Lobby.svg?style=flat-square)](https://gitter.im/sharpsnmplib/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link)
-[![Azure DevOps builds](https://img.shields.io/azure-devops/build/lextudio/08d27f27-71b2-4158-90ec-565c685b3c05/10.svg?style=flat-square)](https://dev.azure.com/lextudio/sharpsnmp/_build?definitionId=10&_a=summary)
+[![Build](https://img.shields.io/github/actions/workflow/status/lextudio/sharpsnmplib-samples/dotnetcore.yml?branch=master&style=flat-square)](https://github.com/lextudio/sharpsnmplib-samples/actions/workflows/dotnetcore.yml)
 
-This is the source code repository of #SNMP Library Samples. Visual Studio 2017/2019 and .NET Core SDK is required to compile it on Windows.
+This is the source code repository of #SNMP Library Samples. Visual Studio 2019/2022 and .NET 6 SDK is required to compile it on Windows.
 
 The following can be found at [#SNMP Library homepage](https://sharpsnmp.com),
 
