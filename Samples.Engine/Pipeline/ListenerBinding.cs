@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 
 namespace Samples.Pipeline
 {
+    using Lextm.SharpSnmpLib;
     using Lextm.SharpSnmpLib.Messaging;
     using Lextm.SharpSnmpLib.Security;
 
@@ -154,6 +155,10 @@ namespace Samples.Pipeline
             try
             {
                 _socket.SendTo(buffer, 0, buffer.Length, 0, receiver);
+                /*
+                Console.WriteLine($"Sent packet to {receiver}:");
+                Console.WriteLine(ByteTool.Convert(buffer));
+                //*/
             }
             catch (SocketException ex)
             {
@@ -388,6 +393,11 @@ namespace Samples.Pipeline
             try
             {
                 messages = MessageFactory.ParseMessages(buffer, 0, count, _users);
+                /*
+                var bytes = buffer.AsSpan().Slice(0, count).ToArray();
+                Console.WriteLine($"Received packet from {remote}:");
+                Console.WriteLine(ByteTool.Convert(bytes));
+                //*/
             }
             catch (Exception ex)
             {
