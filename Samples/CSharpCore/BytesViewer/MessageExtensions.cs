@@ -52,8 +52,8 @@ namespace BytesViewer
             {
                 if (message.Version == VersionCode.V3)
                 {
-                    scope.Nodes.Add(string.Format("context name {0}", message.Scope.ContextName));
                     scope.Nodes.Add(string.Format("context engine id {0}", message.Scope.ContextEngineId.ToHexString()));
+                    scope.Nodes.Add(string.Format("context name {0}", message.Scope.ContextName));
                 }
 
                 var pdu = scope.Nodes.Add(string.Format("pdu type {0}", message.Scope.Pdu.TypeCode));
