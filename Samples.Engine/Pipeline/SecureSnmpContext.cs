@@ -164,18 +164,17 @@ namespace Samples.Pipeline
         {
             var request = Request;
             var parameters = request.Parameters;
-            var typeCode = Request.TypeCode();
-
-            if (typeCode == SnmpType.Unknown)
-            {
-                HandleFailure(Group.DecryptionError);
-                return false;
-            }
-
             var user = Users.Find(parameters.UserName);
             if (user == null) 
             {
                 HandleFailure(Group.UnknownSecurityName);
+                return false;
+            }
+
+            var typeCode = Request.TypeCode();
+            if (typeCode == SnmpType.Unknown)
+            {
+                HandleFailure(Group.DecryptionError);
                 return false;
             }
 
