@@ -325,7 +325,7 @@ namespace Samples.Integration
         }
 
         [Fact]
-        public void TestResponseVersion3_2()
+        public void TestResponseVersion3_DuplicateAuthPassphrase()
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
@@ -349,6 +349,120 @@ namespace Samples.Integration
                 Assert.Equal(SnmpType.ResponsePdu, snmpPdu.TypeCode);
                 Assert.Equal(expected, reply.RequestId());
                 Assert.Equal(ErrorCode.NoError, snmpPdu.ErrorStatus.ToErrorCode());
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Version3_Report_Wrong_Auth()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                // Intentionally use wrong authentication.
+                IAuthenticationProvider auth = new SHA1AuthenticationProvider(new OctetString("authentication"));
+                IPrivacyProvider priv = new DefaultPrivacyProvider(auth);
+
+                var timeout = 3000;
+                Discovery discovery = Messenger.GetNextDiscovery(SnmpType.GetRequestPdu);
+                ReportMessage report = discovery.GetResponse(timeout, serverEndPoint);
+
+                var expected = Messenger.NextRequestId;
+                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("authen"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, priv, Messenger.MaxMessageSize, report);
+                ISnmpMessage reply = request.GetResponse(timeout, serverEndPoint);
+                ISnmpPdu snmpPdu = reply.Pdu();
+                Assert.Equal(SnmpType.ReportPdu, snmpPdu.TypeCode);
+                Assert.Equal(expected, reply.RequestId());
+                Assert.Equal(ErrorCode.NoError, snmpPdu.ErrorStatus.ToErrorCode());
+                Assert.Single(snmpPdu.Variables);
+                Assert.Equal("1.3.6.1.6.3.15.1.1.5.0", snmpPdu.Variables[0].Id.ToString());
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Version3_Report_Wrong_Priv()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                // Intentionally use wrong privacy.
+                IAuthenticationProvider auth = new MD5AuthenticationProvider(new OctetString("authentication"));
+                IPrivacyProvider priv = new AESPrivacyProvider(new OctetString("privacyphrase"), auth);
+
+                var timeout = 3000;
+                Discovery discovery = Messenger.GetNextDiscovery(SnmpType.GetRequestPdu);
+                ReportMessage report = discovery.GetResponse(timeout, serverEndPoint);
+
+                var expected = Messenger.NextRequestId;
+                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("privacy"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, priv, Messenger.MaxMessageSize, report);
+                ISnmpMessage reply = request.GetResponse(timeout, serverEndPoint);
+                ISnmpPdu snmpPdu = reply.Pdu();
+                Assert.Equal(SnmpType.ReportPdu, snmpPdu.TypeCode);
+                Assert.Equal(0, reply.RequestId());
+                Assert.Equal(ErrorCode.NoError, snmpPdu.ErrorStatus.ToErrorCode());
+                Assert.Single(snmpPdu.Variables);
+                Assert.Equal("1.3.6.1.6.3.15.1.1.6.0", snmpPdu.Variables[0].Id.ToString());
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Version3_Report_Wrong_User()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                // Intentionally use wrong privacy.
+                IAuthenticationProvider auth = new MD5AuthenticationProvider(new OctetString("authentication"));
+                IPrivacyProvider priv = new DESPrivacyProvider(new OctetString("privacyphrase"), auth);
+
+                var timeout = 3000;
+                Discovery discovery = Messenger.GetNextDiscovery(SnmpType.GetRequestPdu);
+                ReportMessage report = discovery.GetResponse(timeout, serverEndPoint);
+
+                var expected = Messenger.NextRequestId;
+                GetRequestMessage request = new GetRequestMessage(VersionCode.V3, Messenger.NextMessageId, expected, new OctetString("privacy-not-exist"), OctetString.Empty, new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, priv, Messenger.MaxMessageSize, report);
+                ISnmpMessage reply = request.GetResponse(timeout, serverEndPoint);
+                ISnmpPdu snmpPdu = reply.Pdu();
+                Assert.Equal(SnmpType.ReportPdu, snmpPdu.TypeCode);
+                Assert.Equal(0, reply.RequestId());
+                Assert.Equal(ErrorCode.NoError, snmpPdu.ErrorStatus.ToErrorCode());
+                Assert.Single(snmpPdu.Variables);
+                Assert.Equal("1.3.6.1.6.3.15.1.1.3.0", snmpPdu.Variables[0].Id.ToString());
             }
             finally
             {
