@@ -67,7 +67,7 @@ namespace Samples.Pipeline
                 return parameters.UserName == _set;
             }
 
-            return parameters.UserName == _get;
+            return parameters.UserName == _get || parameters.UserName == _set;
         }
     }
 }
