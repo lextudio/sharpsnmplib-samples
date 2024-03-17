@@ -47,7 +47,7 @@ namespace Samples.Objects
 // ReSharper disable UnusedParameter.Local
         public IfIndex(int index, NetworkInterface networkInterface)
 // ReSharper restore UnusedParameter.Local
-            : base("1.3.6.1.2.1.2.2.1.1.{0}", index)
+            : base("1.3.6.1.2.1.2.2.1.1.{0}", index.ToString())
         {
             _data = new Integer32(index);
         }

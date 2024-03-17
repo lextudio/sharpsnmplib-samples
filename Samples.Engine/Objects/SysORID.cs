@@ -27,7 +27,7 @@ namespace Samples.Objects
         private readonly ObjectIdentifier _data;
 
         public SysORID(int index, ObjectIdentifier dots)
-            : base("1.3.6.1.2.1.1.9.1.2.{0}", index)
+            : base("1.3.6.1.2.1.1.9.1.2.{0}", index.ToString())
         {
             _data = dots;
         }

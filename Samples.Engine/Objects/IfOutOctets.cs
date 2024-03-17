@@ -35,7 +35,7 @@ namespace Samples.Objects
         /// <param name="index">The index.</param>
         /// <param name="networkInterface">The network interface.</param>
         public IfOutOctets(int index, NetworkInterface networkInterface)
-            : base("1.3.6.1.2.1.2.2.1.16.{0}", index)
+            : base("1.3.6.1.2.1.2.2.1.16.{0}", index.ToString())
         {
             _networkInterface = networkInterface;
         }

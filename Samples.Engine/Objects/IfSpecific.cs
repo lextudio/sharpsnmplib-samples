@@ -35,7 +35,7 @@ namespace Samples.Objects
         /// <param name="index">The index.</param>
         /// <param name="networkInterface">The network interface.</param>
         public IfSpecific(int index, NetworkInterface networkInterface)
-            : base("1.3.6.1.2.1.2.2.1.22.{0}", index)
+            : base("1.3.6.1.2.1.2.2.1.22.{0}", index.ToString())
         {
             _data = new ObjectIdentifier("0.0");
         }

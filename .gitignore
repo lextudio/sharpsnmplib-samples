@@ -21,7 +21,6 @@ _UpgradeReport_Files
 *.project
 *.metadata
 logs
-*.generated.cs
 T4MVC.cs
 /SharpSnmpLib/sharpsnmplib.snk
 /packages

@@ -49,9 +49,9 @@ namespace Samples.Pipeline
         /// Initializes a new instance of the <see cref="ScalarObject"/> class.
         /// </summary>
         /// <param name="dots">The ID string.</param>
-        /// <param name="index">The index.</param>
-        protected ScalarObject(string dots, int index)
-            : this(string.Format(CultureInfo.InvariantCulture, dots, index))
+        /// <param name="indexes">The indexes.</param>
+        protected ScalarObject(string dots, string indexes)
+            : this(string.Format(CultureInfo.InvariantCulture, dots, indexes))
         {
         }
 
