@@ -535,6 +535,68 @@ namespace Samples.Integration
         }
 
         [Fact]
+        public void TestDiscovererV1_IPv6()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(() =>
+                {
+                    discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Parse("[ff02::1]"), serverEndPoint.Port),
+                        new OctetString(communityPublic), timeout);
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+
+        [Fact]
         public void TestDiscovererV2()
         {
             if (Environment.GetEnvironmentVariable("CI") == "true")

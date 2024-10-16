@@ -247,7 +247,8 @@ namespace Samples.Pipeline
         /// Adds the binding.
         /// </summary>
         /// <param name="endpoint">The endpoint.</param>
-        public void AddBinding(IPEndPoint endpoint)
+        /// <param name="multicastAddress">The multicast address.</param>
+        public void AddBinding(IPEndPoint endpoint, string multicastAddress = null)
         {
             if (_disposed)
             {
@@ -264,7 +265,7 @@ namespace Samples.Pipeline
                 return;
             }
 
-            var binding = new ListenerBinding(Users, endpoint);
+            var binding = new ListenerBinding(Users, endpoint, multicastAddress);
             binding.ExceptionRaised += (o, args) =>
             {
                 ExceptionRaised?.Invoke(o, args);

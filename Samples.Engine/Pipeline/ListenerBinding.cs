@@ -36,6 +36,7 @@ namespace Samples.Pipeline
     public sealed class ListenerBinding : IDisposable, IListenerBinding
     {
         private readonly UserRegistry _users;
+        private readonly string _multicastAddress;
         private Socket _socket;
         private int _bufferSize;
         private int _active; // = Inactive
@@ -48,10 +49,16 @@ namespace Samples.Pipeline
         /// </summary>
         /// <param name="users">The users.</param>
         /// <param name="endpoint">The endpoint.</param>
-        public ListenerBinding(UserRegistry users, IPEndPoint endpoint)
+        public ListenerBinding(UserRegistry users, IPEndPoint endpoint, string multicastAddress = "[ff02::1]")
         {
+            if (string.IsNullOrWhiteSpace(multicastAddress))
+            {
+                throw new ArgumentException($"'{nameof(multicastAddress)}' cannot be null or whitespace.", nameof(multicastAddress));
+            }
+
             _users = users;
             Endpoint = endpoint;
+            _multicastAddress = multicastAddress;
         }
 
         /// <summary>
@@ -214,6 +221,11 @@ namespace Samples.Pipeline
             try
             {
                 _socket.Bind(Endpoint);
+                if (addressFamily == AddressFamily.InterNetworkV6)
+                {
+                    //_socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastLoopback, true);
+                    //_socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new IPv6MulticastOption(IPAddress.Parse(_multicastAddress)));
+                }
             }
             catch (SocketException ex)
             {
