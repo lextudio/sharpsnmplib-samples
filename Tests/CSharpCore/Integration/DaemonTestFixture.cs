@@ -535,6 +535,68 @@ namespace Samples.Integration
         }
 
         [Fact]
+        public void TestDiscovererV1_IPv6()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(() =>
+                {
+                    discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Parse("[ff02::1]"), serverEndPoint.Port),
+                        new OctetString(communityPublic), timeout);
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 1,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+
+        [Fact]
         public void TestDiscovererV2()
         {
             if (Environment.GetEnvironmentVariable("CI") == "true")
@@ -716,6 +778,68 @@ namespace Samples.Integration
                 }
             }
         }
+
+        [Fact]
+        public void TestDiscovererAsyncV1_IPv6()
+        {
+            if (Environment.GetEnvironmentVariable("CI") == "true")
+            {
+                return;
+            }
+
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Any, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            var timeout = 1000;
+            var wait = 60 * timeout;
+            try
+            {
+                var signal = new AutoResetEvent(false);
+                var ending = new AutoResetEvent(false);
+                var discoverer = new Discoverer();
+                discoverer.AgentFound += (sender, args)
+                    =>
+                {
+                    Assert.True(args.Agent.Address.ToString() != "0.0.0.0");
+                    signal.Set();
+                };
+
+                var source = Observable.Defer(async () =>
+                {
+                    await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Parse("[ff02::1]"), serverEndPoint.Port),
+                        new OctetString(communityPublic), timeout);
+                    var result = signal.WaitOne(wait);
+                    if (!result)
+                    {
+                        throw new TimeoutException();
+                    }
+
+                    return Observable.Return(result);
+                })
+                .RetryWithBackoffStrategy(
+                    retryCount: 4,
+                    retryOnError: e => e is TimeoutException
+                );
+
+                source.Subscribe(result =>
+                {
+                    Assert.True(result);
+                    ending.Set();
+                });
+                Assert.True(ending.WaitOne(MaxTimeout));
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
 
         [Fact]
         public void TestDiscovererAsyncV2()
@@ -1432,8 +1556,74 @@ namespace Samples.Integration
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
                     time,
+                    WalkMode.Default);
+                Assert.True(16 < list.Count);
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void TestWalk_Subtree()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                var list = new List<Variable>();
+                var time = 3000;
+                // IMPORTANT: test against an agent that doesn't exist.
+                var result = Messenger.Walk(
+                    VersionCode.V1,
+                    serverEndPoint,
+                    new OctetString(communityPublic),
+                    new ObjectIdentifier("1.3.6.1.2.1.1"),
+                    list,
+                    time,
                     WalkMode.WithinSubtree);
                 Assert.Equal(16, list.Count);
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public void TestWalk_V2()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                var list = new List<Variable>();
+                var time = 3000;
+                // IMPORTANT: test against an agent that doesn't exist.
+                var result = Messenger.Walk(
+                    VersionCode.V2,
+                    serverEndPoint,
+                    new OctetString(communityPublic),
+                    new ObjectIdentifier("1.3.6.1.2.1.1"),
+                    list,
+                    time,
+                    WalkMode.Default);
+                Assert.True(16 < list.Count);
             }
             finally
             {
@@ -1463,8 +1653,39 @@ namespace Samples.Integration
                     new OctetString(communityPublic),
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
-                    WalkMode.WithinSubtree);
-                Assert.Equal(16, list.Count);
+                    WalkMode.Default);
+                Assert.True(16 < list.Count);
+            }
+            finally
+            {
+                if (SnmpMessageExtension.IsRunningOnWindows)
+                {
+                    engine.Stop();
+                }
+            }
+        }
+
+        [Fact]
+        public async Task TestWalkAsync_V2()
+        {
+            var engine = CreateEngine();
+            engine.Listener.ClearBindings();
+            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            engine.Listener.AddBinding(serverEndPoint);
+            engine.Start();
+
+            try
+            {
+                var list = new List<Variable>();
+                // IMPORTANT: test against an agent that doesn't exist.
+                var result = await Messenger.WalkAsync(
+                    VersionCode.V2,
+                    serverEndPoint,
+                    new OctetString(communityPublic),
+                    new ObjectIdentifier("1.3.6.1.2.1.1"),
+                    list,
+                    WalkMode.Default);
+                Assert.True(16 < list.Count);
             }
             finally
             {
