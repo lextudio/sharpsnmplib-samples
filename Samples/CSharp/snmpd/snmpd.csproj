@@ -132,7 +132,7 @@
       <Version>3.0.1</Version>
     </PackageReference>
     <PackageReference Include="Lextm.SharpSnmpLib">
-      <Version>12.5.4</Version>
+      <Version>12.5.5</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
