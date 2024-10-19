@@ -76,6 +76,9 @@ namespace Samples.Unit.Security
             byte[] expected =
                 ByteTool.Convert(
                     "04 30 9D 13 04 9C 7E D9 84 8B 33 C3 26 5C 1F 91 30 27 D3 56 B0 FD 81 36 50 3A EF 80 1C B9 25 D6 38 84 A7 07 45 FE E8 D7 01 83 A1 CE 04 79 9D 5F 9E 2F");
+            byte[] noPaddings =
+                ByteTool.Convert(
+                    "04 2F 9D 13 04 9C 7E D9 84 8B 33 C3 26 5C 1F 91 30 27 D3 56 B0 FD 81 36 50 3A EF 80 1C B9 25 D6 38 84 A7 07 45 FE E8 D7 01 83 A1 CE 04 79 9D 5F 9E");
             OctetString engineId = new OctetString(ByteTool.Convert("80 00 1F 88 80  E9 63 00 00  D6 1F F4 49"));
 
             IPrivacyProvider priv;
@@ -99,7 +102,7 @@ namespace Samples.Unit.Security
             var original = scope.GetData(VersionCode.V3);
             ISnmpData data = priv.Encrypt(original, parameters);
             Assert.Equal(SnmpType.OctetString, data.TypeCode);
-            Assert.Equal(ByteTool.Convert(expected), ByteTool.Convert(data.ToBytes()));
+            Assert.Equal(ByteTool.Convert(noPaddings), ByteTool.Convert(data.ToBytes()));
 
             ISnmpData decrypted = priv.Decrypt(data, parameters);
             Assert.Equal(ByteTool.Convert(original.ToBytes()), ByteTool.Convert(decrypted.ToBytes()));
