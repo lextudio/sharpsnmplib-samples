@@ -803,7 +803,7 @@ namespace Samples.Integration
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
             var serverEndPoint = new IPEndPoint(IPAddress.IPv6Any, Port.NextId);
-            engine.Listener.AddBinding(serverEndPoint);
+            engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
             engine.Start();
 
             var timeout = 1000;
