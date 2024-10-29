@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Samples/CSharpCore/snmpd/bin/Debug/net6.0/snmpd.dll",
+            "program": "${workspaceFolder}/Samples/CSharpCore/snmpd/bin/Debug/net8.0/snmpd.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Samples/CSharpCore/snmpd",
             "console": "internalConsole",
