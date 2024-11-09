@@ -31,12 +31,12 @@ namespace BytesViewer
             if (message.Version == VersionCode.V3)
             {
                 parameter.Nodes.Add(string.Format("user {0}", message.Parameters.UserName));
-                parameter.Nodes.Add(string.Format("engine id {0}", message.Parameters.EngineId.ToHexString()));
+                parameter.Nodes.Add(string.Format("engine id {0}", message.Parameters.EngineId?.ToHexString()));
                 parameter.Nodes.Add(string.Format("engine boots {0}", message.Parameters.EngineBoots));
                 parameter.Nodes.Add(string.Format("engine time {0}", message.Parameters.EngineTime));
-                parameter.Nodes.Add(string.Format("checksum {0}", message.Parameters.AuthenticationParameters.ToHexString()));
+                parameter.Nodes.Add(string.Format("checksum {0}", message.Parameters.AuthenticationParameters?.ToHexString()));
                 parameter.Nodes.Add(string.Format("checksum broken {0}", message.Parameters.IsInvalid));
-                parameter.Nodes.Add(string.Format("encryption token {0}", message.Parameters.PrivacyParameters.ToHexString()));
+                parameter.Nodes.Add(string.Format("encryption token {0}", message.Parameters.PrivacyParameters?.ToHexString()));
             }
             else
             {
@@ -48,11 +48,11 @@ namespace BytesViewer
             {
                 scope.Nodes.Add("decryption error");
             }
-            else if (OctetString.IsNullOrEmpty(message.Parameters.PrivacyParameters))
+            else
             {
                 if (message.Version == VersionCode.V3)
                 {
-                    scope.Nodes.Add(string.Format("context engine id {0}", message.Scope.ContextEngineId.ToHexString()));
+                    scope.Nodes.Add(string.Format("context engine id {0}", message.Scope.ContextEngineId?.ToHexString()));
                     scope.Nodes.Add(string.Format("context name {0}", message.Scope.ContextName));
                 }
 
@@ -65,10 +65,6 @@ namespace BytesViewer
                 {
                     variables.Nodes.Add(variable.ToString());
                 }
-            }
-            else
-            {
-                scope.Nodes.Add("encrypted data");
             }
 
             tree.ExpandAll();
