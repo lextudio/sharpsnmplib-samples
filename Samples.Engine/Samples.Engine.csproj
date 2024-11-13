@@ -2,8 +2,8 @@
   <PropertyGroup>
     <AssemblyName>Samples.Engine</AssemblyName>
     <RootNamespace>Lextm.SharpSnmpLib</RootNamespace>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;net471</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net8.0;net471</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">net8.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Net.NetworkInformation" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />

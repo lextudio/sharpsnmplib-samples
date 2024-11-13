@@ -2,8 +2,8 @@
   <PropertyGroup>
     <AssemblyName>Samples.BouncyCastle</AssemblyName>
     <RootNamespace>Samples.BouncyCastle</RootNamespace>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;net471</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">net8.0;net471</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">net8.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
