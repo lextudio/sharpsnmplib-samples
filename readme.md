@@ -2,7 +2,7 @@
 
 # C# SNMP Library (#SNMP) Samples
 
-This is the source code repository of C# SNMP Library (#SNMP) samples. Visual Studio 2019/2022 and .NET 6 SDK is required to compile it on Windows.
+This is the source code repository of C# SNMP Library (#SNMP) samples. Visual Studio 2022 and .NET 8 SDK is required to compile it on Windows.
 
 The following can be found at [C# SNMP Library homepage](https://sharpsnmp.com),
 
