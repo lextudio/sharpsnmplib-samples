@@ -88,6 +88,7 @@ namespace Samples.Pipeline
                 return;
             }
 
+            System.Threading.Thread.Sleep(2000); // simulate a slow device
             context.GenerateResponse(result);
         }
     }

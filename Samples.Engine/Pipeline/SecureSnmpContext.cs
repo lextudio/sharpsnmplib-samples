@@ -18,7 +18,7 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System.Collections.Generic;
-#if NET471
+#if NET471_OR_GREATER
 using System;
 using System.Configuration;
 using System.Globalization;
@@ -226,7 +226,7 @@ namespace Samples.Pipeline
             {
                 if (_timeIncluded == null)
                 {
-#if NET471
+#if NET471_OR_GREATER
                     object setting = ConfigurationManager.AppSettings["TimeIncluded"];
                     _timeIncluded = setting != null && Convert.ToBoolean(setting.ToString(), CultureInfo.InvariantCulture);
 #else

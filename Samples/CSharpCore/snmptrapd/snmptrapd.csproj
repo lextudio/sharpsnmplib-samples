@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.4" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
     <ProjectReference Include="..\..\..\Samples.BouncyCastle\Samples.BouncyCastle.csproj" />
   </ItemGroup>

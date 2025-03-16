@@ -220,12 +220,13 @@ namespace Samples.Pipeline
 
             try
             {
-                _socket.Bind(Endpoint);
                 if (addressFamily == AddressFamily.InterNetworkV6)
                 {
-                    //_socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastLoopback, true);
-                    //_socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new IPv6MulticastOption(IPAddress.Parse(_multicastAddress)));
+                    _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastLoopback, true);
+                    _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new IPv6MulticastOption(IPAddress.Parse(_multicastAddress)));
                 }
+
+                _socket.Bind(Endpoint);
             }
             catch (SocketException ex)
             {
@@ -516,6 +517,12 @@ namespace Samples.Pipeline
 
             try
             {
+                if (addressFamily == AddressFamily.InterNetworkV6)
+                {
+                    _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastLoopback, true);
+                    _socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new IPv6MulticastOption(IPAddress.Parse(_multicastAddress)));
+                }
+
                 _socket.Bind(Endpoint);
             }
             catch (SocketException ex)

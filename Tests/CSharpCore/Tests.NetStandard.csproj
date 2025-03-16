@@ -6,9 +6,9 @@
     <AssemblyName>SharpSnmpLib.Tests.NetStandard</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
-    <OutputType Condition="'$(TargetFramework)'!='net471'">Exe</OutputType>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' AND '$(MSBuildAssemblyVersion)' == '17.0' ">net6.0;net471</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' AND '$(MSBuildAssemblyVersion)' == '16.0' ">net471</TargetFrameworks>
+    <OutputType Condition="'$(TargetFramework)'!='net472'">Exe</OutputType>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' AND '$(MSBuildAssemblyVersion)' == '17.0' ">net6.0;net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' AND '$(MSBuildAssemblyVersion)' == '16.0' ">net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">net6.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
@@ -30,7 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AltCover" Version="8.9.3" />
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.4" />
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="System.Reactive.Linq" Version="6.0.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -40,7 +39,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'!='net471'">
+  <ItemGroup Condition="'$(TargetFramework)'!='net472'">
     <PackageReference Include="System.Net.Sockets" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>

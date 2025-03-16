@@ -5,8 +5,4 @@
     <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.4" />
-  </ItemGroup>
-
 </Project>

@@ -248,7 +248,7 @@ namespace Samples.Pipeline
         /// </summary>
         /// <param name="endpoint">The endpoint.</param>
         /// <param name="multicastAddress">The multicast address.</param>
-        public void AddBinding(IPEndPoint endpoint, string multicastAddress = null)
+        public void AddBinding(IPEndPoint endpoint, string multicastAddress = "[ff02::1]")
         {
             if (_disposed)
             {
