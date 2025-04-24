@@ -24,13 +24,14 @@
             "program": "${workspaceFolder}/Samples/CSharpCore/snmpget/bin/Debug/net8.0/snmpget.dll",
             "args": [
                 "-v=3",
+                "-l=authPriv",
                 "-u=usr-md5-des",
                 "-a=MD5",
                 "-A=authkey1",
                 "-x=DES",
                 "-X=privkey1",
                 "-d",
-                "localhost:1610",
+                "demo.pysnmp.com",
                 "1.3.6.1.2.1.1.1.0",
                 "1.3.6.1.2.1.1.2.0"
             ],
