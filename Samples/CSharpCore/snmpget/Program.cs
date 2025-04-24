@@ -60,7 +60,7 @@ namespace SnmpGet
                                                                                    })
                 .Add("a:", "Authentication method (MD5, SHA, SHA256, SHA384, or SHA512)", delegate (string v) { authentication = v; })
                 .Add("A:", "Authentication passphrase", delegate (string v) { authPhrase = v; })
-                .Add("x:", "Privacy method", delegate (string v) { privacy = v; })
+                .Add("x:", "Privacy method (DES, 3DES, AES, AES192, or AES256)", delegate (string v) { privacy = v; })
                 .Add("X:", "Privacy passphrase", delegate (string v) { privPhrase = v; })
                 .Add("u:", "Security name", delegate (string v) { user = v; })
                 .Add("C:", "Context name", delegate (string v) { contextName = v; })
@@ -126,12 +126,26 @@ namespace SnmpGet
                 Console.WriteLine(Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyVersionAttribute>().Version);
                 return;
             }
-            
+
             IPAddress ip;
-            bool parsed = IPAddress.TryParse(extra[0], out ip);
+            int port = 161; // Default SNMP port
+            string hostNameOrAddress = extra[0];
+            
+            // Handle host:port format
+            if (hostNameOrAddress.Contains(':'))
+            {
+                string[] parts = hostNameOrAddress.Split(':');
+                if (parts.Length == 2 && int.TryParse(parts[1], out int parsedPort))
+                {
+                    hostNameOrAddress = parts[0];
+                    port = parsedPort;
+                }
+            }
+            
+            bool parsed = IPAddress.TryParse(hostNameOrAddress, out ip);
             if (!parsed)
             {
-                var addresses = Dns.GetHostAddressesAsync(extra[0]);
+                var addresses = Dns.GetHostAddressesAsync(hostNameOrAddress);
                 addresses.Wait();
                 foreach (IPAddress address in 
                     addresses.Result.Where(address => address.AddressFamily == AddressFamily.InterNetwork))
@@ -142,7 +156,7 @@ namespace SnmpGet
 
                 if (ip == null)
                 {
-                    Console.WriteLine("invalid host or wrong IP address found: " + extra[0]);
+                    Console.WriteLine("invalid host or wrong IP address found: " + hostNameOrAddress);
                     return;
                 }
             }
@@ -156,7 +170,7 @@ namespace SnmpGet
                     vList.Add(test);
                 }
 
-                IPEndPoint receiver = new IPEndPoint(ip, 161);
+                IPEndPoint receiver = new IPEndPoint(ip, port);
                 if (version != VersionCode.V3)
                 {
                     foreach (
@@ -182,15 +196,7 @@ namespace SnmpGet
                 IPrivacyProvider priv;
                 if ((level & Levels.Privacy) == Levels.Privacy)
                 {
-                    if (DESPrivacyProvider.IsSupported)
-                    {
-                        priv = new DESPrivacyProvider(new OctetString(privPhrase), auth);
-                    }
-                    else
-                    {
-                        Console.WriteLine("DES (ECB) is not supported by .NET Core.");
-                        return;
-                    }
+                    priv = GetPrivacyProviderByName(privacy, privPhrase, auth);
                 }
                 else
                 {
@@ -251,6 +257,75 @@ namespace SnmpGet
             Console.WriteLine("snmpget [Options] IP-address|host-name OID [OID] ...");
             Console.WriteLine("Options:");
             optionSet.WriteOptionDescriptions(Console.Out);
+        }
+
+        private static IPrivacyProvider GetPrivacyProviderByName(string privacy, string phrase, IAuthenticationProvider auth)
+        {
+            if (string.IsNullOrEmpty(privacy))
+            {
+                return new DefaultPrivacyProvider(auth);
+            }
+
+            switch (privacy.ToUpperInvariant())
+            {
+                case "DES":
+                    if (DESPrivacyProvider.IsSupported)
+                    {
+                        return new DESPrivacyProvider(new OctetString(phrase), auth);
+                    }
+                    
+                    throw new ArgumentException("DES privacy is not supported in this system");
+
+                case "3DES":
+                    return new TripleDESPrivacyProvider(new OctetString(phrase), auth);
+
+                case "AES":
+                    if (AESPrivacyProvider.IsSupported)
+                    {
+                        return new AESPrivacyProvider(new OctetString(phrase), auth);;
+                    }
+                    
+                    throw new ArgumentException("AES privacy is not supported in this system");
+
+                case "AES192":
+                    if (AESPrivacyProvider.IsSupported)
+                    {
+                        return new AES192PrivacyProvider(new OctetString(phrase), auth);
+                    }
+                    
+                    throw new ArgumentException("AES192 privacy is not supported in this system");
+
+                case "AES256":
+                    if (AESPrivacyProvider.IsSupported)
+                    {
+                        return new AES256PrivacyProvider(new OctetString(phrase), auth);
+                    }
+                    
+                    throw new ArgumentException("AES256 privacy is not supported in this system");
+                    
+                default:
+                    throw new ArgumentException("unknown privacy name: " + privacy);
+            }
+        }
+
+        private static Type GetType(string typeName)
+        {
+            var type = Type.GetType(typeName);
+            if (type != null)
+            {
+                return type;
+            }
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                type = assembly.GetType(typeName);
+                if (type != null)
+                {
+                    return type;
+                }
+            }
+
+            return null;
         }
 
         private static IAuthenticationProvider GetAuthenticationProviderByName(string authentication, string phrase)

@@ -5,13 +5,36 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "snmpd Launch (console)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Samples/CSharpCore/snmpd/bin/Debug/net8.0/snmpd.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Samples/CSharpCore/snmpd",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "justMyCode": false
+        },
+        {
+            "name": "snmpget Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Samples/CSharpCore/snmpget/bin/Debug/net8.0/snmpget.dll",
+            "args": [
+                "-v=3",
+                "-u=usr-md5-des",
+                "-a=MD5",
+                "-A=authkey1",
+                "-x=DES",
+                "-X=privkey1",
+                "-d",
+                "localhost:1610",
+                "1.3.6.1.2.1.1.1.0",
+                "1.3.6.1.2.1.1.2.0"
+            ],
+            "cwd": "${workspaceFolder}/Samples/CSharpCore/snmpget",
             "console": "internalConsole",
             "stopAtEntry": false,
             "justMyCode": false

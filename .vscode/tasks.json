@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Samples/CSharpCore/snmpd/snmpd.csproj",
+                "${workspaceFolder}/SharpSnmpLib.Samples.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
