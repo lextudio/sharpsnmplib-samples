@@ -1,17 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
+    <ProjectReference Include="..\..\..\..\..\sharpsnmplib-samples\Samples.Engine\Samples.Engine.csproj" />
+    <ProjectReference Include="..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\..\SharpSnmpPro.Mib\SharpSnmpPro.Mib.csproj" />  
   </ItemGroup>
 
+  <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->
+  <ItemGroup>
+    <AdditionalFiles Include="Mibs\*.mibs" />
+    <AdditionalFiles Include="Mibs\.customized" />
+    <AdditionalFiles Include="Mibs\*.txt" />
+  </ItemGroup>
 </Project>
