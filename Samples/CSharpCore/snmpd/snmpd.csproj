@@ -3,6 +3,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+
+    <MibSourceGenerator>..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj</MibSourceGenerator>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.6" />
@@ -10,8 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\sharpsnmplib-samples\Samples.Engine\Samples.Engine.csproj" />
-    <ProjectReference Include="..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\..\..\..\SharpSnmpPro.Mib\SharpSnmpPro.Mib.csproj" />  
+    <ProjectReference Include="..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists($(MibSourceGenerator))" />
   </ItemGroup>
 
   <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->
@@ -19,5 +20,10 @@
     <AdditionalFiles Include="Mibs\*.mibs" />
     <AdditionalFiles Include="Mibs\.customized" />
     <AdditionalFiles Include="Mibs\*.txt" />
+  </ItemGroup>
+
+  <!-- Exclude all MIB implementation files when MibSourceGenerator is not available -->
+  <ItemGroup Condition="!Exists($(MibSourceGenerator))">
+    <Compile Remove="Customized\*.g.cs" />
   </ItemGroup>
 </Project>
