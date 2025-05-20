@@ -9,7 +9,7 @@ try
 {
     & $msBuild /version
     Write-Host "Likely on Linux/macOS."
-    $solution = "SharpSnmpLib.Samples.sln"
+    $solution = "SharpSnmpLib.Samples.slnx"
 
     & dotnet restore $solution -c $Configuration
     & dotnet clean $solution -c $Configuration
@@ -45,7 +45,7 @@ catch
 
     Write-Host "MSBuild found. Compile the projects."
 
-    $solution = "SharpSnmpLib.Samples.Windows.sln"
+    $solution = "SharpSnmpLib.Samples.Windows.slnx"
 
     & $msBuild $solution /p:Configuration=$Configuration /t:restore
     & $msBuild $solution /p:Configuration=$Configuration /t:clean
