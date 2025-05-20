@@ -480,14 +480,6 @@ namespace Samples.Integration
                         new OctetString("privacyphrase"),
                         new MD5AuthenticationProvider(new OctetString("authentication"))));
             }
-            else
-            {
-                users.Add(
-                    new OctetString("privacy"),
-                    new BouncyCastle.BouncyCastleDESPrivacyProvider(
-                        new OctetString("privacyphrase"),
-                        new MD5AuthenticationProvider(new OctetString("authentication"))));
-            }
 
             var count = 0;
 
@@ -532,11 +524,7 @@ namespace Samples.Integration
                     new ObjectIdentifier("1.3.6.1"),
                     500,
                     new List<Variable>(),
-                    DESPrivacyProvider.IsSupported
-                        ? (IPrivacyProvider)new DESPrivacyProvider(
-                            new OctetString("privacyphrase"),
-                            new MD5AuthenticationProvider(new OctetString("authentication")))
-                        : new BouncyCastle.BouncyCastleDESPrivacyProvider(
+                    new DESPrivacyProvider(
                             new OctetString("privacyphrase"),
                             new MD5AuthenticationProvider(new OctetString("authentication"))),
                     report);

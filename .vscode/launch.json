@@ -25,10 +25,10 @@
             "args": [
                 "-v=3",
                 "-l=authPriv",
-                "-u=usr-md5-des",
+                "-u=usr-md5-3des",
                 "-a=MD5",
                 "-A=authkey1",
-                "-x=DES",
+                "-x=3DES",
                 "-X=privkey1",
                 "-d",
                 "demo.pysnmp.com",

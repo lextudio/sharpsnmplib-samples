@@ -13,7 +13,6 @@ namespace Samples.Unit.Security
     using System.Collections.Generic;
     using Xunit;
     using Lextm.SharpSnmpLib.Security;
-    using Samples.BouncyCastle;
     using Lextm.SharpSnmpLib;
 
     public class AESPrivacyProviderTestFixture
@@ -81,15 +80,10 @@ namespace Samples.Unit.Security
                     "04 2F 9D 13 04 9C 7E D9 84 8B 33 C3 26 5C 1F 91 30 27 D3 56 B0 FD 81 36 50 3A EF 80 1C B9 25 D6 38 84 A7 07 45 FE E8 D7 01 83 A1 CE 04 79 9D 5F 9E");
             OctetString engineId = new OctetString(ByteTool.Convert("80 00 1F 88 80  E9 63 00 00  D6 1F F4 49"));
 
-            IPrivacyProvider priv;
+            IPrivacyProvider priv = null;
             if (AESPrivacyProviderBase.IsSupported)
             {
                 priv = new AESPrivacyProvider(new OctetString("passtest"),
-                    new MD5AuthenticationProvider(new OctetString("testpass")));
-            }
-            else
-            {
-                priv = new BouncyCastleAESPrivacyProvider(new OctetString("passtest"),
                     new MD5AuthenticationProvider(new OctetString("testpass")));
             }
 
@@ -116,15 +110,10 @@ namespace Samples.Unit.Security
                     "04 35 CC AE 0C FA 1E 41  CC DD F8 BA  49 27 7E 47  C9 8D 73 63 3B 1A CE 56  97 2D CB 0A  2D DF A1 AC  0F B0 8E 3B 25 EF F1 B6  3B 76 3F 74  84 7C E6 C0  DC AE DE EC D9 9E 5F");
             OctetString engineId = new OctetString(ByteTool.Convert("80 00 1F 88 80  38 92 B3 6C  6C 89 40 65  00 00 00 00"));
 
-            IPrivacyProvider priv;
+            IPrivacyProvider priv = null;
             if (AESPrivacyProviderBase.IsSupported)
             {
                 priv = new AESPrivacyProvider(new OctetString("privkey1"),
-                    new SHA1AuthenticationProvider(new OctetString("authkey1")));
-            }
-            else
-            {
-                priv = new BouncyCastleAESPrivacyProvider(new OctetString("privkey1"),
                     new SHA1AuthenticationProvider(new OctetString("authkey1")));
             }
 

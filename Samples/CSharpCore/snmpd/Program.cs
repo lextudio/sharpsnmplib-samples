@@ -17,7 +17,6 @@ using Listener = Samples.Pipeline.Listener;
 using MessageReceivedEventArgs = Samples.Pipeline.MessageReceivedEventArgs;
 using System.Threading;
 using System.Threading.Tasks;
-using IP_MIB;
 
 namespace SnmpD
 {
@@ -43,7 +42,7 @@ namespace SnmpD
             store.Add(new SysORTable());
             store.Add(new IfNumber());
             store.Add(new IfTable());
-            store.Add(new ipNetToMediaTable());
+            // store.Add(new ipNetToMediaTable());
             // store.Add(new IpNetToMediaTable());
             // //store.Add(new EntPhysicalTable());
             // // store.Add(new Counter64Test());
@@ -133,7 +132,7 @@ namespace SnmpD
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
             using var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine161));
-            engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 161));
+            engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 1610));
             engine.Listener.ExceptionRaised += Engine_ExceptionRaised;
             engine.Listener.MessageReceived += RequestReceived;
             engine.Start();

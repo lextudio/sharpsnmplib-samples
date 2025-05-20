@@ -1,0 +1,49 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Perf" />
+    <BuildType Name="Release" />
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Samples/" />
+  <Folder Name="/Samples/CSharpCore/">
+    <Project Path="Samples/CSharpCore/snmpbulkget/snmpbulkget.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpd/snmpd.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpdiscover/snmpdiscover.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpget/snmpget.csproj">
+      <BuildType Solution="Perf|*" Project="Release" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpgetnext/snmpgetnext.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpsendtrap/snmpsendtrap.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpset/snmpset.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmptrapd/snmptrapd.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+    <Project Path="Samples/CSharpCore/snmpwalk/snmpwalk.csproj">
+      <BuildType Solution="Perf|*" Project="Debug" />
+    </Project>
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="global.json" />
+  </Folder>
+  <Project Path="Samples.Engine/Samples.Engine.csproj">
+    <BuildType Solution="Perf|*" Project="Debug" />
+  </Project>
+  <Project Path="Tests/CSharpCore/Tests.NetStandard.csproj">
+    <BuildType Solution="Perf|*" Project="Debug" />
+  </Project>
+</Solution>

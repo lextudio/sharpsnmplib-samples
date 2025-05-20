@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
-    <ProjectReference Include="..\..\..\Samples.BouncyCastle\Samples.BouncyCastle.csproj" />
   </ItemGroup>
 
 </Project>
