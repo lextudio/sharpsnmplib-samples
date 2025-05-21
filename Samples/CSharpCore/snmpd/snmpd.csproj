@@ -6,6 +6,11 @@
 
     <MibSourceGenerator>..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj</MibSourceGenerator>
   </PropertyGroup>
+  
+  <!-- Define USE_SOURCE_GENERATOR when MibSourceGenerator is available -->
+  <PropertyGroup Condition="Exists($(MibSourceGenerator))">
+    <DefineConstants>$(DefineConstants);USE_SOURCE_GENERATOR</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.6" />
   </ItemGroup>

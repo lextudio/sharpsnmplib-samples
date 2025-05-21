@@ -17,6 +17,11 @@ using Listener = Samples.Pipeline.Listener;
 using MessageReceivedEventArgs = Samples.Pipeline.MessageReceivedEventArgs;
 using System.Threading;
 using System.Threading.Tasks;
+// USE_SOURCE_GENERATOR conditional symbol is automatically defined in the project file
+// when MibSourceGenerator is detected
+#if USE_SOURCE_GENERATOR
+using SNMPv2_MIB;
+#endif
 
 namespace SnmpD
 {
@@ -31,15 +36,20 @@ namespace SnmpD
 
             var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
             var store = new ObjectStore();
-            store.Add(new SysDescr());
-            store.Add(new SysObjectId());
-            store.Add(new SysUpTime());
-            store.Add(new SysContact());
-            store.Add(new SysName());
-            store.Add(new SysLocation());
-            store.Add(new SysServices());
-            store.Add(new SysORLastChange());
-            store.Add(new SysORTable());
+            
+#if USE_SOURCE_GENERATOR
+            // Use the source-generated MIB classes from SNMPv2-MIB
+            store.Add(new sysDescr());
+            store.Add(new sysObjectID());
+            store.Add(new sysUpTime());
+            store.Add(new sysContact());
+            store.Add(new sysName());
+            store.Add(new sysLocation());
+            store.Add(new sysServices());
+            store.Add(new sysORLastChange());
+            store.Add(new sysORTable());
+#endif
+
             store.Add(new IfNumber());
             store.Add(new IfTable());
             // store.Add(new ipNetToMediaTable());
