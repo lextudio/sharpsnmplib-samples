@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
 
-    <MibSourceGenerator>..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj</MibSourceGenerator>
+    <MibSourceGenerator>..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj</MibSourceGenerator>
   </PropertyGroup>
   
   <!-- Define USE_SOURCE_GENERATOR when MibSourceGenerator is available -->
@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
-    <ProjectReference Include="..\..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists($(MibSourceGenerator))" />
+    <ProjectReference Include="..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists($(MibSourceGenerator))" />
   </ItemGroup>
 
   <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->
