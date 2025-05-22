@@ -36,7 +36,7 @@ namespace SnmpD
 
             var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
             var store = new ObjectStore();
-            
+
 #if USE_SOURCE_GENERATOR
             // Use the source-generated MIB classes from SNMPv2-MIB
             store.Add(new sysDescr());
@@ -48,6 +48,17 @@ namespace SnmpD
             store.Add(new sysServices());
             store.Add(new sysORLastChange());
             store.Add(new sysORTable());
+#else
+            store.Add(new SysDescr());
+            store.Add(new SysObjectId());
+            store.Add(new SysUpTime());
+            store.Add(new SysContact());
+            store.Add(new SysName());
+            store.Add(new SysLocation());
+            store.Add(new SysServices());
+            store.Add(new SysORLastChange());
+            store.Add(new SysORTable());
+
 #endif
 
             store.Add(new IfNumber());
