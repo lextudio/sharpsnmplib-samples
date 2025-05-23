@@ -16,6 +16,7 @@ using System.Net;
 using Listener = Samples.Pipeline.Listener;
 using System.Threading;
 using System.Threading.Tasks;
+using Mono.Options;
 
 namespace SnmpTrapD
 {
@@ -23,8 +24,31 @@ namespace SnmpTrapD
     {
         public static async Task Main(string[] args)
         {
-            if (args.Length != 0)
+            // Default port value
+            int port = 162;
+            bool showHelp = false;
+            
+            // Parse command line options
+            var options = new OptionSet
             {
+                { "p|port=", "SNMP trap listener port number (default: 162)", (int p) => port = p },
+                { "h|help", "Show this help message and exit", h => showHelp = h != null }
+            };
+            
+            try
+            {
+                options.Parse(args);
+            }
+            catch (OptionException ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                ShowHelp(options);
+                return;
+            }
+            
+            if (showHelp)
+            {
+                ShowHelp(options);
                 return;
             }
 
@@ -96,7 +120,7 @@ namespace SnmpTrapD
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
             using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine)))
             {
-                engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 162));
+                engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, port));
                 engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception occurred: {e.Exception}");
                 engine.Start();
                 Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
@@ -107,6 +131,15 @@ namespace SnmpTrapD
                 await Task.Delay(-1, cancellationTokenSource.Token).ContinueWith(t => { });
                 engine.Stop();
             }
+        }
+
+        private static void ShowHelp(OptionSet options)
+        {
+            Console.WriteLine("Usage: snmptrapd [OPTIONS]");
+            Console.WriteLine("SNMP trap daemon sample using #SNMP Library.");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            options.WriteOptionDescriptions(Console.Out);
         }
 
         private static void WatcherInformRequestReceived(object sender, InformRequestMessageReceivedEventArgs e)
