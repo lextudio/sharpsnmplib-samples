@@ -17,6 +17,8 @@ using Listener = Samples.Pipeline.Listener;
 using MessageReceivedEventArgs = Samples.Pipeline.MessageReceivedEventArgs;
 using System.Threading;
 using System.Threading.Tasks;
+using Mono.Options;
+
 // USE_SOURCE_GENERATOR conditional symbol is automatically defined in the project file
 // when MibSourceGenerator is detected
 #if USE_SOURCE_GENERATOR
@@ -29,11 +31,34 @@ namespace SnmpD
     {
         public static async Task Main(string[] args)
         {
-            if (args.Length != 0)
+            // Default port value
+            int port = 161;
+            bool showHelp = false;
+            
+            // Parse command line options
+            var options = new OptionSet
             {
+                { "p|port=", "SNMP agent port number (default: 161)", (int p) => port = p },
+                { "h|help", "Show this help message and exit", h => showHelp = h != null }
+            };
+            
+            try
+            {
+                options.Parse(args);
+            }
+            catch (OptionException ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                ShowHelp(options);
                 return;
             }
-
+            
+            if (showHelp)
+            {
+                ShowHelp(options);
+                return;
+            }
+            
             var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
             var store = new ObjectStore();
 
@@ -153,11 +178,12 @@ namespace SnmpD
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
             using var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine161));
-            engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, 1610));
+            engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, port));
             engine.Listener.ExceptionRaised += Engine_ExceptionRaised;
             engine.Listener.MessageReceived += RequestReceived;
             engine.Start();
             Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
+            Console.WriteLine($"SNMP agent listening on port {port}");
 
             Console.WriteLine("Press Ctrl+C to stop . . . ");
             var cancellationTokenSource = new CancellationTokenSource();
@@ -175,6 +201,15 @@ namespace SnmpD
         private static void RequestReceived(object sender, MessageReceivedEventArgs e)
         {
             Console.WriteLine("Message version {0}: {1}", e.Message.Version, e.Message);
+        }
+        
+        private static void ShowHelp(OptionSet options)
+        {
+            Console.WriteLine("Usage: snmpd [OPTIONS]");
+            Console.WriteLine("SNMP agent sample using #SNMP Library.");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            options.WriteOptionDescriptions(Console.Out);
         }
     }
 }
