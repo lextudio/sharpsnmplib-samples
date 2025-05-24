@@ -124,6 +124,7 @@ namespace SnmpTrapD
                 engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception occurred: {e.Exception}");
                 engine.Start();
                 Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
+                Console.WriteLine($"SNMP trap daemon listening on port {port}");
                 Console.WriteLine("Press Ctrl+C to stop . . . ");
                 var cancellationTokenSource = new CancellationTokenSource();
                 AppDomain.CurrentDomain.ProcessExit += (s, e) => cancellationTokenSource.Cancel();
