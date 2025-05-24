@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -11,6 +12,7 @@
   <PropertyGroup Condition="Exists($(MibSourceGenerator))">
     <DefineConstants>$(DefineConstants);USE_SOURCE_GENERATOR</DefineConstants>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.6" />
     <PackageReference Include="Mono.Options.Core" Version="1.0.0" />
@@ -32,4 +34,11 @@
   <ItemGroup Condition="!Exists($(MibSourceGenerator))">
     <Compile Remove="Customized\*.g.cs" />
   </ItemGroup>
+
+  <!-- Exclude manual MIB implementation files when MibSourceGenerator is available -->
+  <ItemGroup Condition="Exists($(MibSourceGenerator))">
+    <Compile Remove="IP-MIB.cs" />
+    <Compile Remove="IP-MIB.Generated.cs" />
+  </ItemGroup>
+
 </Project>

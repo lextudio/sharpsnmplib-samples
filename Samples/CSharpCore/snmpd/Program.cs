@@ -23,6 +23,8 @@ using Mono.Options;
 // when MibSourceGenerator is detected
 #if USE_SOURCE_GENERATOR
 using SNMPv2_MIB;
+#else
+using IP_MIB;
 #endif
 
 namespace SnmpD
@@ -83,12 +85,11 @@ namespace SnmpD
             store.Add(new SysServices());
             store.Add(new SysORLastChange());
             store.Add(new SysORTable());
-
 #endif
 
             store.Add(new IfNumber());
             store.Add(new IfTable());
-            // store.Add(new ipNetToMediaTable());
+            store.Add(new ipNetToMediaTable());
             // store.Add(new IpNetToMediaTable());
             // //store.Add(new EntPhysicalTable());
             // // store.Add(new Counter64Test());
