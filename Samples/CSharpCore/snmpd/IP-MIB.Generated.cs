@@ -428,12 +428,10 @@ namespace IP_MIB
         {
             get { return _elements; }
         }
-    }
-    partial class ipAddrTable
-    {
-        public ipAddrTable()
+
+        public ipAddrTable() : base("1.3.6.1.2.1.4.20")
         {
-            // TODO: add rows and columns here.
+            OnCreate();
         }
     }
 
@@ -563,28 +561,33 @@ namespace IP_MIB
         {
             get { return _elements; }
         }
+
+        public ipNetToMediaTable() : base("1.3.6.1.2.1.4.22")
+        {
+            OnCreate();
+        }
     }
 
     /// <remarks>
-    /// * ID:
-    ///   1.3.6.1.2.1.4.22.1.1
-    /// * Max access:
-    ///   read-create
-    /// * Status:
-    ///   br
-    /// * Description:
-    ///   "The interface on which this entry's equivalence is
-    ///         effective. The interface identified by a particular value
-    ///         of this index is the same interface as identified by the
-    ///         same value of RFC 1573's ifIndex."
-    /// </remarks>
-    public sealed partial class ipNetToMediaIfIndex : ScalarObject
-    {
-        public ipNetToMediaIfIndex(params string[] indexes) : base("1.3.6.1.2.1.4.22.1.1.{0}", string.Join('.', indexes))
+        /// * ID:
+        ///   1.3.6.1.2.1.4.22.1.1
+        /// * Max access:
+        ///   read-create
+        /// * Status:
+        ///   br
+        /// * Description:
+        ///   "The interface on which this entry's equivalence is
+        ///         effective. The interface identified by a particular value
+        ///         of this index is the same interface as identified by the
+        ///         same value of RFC 1573's ifIndex."
+        /// </remarks>
+        public sealed partial class ipNetToMediaIfIndex : ScalarObject
         {
+            public ipNetToMediaIfIndex(params string[] indexes) : base("1.3.6.1.2.1.4.22.1.1.{0}", string.Join('.', indexes))
+            {
 
+            }
         }
-    }
 
     /// <remarks>
     /// * ID:

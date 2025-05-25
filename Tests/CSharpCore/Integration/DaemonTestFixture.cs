@@ -97,7 +97,7 @@ namespace Samples.Integration
 
             var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
             var listener = new Listener { Users = users };
-            listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unexpected exception"); };
+            listener.ExceptionRaised += (sender, e) => { Assert.Fail("unexpected exception"); };
             return new SnmpEngine(pipelineFactory, listener, new EngineGroup(idEngine161));
         }
 
@@ -1374,7 +1374,7 @@ namespace Samples.Integration
                         {
                             var result = Messenger.Get(VersionCode.V2, serverEndPoint, new OctetString(communityPublic),
                                 new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) }, timeout);
-                            Assert.Equal(1, result.Count);
+                            Assert.Single(result);
                         }
                         catch (Exception)
                         {

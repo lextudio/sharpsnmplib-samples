@@ -902,9 +902,15 @@ namespace IP_MIB
         }
     }
 
+    partial class ipAddrTable
+    {
+        public void OnCreate()
+        {}
+    }
+
     partial class ipNetToMediaTable
     {
-        public ipNetToMediaTable()
+        public void OnCreate()
         {
             // TODO: add rows and columns here.
             NetworkChange.NetworkAddressChanged +=

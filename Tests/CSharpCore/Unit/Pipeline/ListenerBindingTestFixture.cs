@@ -25,7 +25,7 @@ namespace Samples.Unit.Pipeline
             var listener = new Listener();
             listener.AddBinding(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 21));
             listener.AddBinding(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 21));
-            Assert.Equal(1, listener.Bindings.Count);
+            Assert.Single(listener.Bindings);
         }
         
         [Fact]
@@ -35,7 +35,7 @@ namespace Samples.Unit.Pipeline
             var listener = new Listener();
             listener.AddBinding(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 21));
             listener.RemoveBinding(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 21));
-            Assert.Equal(0, listener.Bindings.Count);
+            Assert.Empty(listener.Bindings);
         }
     }
 }

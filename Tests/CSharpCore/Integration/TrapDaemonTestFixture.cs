@@ -59,7 +59,7 @@ namespace Samples.Integration
             var engine = new SnmpEngine(pipelineFactory, new Listener {Users = users}, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
-            engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
+            engine.Listener.ExceptionRaised += (sender, e) => { Assert.Fail("unhandled exception"); };
             engine.Listener.MessageReceived += (sender, e) => { Console.WriteLine(e.Message); };
             engine.Start();
 
@@ -359,7 +359,7 @@ namespace Samples.Integration
             var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
-            engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
+            engine.Listener.ExceptionRaised += (sender, e) => { Assert.Fail("unhandled exception"); };
             engine.Listener.MessageReceived += (sender, e) => { Console.WriteLine(e.Message); };
             engine.Start();
 
@@ -431,7 +431,7 @@ namespace Samples.Integration
             var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
-            engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
+            engine.Listener.ExceptionRaised += (sender, e) => { Assert.Fail("unhandled exception"); };
             engine.Listener.MessageReceived += (sender, e) => { Console.WriteLine(e.Message); };
             engine.Start();
 
@@ -508,7 +508,7 @@ namespace Samples.Integration
             var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(engineId));
             var daemonEndPoint = new IPEndPoint(IPAddress.Loopback, port.NextId);
             engine.Listener.AddBinding(daemonEndPoint);
-            engine.Listener.ExceptionRaised += (sender, e) => { Assert.True(false, "unhandled exception"); };
+            engine.Listener.ExceptionRaised += (sender, e) => { Assert.Fail("unhandled exception"); };
             engine.Listener.MessageReceived += (sender, e) => { Console.WriteLine(e.Message); };
             engine.Start();
 
