@@ -204,14 +204,14 @@ namespace SNMPv2_MIB
     {
         void OnCreate()
         {
-            _elements.Add(new sysORIndex { _data = new Integer32(1) });
-            _elements.Add(new sysORIndex { _data = new Integer32(2) });
-            _elements.Add(new sysORID { _data = new ObjectIdentifier("1.3") });
-            _elements.Add(new sysORID { _data = new ObjectIdentifier("1.4") });
-            _elements.Add(new sysORDescr { _data = new OctetString("Test1") });
-            _elements.Add(new sysORDescr { _data = new OctetString("Test2") });
-            _elements.Add(new sysORUpTime { _data = new TimeTicks(1) });
-            _elements.Add(new sysORUpTime { _data = new TimeTicks(2) });
+            _elements.Add(new sysORIndex("1") { _data = new Integer32(1) });
+            _elements.Add(new sysORIndex("2") { _data = new Integer32(2) });
+            _elements.Add(new sysORID("1") { _data = new ObjectIdentifier("1.3") });
+            _elements.Add(new sysORID("2") { _data = new ObjectIdentifier("1.4") });
+            _elements.Add(new sysORDescr("1") { _data = new OctetString("Test1") });
+            _elements.Add(new sysORDescr("2") { _data = new OctetString("Test2") });
+            _elements.Add(new sysORUpTime("1") { _data = new TimeTicks(1) });
+            _elements.Add(new sysORUpTime("2") { _data = new TimeTicks(2) });
         }
     }
     partial class sysORIndex
