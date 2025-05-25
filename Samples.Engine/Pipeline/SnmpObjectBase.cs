@@ -26,6 +26,7 @@ namespace Samples.Pipeline
     /// </summary>
     public abstract class SnmpObjectBase : ISnmpObject
     {
+        public ObjectIdentifier Id { get; protected set; }
         /// <summary>
         /// Matches the GET NEXT criteria.
         /// </summary>

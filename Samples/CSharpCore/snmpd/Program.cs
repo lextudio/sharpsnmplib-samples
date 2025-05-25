@@ -65,16 +65,9 @@ namespace SnmpD
             var store = new ObjectStore();
 
 #if USE_SOURCE_GENERATOR
-            // Use the source-generated MIB classes from SNMPv2-MIB
-            store.Add(new sysDescr());
-            store.Add(new sysObjectID());
-            store.Add(new sysUpTime());
-            store.Add(new sysContact());
-            store.Add(new sysName());
-            store.Add(new sysLocation());
-            store.Add(new sysServices());
-            store.Add(new sysORLastChange());
-            store.Add(new sysORTable());
+            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterSNMPv2_MIB(store);
+            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIF_MIB(store);
+            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIP_MIB(store);
 #else
             store.Add(new SysDescr());
             store.Add(new SysObjectId());
@@ -85,18 +78,18 @@ namespace SnmpD
             store.Add(new SysServices());
             store.Add(new SysORLastChange());
             store.Add(new SysORTable());
-#endif
 
             store.Add(new IfNumber());
             store.Add(new IfTable());
-#if !USE_SOURCE_GENERATOR
+
             store.Add(new ipNetToMediaTable());
-#endif
+
             // store.Add(new IpNetToMediaTable());
             // //store.Add(new EntPhysicalTable());
             // // store.Add(new Counter64Test());
             // store.Add(new CompDescr());
             // store.Add(new PowerVoltage());
+#endif
 
             var users = new UserRegistry();
             users.Add(new OctetString("usr-none-none"), DefaultPrivacyProvider.DefaultPair);

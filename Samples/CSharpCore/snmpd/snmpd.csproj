@@ -19,14 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
     <ProjectReference Include="..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists($(MibSourceGenerator))" />
+    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
   </ItemGroup>
 
   <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->
   <ItemGroup>
     <AdditionalFiles Include="Mibs\*.mibs" />
-    <AdditionalFiles Include="Mibs\.customized" />
+    <AdditionalFiles Include="Customized\.customized" />
     <AdditionalFiles Include="Mibs\*.txt" />
   </ItemGroup>
 

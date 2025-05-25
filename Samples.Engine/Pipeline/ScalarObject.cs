@@ -74,12 +74,6 @@ namespace Samples.Pipeline
         }
 
         /// <summary>
-        /// Gets the ID.
-        /// </summary>
-        /// <value>The ID.</value>
-        private ObjectIdentifier Id { get; set; }
-
-        /// <summary>
         /// Matches the GET NEXT criteria.
         /// </summary>
         /// <param name="id">The ID in GET NEXT message.</param>

@@ -3890,3 +3890,92 @@ namespace IP_MIB
         }
     }
 }
+
+namespace Lextm.SharpSnmpPro.Mib
+{
+    /// <summary>
+    /// Registration class for IP-MIB MIB objects.
+    /// </summary>
+    public static partial class ModuleRegister
+    {
+        /// <summary>
+        /// Registers all objects from this module to the specified object store.
+        /// </summary>
+        /// <param name="store">The object store to register objects with.</param>
+        public static void RegisterIP_MIB(ObjectStore store)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+
+            store.Add(new IP_MIB.ipForwarding());
+            store.Add(new IP_MIB.ipDefaultTTL());
+            store.Add(new IP_MIB.ipReasmTimeout());
+            store.Add(new IP_MIB.ipv6IpForwarding());
+            store.Add(new IP_MIB.ipv6IpDefaultHopLimit());
+            store.Add(new IP_MIB.ipv4InterfaceTableLastChange());
+            store.Add(new IP_MIB.ipv4InterfaceTable());
+            store.Add(new IP_MIB.ipv6InterfaceTableLastChange());
+            store.Add(new IP_MIB.ipv6InterfaceTable());
+            store.Add(new IP_MIB.ipSystemStatsTable());
+            store.Add(new IP_MIB.ipIfStatsTableLastChange());
+            store.Add(new IP_MIB.ipIfStatsTable());
+            store.Add(new IP_MIB.ipAddressPrefixTable());
+            store.Add(new IP_MIB.ipAddressSpinLock());
+            store.Add(new IP_MIB.ipAddressTable());
+            store.Add(new IP_MIB.ipNetToPhysicalTable());
+            store.Add(new IP_MIB.ipv6ScopeZoneIndexTable());
+            store.Add(new IP_MIB.ipDefaultRouterTable());
+            store.Add(new IP_MIB.ipv6RouterAdvertSpinLock());
+            store.Add(new IP_MIB.ipv6RouterAdvertTable());
+            store.Add(new IP_MIB.icmpStatsTable());
+            store.Add(new IP_MIB.icmpMsgStatsTable());
+            store.Add(new IP_MIB.ipInReceives());
+            store.Add(new IP_MIB.ipInHdrErrors());
+            store.Add(new IP_MIB.ipInAddrErrors());
+            store.Add(new IP_MIB.ipForwDatagrams());
+            store.Add(new IP_MIB.ipInUnknownProtos());
+            store.Add(new IP_MIB.ipInDiscards());
+            store.Add(new IP_MIB.ipInDelivers());
+            store.Add(new IP_MIB.ipOutRequests());
+            store.Add(new IP_MIB.ipOutDiscards());
+            store.Add(new IP_MIB.ipOutNoRoutes());
+            store.Add(new IP_MIB.ipReasmReqds());
+            store.Add(new IP_MIB.ipReasmOKs());
+            store.Add(new IP_MIB.ipReasmFails());
+            store.Add(new IP_MIB.ipFragOKs());
+            store.Add(new IP_MIB.ipFragFails());
+            store.Add(new IP_MIB.ipFragCreates());
+            store.Add(new IP_MIB.ipRoutingDiscards());
+            store.Add(new IP_MIB.ipAddrTable());
+            store.Add(new IP_MIB.ipNetToMediaTable());
+            store.Add(new IP_MIB.icmpInMsgs());
+            store.Add(new IP_MIB.icmpInErrors());
+            store.Add(new IP_MIB.icmpInDestUnreachs());
+            store.Add(new IP_MIB.icmpInTimeExcds());
+            store.Add(new IP_MIB.icmpInParmProbs());
+            store.Add(new IP_MIB.icmpInSrcQuenchs());
+            store.Add(new IP_MIB.icmpInRedirects());
+            store.Add(new IP_MIB.icmpInEchos());
+            store.Add(new IP_MIB.icmpInEchoReps());
+            store.Add(new IP_MIB.icmpInTimestamps());
+            store.Add(new IP_MIB.icmpInTimestampReps());
+            store.Add(new IP_MIB.icmpInAddrMasks());
+            store.Add(new IP_MIB.icmpInAddrMaskReps());
+            store.Add(new IP_MIB.icmpOutMsgs());
+            store.Add(new IP_MIB.icmpOutErrors());
+            store.Add(new IP_MIB.icmpOutDestUnreachs());
+            store.Add(new IP_MIB.icmpOutTimeExcds());
+            store.Add(new IP_MIB.icmpOutParmProbs());
+            store.Add(new IP_MIB.icmpOutSrcQuenchs());
+            store.Add(new IP_MIB.icmpOutRedirects());
+            store.Add(new IP_MIB.icmpOutEchos());
+            store.Add(new IP_MIB.icmpOutEchoReps());
+            store.Add(new IP_MIB.icmpOutTimestamps());
+            store.Add(new IP_MIB.icmpOutTimestampReps());
+            store.Add(new IP_MIB.icmpOutAddrMasks());
+            store.Add(new IP_MIB.icmpOutAddrMaskReps());
+        }
+    }
+}

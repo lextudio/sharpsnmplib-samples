@@ -29,6 +29,24 @@ namespace Samples.Pipeline
     public abstract class TableObject : SnmpObjectBase
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="TableObject"/> class.
+        /// </summary>
+        /// <param name="id">The ID.</param>
+        protected TableObject(ObjectIdentifier id)
+        {
+            Id = id;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableObject"/> class.
+        /// </summary>
+        /// <param name="dots">The ID string.</param>
+        protected TableObject(string dots)
+            : this(new ObjectIdentifier(dots))
+        {
+        }
+
+        /// <summary>
         /// Gets the objects in the table.
         /// </summary>
         /// <value>The objects.</value>

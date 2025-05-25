@@ -26,6 +26,7 @@ namespace Samples.Pipeline
     /// </summary>
     public interface ISnmpObject
     {
+        ObjectIdentifier Id { get; }
         /// <summary>
         /// Matches the GET NEXT criteria.
         /// </summary>

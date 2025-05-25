@@ -23,4 +23,4 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net471'">
     <Reference Include="System.Configuration" />
   </ItemGroup>
-  </Project>
+</Project>

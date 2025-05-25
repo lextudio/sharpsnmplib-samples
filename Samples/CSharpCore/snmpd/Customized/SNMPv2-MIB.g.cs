@@ -14,7 +14,7 @@ namespace SNMPv2_MIB
 {
     partial class sysDescr
     {
-#if NET471
+#if NET471_OR_GREATER
         private readonly OctetString _data =
             new OctetString(string.Format(CultureInfo.InvariantCulture, "#SNMP Agent on {0}", Environment.OSVersion));
 #else
@@ -804,6 +804,70 @@ namespace SNMPv2_MIB
         {
             get { return _data; }
             set { throw new AccessFailureException(); }
+        }
+    }
+}
+
+namespace Lextm.SharpSnmpPro.Mib
+{
+    /// <summary>
+    /// Registration class for SNMPv2-MIB MIB objects.
+    /// </summary>
+    public static partial class ModuleRegister
+    {
+        /// <summary>
+        /// Registers all objects from this module to the specified object store.
+        /// </summary>
+        /// <param name="store">The object store to register objects with.</param>
+        public static void RegisterSNMPv2_MIB(ObjectStore store)
+        {
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+
+            store.Add(new SNMPv2_MIB.sysDescr());
+            store.Add(new SNMPv2_MIB.sysObjectID());
+            store.Add(new SNMPv2_MIB.sysUpTime());
+            store.Add(new SNMPv2_MIB.sysContact());
+            store.Add(new SNMPv2_MIB.sysName());
+            store.Add(new SNMPv2_MIB.sysLocation());
+            store.Add(new SNMPv2_MIB.sysServices());
+            store.Add(new SNMPv2_MIB.sysORLastChange());
+            store.Add(new SNMPv2_MIB.sysORTable());
+            store.Add(new SNMPv2_MIB.snmpInPkts());
+            store.Add(new SNMPv2_MIB.snmpInBadVersions());
+            store.Add(new SNMPv2_MIB.snmpInBadCommunityNames());
+            store.Add(new SNMPv2_MIB.snmpInBadCommunityUses());
+            store.Add(new SNMPv2_MIB.snmpInASNParseErrs());
+            store.Add(new SNMPv2_MIB.snmpEnableAuthenTraps());
+            store.Add(new SNMPv2_MIB.snmpSilentDrops());
+            store.Add(new SNMPv2_MIB.snmpProxyDrops());
+            store.Add(new SNMPv2_MIB.snmpTrapOID());
+            store.Add(new SNMPv2_MIB.snmpTrapEnterprise());
+            store.Add(new SNMPv2_MIB.snmpSetSerialNo());
+            store.Add(new SNMPv2_MIB.snmpOutPkts());
+            store.Add(new SNMPv2_MIB.snmpInTooBigs());
+            store.Add(new SNMPv2_MIB.snmpInNoSuchNames());
+            store.Add(new SNMPv2_MIB.snmpInBadValues());
+            store.Add(new SNMPv2_MIB.snmpInReadOnlys());
+            store.Add(new SNMPv2_MIB.snmpInGenErrs());
+            store.Add(new SNMPv2_MIB.snmpInTotalReqVars());
+            store.Add(new SNMPv2_MIB.snmpInTotalSetVars());
+            store.Add(new SNMPv2_MIB.snmpInGetRequests());
+            store.Add(new SNMPv2_MIB.snmpInGetNexts());
+            store.Add(new SNMPv2_MIB.snmpInSetRequests());
+            store.Add(new SNMPv2_MIB.snmpInGetResponses());
+            store.Add(new SNMPv2_MIB.snmpInTraps());
+            store.Add(new SNMPv2_MIB.snmpOutTooBigs());
+            store.Add(new SNMPv2_MIB.snmpOutNoSuchNames());
+            store.Add(new SNMPv2_MIB.snmpOutBadValues());
+            store.Add(new SNMPv2_MIB.snmpOutGenErrs());
+            store.Add(new SNMPv2_MIB.snmpOutGetRequests());
+            store.Add(new SNMPv2_MIB.snmpOutGetNexts());
+            store.Add(new SNMPv2_MIB.snmpOutSetRequests());
+            store.Add(new SNMPv2_MIB.snmpOutGetResponses());
+            store.Add(new SNMPv2_MIB.snmpOutTraps());
         }
     }
 }

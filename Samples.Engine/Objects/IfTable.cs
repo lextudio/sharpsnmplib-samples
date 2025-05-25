@@ -44,7 +44,7 @@ namespace Samples.Objects
         /// <summary>
         /// Initializes a new instance of the <see cref="IfTable"/> class.
         /// </summary>
-        public IfTable()
+        public IfTable() : base("1.3.6.1.2.1.2.2")
         {
             NetworkChange.NetworkAddressChanged +=
                 (sender, args) => LoadElements();

@@ -34,7 +34,7 @@ namespace Samples.Objects
         /// <summary>
         /// Initializes a new instance of the <see cref="SysORTable"/> class.
         /// </summary>
-        public SysORTable()
+        public SysORTable() : base("1.3.6.1.2.1.1.9.1")
         {
             _elements.Add(new SysORIndex(1));
             _elements.Add(new SysORIndex(2));

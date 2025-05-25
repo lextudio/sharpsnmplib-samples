@@ -55,8 +55,15 @@ namespace Samples.Pipeline
         /// Adds the specified <see cref="ISnmpObject"/>.
         /// </summary>
         /// <param name="newObject">The object.</param>
+        /// <exception cref="System.InvalidOperationException">
+        /// Thrown if an object with the same ID already exists in the store.
+        /// </exception>
         public virtual void Add(ISnmpObject newObject)
         {
+            if (List.Any(o => o.Id == newObject.Id))
+            {
+                throw new System.InvalidOperationException($"An object with ID {newObject.Id} already exists in the store.");
+            }
             List.Add(newObject);
         }
     }
