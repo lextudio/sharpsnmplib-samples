@@ -89,7 +89,9 @@ namespace SnmpD
 
             store.Add(new IfNumber());
             store.Add(new IfTable());
+#if !USE_SOURCE_GENERATOR
             store.Add(new ipNetToMediaTable());
+#endif
             // store.Add(new IpNetToMediaTable());
             // //store.Add(new EntPhysicalTable());
             // // store.Add(new Counter64Test());

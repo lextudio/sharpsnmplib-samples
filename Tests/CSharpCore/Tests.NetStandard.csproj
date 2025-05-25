@@ -1,12 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-  <PropertyGroup Label="Configuration">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">  <PropertyGroup Label="Configuration">
     <RootNamespace>Lextm.SharpSnmpLib</RootNamespace>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>sharpsnmplib.tests.snk</AssemblyOriginatorKeyFile>
     <AssemblyName>SharpSnmpLib.Tests.NetStandard</AssemblyName>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OutputType Condition="'$(TargetFramework)'!='net471'">Exe</OutputType>
+  </PropertyGroup>  <PropertyGroup>
+    <OutputType Condition="!$(TargetFramework.StartsWith('net4'))">Exe</OutputType>
     <!-- Detect SDK version -->
     <ParsedSdkVersion>$([System.Text.RegularExpressions.Regex]::Replace($(NETCoreSdkVersion), '-.*',
       ''))</ParsedSdkVersion>
