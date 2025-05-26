@@ -68,6 +68,7 @@ namespace SnmpD
             Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterSNMPv2_MIB(store);
             Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIF_MIB(store);
             Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIP_MIB(store);
+            store.LoadData("Data/XP.snmprec");
 #else
             store.Add(new SysDescr());
             store.Add(new SysObjectId());

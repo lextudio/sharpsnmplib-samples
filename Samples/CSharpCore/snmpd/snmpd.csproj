@@ -25,8 +25,8 @@
 
   <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->
   <ItemGroup>
-    <AdditionalFiles Include="Mibs\*.mibs" />
-    <AdditionalFiles Include="Customized\.customized" />
+    <AdditionalFiles Include="Mibs\.mibs" Condition="Exists('Mibs\.mibs')" />
+    <AdditionalFiles Include="Customized\.customized" Condition="Exists('Customized\.customized')" />
     <AdditionalFiles Include="Mibs\*.txt" />
   </ItemGroup>
 
@@ -39,6 +39,11 @@
   <ItemGroup Condition="Exists($(MibSourceGenerator))">
     <Compile Remove="IP-MIB.cs" />
     <Compile Remove="IP-MIB.Generated.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Data\XP.snmprec">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

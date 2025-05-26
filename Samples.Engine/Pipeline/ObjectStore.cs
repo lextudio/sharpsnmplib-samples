@@ -17,8 +17,12 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Text;
 using Lextm.SharpSnmpLib;
 
 namespace Samples.Pipeline
@@ -65,6 +69,160 @@ namespace Samples.Pipeline
                 throw new System.InvalidOperationException($"An object with ID {newObject.Id} already exists in the store.");
             }
             List.Add(newObject);
+        }
+
+        public void LoadData(string dataFile)
+        {
+            if (!File.Exists(dataFile))
+            {
+                Console.WriteLine($"Warning: Data file '{dataFile}' not found. Skipping data loading.");
+                return;
+            }
+
+            try
+            {
+                var lines = File.ReadAllLines(dataFile);
+                var loadedCount = 0;
+
+                foreach (var line in lines)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                        continue;
+
+                    var parts = line.Split('|');
+                    if (parts.Length != 3)
+                        continue;
+
+                    var oidString = parts[0].Trim();
+                    var typeString = parts[1].Trim();
+                    var valueString = parts[2].Trim();
+
+                    try
+                    {
+                        var oid = new ObjectIdentifier(oidString);
+                        var data = ParseSnmpData(typeString, valueString);
+
+                        if (data != null)
+                        {
+                            SetObjectData(oid, data);
+                            loadedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Warning: Failed to parse line '{line}': {ex.Message}");
+                    }
+                }
+
+                Console.WriteLine($"Successfully loaded {loadedCount} SNMP values from '{dataFile}'");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading data file '{dataFile}': {ex.Message}");
+            }
+        }
+
+        private ISnmpData ParseSnmpData(string typeString, string valueString)
+        {
+            switch (typeString)
+            {
+                case "2": // Integer32
+                    if (int.TryParse(valueString, out var intValue))
+                        return new Integer32(intValue);
+                    break;
+
+                case "4": // OctetString (ASCII)
+                    return new OctetString(valueString);
+
+                case "4x": // OctetString (Hex)
+                    try
+                    {
+                        var bytes = new byte[valueString.Length / 2];
+                        for (int i = 0; i < bytes.Length; i++)
+                        {
+                            bytes[i] = Convert.ToByte(valueString.Substring(i * 2, 2), 16);
+                        }
+                        return new OctetString(bytes);
+                    }
+                    catch
+                    {
+                        return new OctetString(valueString);
+                    }
+
+                case "6": // ObjectIdentifier
+                    try
+                    {
+                        return new ObjectIdentifier(valueString);
+                    }
+                    catch
+                    {
+                        return new ObjectIdentifier("0.0");
+                    }
+
+                case "64x": // IpAddress (Hex)
+                    try
+                    {
+                        var bytes = new byte[valueString.Length / 2];
+                        for (int i = 0; i < bytes.Length; i++)
+                        {
+                            bytes[i] = Convert.ToByte(valueString.Substring(i * 2, 2), 16);
+                        }
+                        return new IP(bytes);
+                    }
+                    catch
+                    {
+                        return new IP("127.0.0.1");
+                    }
+
+                case "65": // Counter32
+                    if (uint.TryParse(valueString, out var counterValue))
+                        return new Counter32(counterValue);
+                    break;
+
+                case "66": // Gauge32
+                    if (uint.TryParse(valueString, out var gaugeValue))
+                        return new Gauge32(gaugeValue);
+                    break;
+
+                case "67": // TimeTicks
+                    if (uint.TryParse(valueString, out var ticksValue))
+                        return new TimeTicks(ticksValue);
+                    break;
+
+                case "70": // Counter64
+                    if (ulong.TryParse(valueString, out var counter64Value))
+                        return new Counter64(counter64Value);
+                    break;
+
+                default:
+                    Console.WriteLine($"Warning: Unknown SNMP type '{typeString}' for value '{valueString}'");
+                    break;
+            }
+
+            return null;
+        }
+
+        private void SetObjectData(ObjectIdentifier oid, ISnmpData data)
+        {
+            // Find the object that matches this OID
+            var obj = GetObject(oid);
+            if (obj != null)
+            {
+                try
+                {
+                    obj.CheckAccess = false;
+                    obj.Data = data;
+                    obj.CheckAccess = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Warning: Failed to set data for OID {oid}: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Warning: No object found for OID {oid}. Cannot set data.");
+            }
         }
     }
 }

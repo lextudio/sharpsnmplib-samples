@@ -1,5 +1,0 @@
-// Customized MIB modules
-// Add MIB module names here to prevent generation of the implementation (.g.cs) files
-// Only the interface (.Generated.g.cs) will be generated
-IP-MIB
-SNMPv2-MIB
