@@ -92,5 +92,7 @@ namespace Samples.Pipeline
         {
             return Id == id ? this : null;
         }
+
+        public bool CheckAccess { get; set; } = false;
     }
 }
