@@ -2,7 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- Detect SDK version and multi-target to net8.0 and net9.0 when supported -->
+    <ParsedSdkVersion>$([System.Text.RegularExpressions.Regex]::Replace($(NETCoreSdkVersion), '-.*', ''))</ParsedSdkVersion>
+    <IsNet80Supported Condition="'$(ParsedSdkVersion)' &gt;= '8.0'">true</IsNet80Supported>
+    <IsNet90Supported Condition="'$(ParsedSdkVersion)' &gt;= '9.0'">true</IsNet90Supported>
+    <TargetFrameworks Condition="'$(IsNet80Supported)' == 'true'">net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(IsNet90Supported)' == 'true'">$(TargetFrameworks);net9.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
 
     <MibSourceGenerator>..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj</MibSourceGenerator>
