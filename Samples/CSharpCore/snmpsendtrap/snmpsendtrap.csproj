@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" Version="12.5.6" />
+  <PackageReference Include="Lextm.SharpSnmpLib" />
   </ItemGroup>
-
 </Project>
