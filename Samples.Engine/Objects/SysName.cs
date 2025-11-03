@@ -28,7 +28,7 @@ namespace Samples.Objects
     /// </summary>
     public sealed class SysName : ScalarObject
     {
-#if NET471
+#if NET471_OR_GREATER
         private OctetString _name = new OctetString(Environment.MachineName);
 #else
         private OctetString _name = new OctetString("UNKNOWN");

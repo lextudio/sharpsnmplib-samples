@@ -109,7 +109,7 @@ namespace Samples.Pipeline
 
         private static IMessageHandler CreateMessageHandler(string assemblyName, string type)
         {
-#if NET471
+#if NET471_OR_GREATER
             foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                 let name = assembly.GetName().Name
                                 where string.Compare(name, assemblyName, StringComparison.OrdinalIgnoreCase) == 0

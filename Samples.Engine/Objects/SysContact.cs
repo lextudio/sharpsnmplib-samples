@@ -28,7 +28,7 @@ namespace Samples.Objects
     /// </summary>
     public sealed class SysContact : ScalarObject
     {
-#if NET471
+#if NET471_OR_GREATER
         private OctetString _contact = new OctetString(Environment.UserName);
 #else
         private OctetString _contact = new OctetString("UNKNOWN");

@@ -63,7 +63,7 @@ namespace SNMPv2_MIB
     }
     partial class sysContact
     {
-#if NET471
+#if NET471_OR_GREATER
         private OctetString _data = new OctetString(Environment.UserName);
 #else
         private OctetString _data = new OctetString("UNKNOWN");
@@ -104,7 +104,7 @@ namespace SNMPv2_MIB
     }
     partial class sysName
     {
-#if NET471
+#if NET471_OR_GREATER
         private OctetString _data = new OctetString(Environment.MachineName);
 #else
         private OctetString _data = new OctetString("UNKNOWN");

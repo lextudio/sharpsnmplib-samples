@@ -29,7 +29,7 @@ namespace Samples.Objects
     /// </summary>
     public sealed class SysDescr : ScalarObject
     {
-#if NET471
+#if NET471_OR_GREATER
         private readonly OctetString _description =
             new OctetString(string.Format(CultureInfo.InvariantCulture, "#SNMP Agent on {0}", Environment.OSVersion));
 #else
