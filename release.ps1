@@ -10,51 +10,19 @@ $isMacOSX = $PSVersionTable.PSVersion.Major -ge 6 -and $PSVersionTable.OS -match
 $isLinuxOS = $PSVersionTable.PSVersion.Major -ge 6 -and $PSVersionTable.OS -match 'Linux'
 
 if ($isWindowsOS) {
-    Write-Host "Detected Windows OS."
-    
-    Install-Module VSSetup -Scope CurrentUser -Force -ErrorAction SilentlyContinue
-    Update-Module VSSetup -ErrorAction SilentlyContinue
-    $instance = Get-VSSetupInstance -All -Prerelease -ErrorAction SilentlyContinue
-    $installDir = $instance.installationPath
-    
-    if ($installDir) {
-        Write-Host "Found VS in " + $installDir
-        $msBuild = Join-Path -Path $installDir -ChildPath 'MSBuild\Current\Bin\MSBuild.exe'
-        
-        if (![System.IO.File]::Exists($msBuild)) {
-            $msBuild = Join-Path -Path $installDir -ChildPath 'MSBuild\15.0\Bin\MSBuild.exe'
-            
-            if (![System.IO.File]::Exists($msBuild)) {
-                Write-Host "MSBuild doesn't exist on Windows. Trying dotnet command..."
-                $solution = "SharpSnmpLib.Samples.Windows.slnx"
-                
-                & dotnet restore $solution -c $Configuration
-                & dotnet clean $solution -c $Configuration
-                & dotnet build $solution -c $Configuration
-            } else {
-                Write-Host "Using MSBuild from VS2017."
-                $solution = "SharpSnmpLib.Samples.Windows.slnx"
-                
-                & $msBuild $solution /p:Configuration=$Configuration /t:restore
-                & $msBuild $solution /p:Configuration=$Configuration /t:clean
-                & $msBuild $solution /p:Configuration=$Configuration
-            }
-        } else {
-            Write-Host "Using MSBuild from VS2019 or newer."
-            $solution = "SharpSnmpLib.Samples.Windows.slnx"
-            
-            & $msBuild $solution /p:Configuration=$Configuration /t:restore
-            & $msBuild $solution /p:Configuration=$Configuration /t:clean
-            & $msBuild $solution /p:Configuration=$Configuration
-        }
-    } else {
-        Write-Host "Visual Studio not found. Using dotnet command..."
-        $solution = "SharpSnmpLib.Samples.Windows.slnx"
-        
-        & dotnet restore $solution -c $Configuration
-        & dotnet clean $solution -c $Configuration
-        & dotnet build $solution -c $Configuration
+    Write-Host "Detected Windows OS. Use VSWhere instead."
+
+    $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -prerelease -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe -products * -nologo | select-object -first 1
+    if (![System.IO.File]::Exists($msBuild))
+    {
+        Write-Host "MSBuild doesn't exist. Exit."
+        exit 1
     }
+
+    $solution = "SharpSnmpLib.Samples.Windows.slnx"
+    & $msBuild $solution /p:Configuration=$Configuration /t:restore
+    & $msBuild $solution /p:Configuration=$Configuration /t:clean
+    & $msBuild $solution /p:Configuration=$Configuration
 } else {
     # On macOS or Linux
     if ($isMacOSX) {
