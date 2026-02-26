@@ -3,24 +3,44 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>sharpsnmplib.tests.snk</AssemblyOriginatorKeyFile>
     <AssemblyName>SharpSnmpLib.Tests.NetStandard</AssemblyName>
-  </PropertyGroup>  <PropertyGroup>
-    <OutputType Condition="!$(TargetFramework.StartsWith('net4'))">Exe</OutputType>
-    <!-- Detect SDK version -->
+  </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <!-- Detect SDK version and multi-target to net10.0 and net11.0 when supported -->
     <ParsedSdkVersion>$([System.Text.RegularExpressions.Regex]::Replace($(NETCoreSdkVersion), '-.*',
       ''))</ParsedSdkVersion>
-    <IsNet80Supported Condition="'$(ParsedSdkVersion)' &gt;= '8.0'">true</IsNet80Supported>
-    <IsNet90Supported Condition="'$(ParsedSdkVersion)' &gt;= '9.0'">true</IsNet90Supported>
-    <!-- Only support .NET 8/9 and .NET Framework 4.7.1 right now. -->
-    <TargetFrameworks Condition="'$(IsNet80Supported)' == 'true' ">net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(IsNet90Supported)' == 'true' ">$(TargetFrameworks);net9.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net472</TargetFrameworks>
+    <IsNet100Supported Condition="'$(ParsedSdkVersion)' &gt;= '10.0'">true</IsNet100Supported>
+    <IsNet110Supported Condition="'$(ParsedSdkVersion)' &gt;= '11.0'">true</IsNet110Supported>
+    <TargetFrameworks Condition="'$(IsNet100Supported)' == 'true'">net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(IsNet110Supported)' == 'true'">$(TargetFrameworks);net11.0</TargetFrameworks>
     <TestTfmsInParallel>false</TestTfmsInParallel>
+    <!-- Suppress obsolete API warnings (tests intentionally test deprecated providers) -->
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="**\*.resx" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Properties\Resources.Designer.cs" />
+  </ItemGroup>
+  
+  <!-- Exclude legacy handler unit tests (middleware-only architecture) -->
+  <ItemGroup>
+    <Compile Remove="Unit/Pipeline/GetV1MessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/GetMessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/SetV1MessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/SetMessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/GetNextV1MessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/GetNextMessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/GetBulkMessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/TrapV1MessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/TrapV2MessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/InformRequestMessageHandlerTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/TrapV1MessageReceivedEventArgsTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/TrapV2MessageReceivedEventArgsTestFixture.cs" />
+    <Compile Remove="Unit/Pipeline/InformRequestMessageReceivedEventArgsTestFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Properties\Resources.resx" />
@@ -34,19 +54,17 @@
     <None Include="sharpsnmplib.tests.snk" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AltCover" />
     <PackageReference Include="Lextm.SharpSnmpLib" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="System.Reactive.Linq" />
-    <PackageReference Include="xunit" />
-    <PackageReference Include="xunit.runner.visualstudio">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-  <PackageReference Include="Microsoft.NET.Test.Sdk" />
-  </ItemGroup>
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="System.Net.Sockets" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Samples.Engine\Samples.Engine.csproj" />

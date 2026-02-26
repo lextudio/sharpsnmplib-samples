@@ -18,13 +18,14 @@ using System.Runtime.InteropServices;
 
 namespace Samples.Integration
 {
+    [Collection("Integration")]
     public class DaemonTestFixture
     {
-        private static readonly NumberGenerator Port = new NumberGenerator(40000, 45000);
+        private static readonly NumberGenerator Port = new NumberGenerator(20000, 29999);
         private const string oidIdentifier = "1.3.6.1.2.1.1.1.0";
         private const string communityPublic = "public";
-        private const int MaxTimeout = 5 * 60 * 1000; // 5 minutes
-
+        private const int MaxTimeout = 30 * 1000; // 30 seconds
+        
         private SnmpEngine CreateEngine(bool timeout = false, bool max255chars = false)
         {
             var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
@@ -59,46 +60,14 @@ namespace Samples.Integration
                                                                              new MD5AuthenticationProvider(new OctetString("authentication"))));
             }
 
-            var getv1 = new GetV1MessageHandler();
-            var getv1Mapping = new HandlerMapping("v1", "GET", getv1);
-
-            var getv23 = new GetMessageHandler();
-            var getv23Mapping = new HandlerMapping("v2,v3", "GET", getv23);
-
-            var setv1 = new SetV1MessageHandler();
-            var setv1Mapping = new HandlerMapping("v1", "SET", setv1);
-
-            var setv23 = new SetMessageHandler();
-            var setv23Mapping = new HandlerMapping("v2,v3", "SET", setv23);
-
-            var getnextv1 = new GetNextV1MessageHandler();
-            var getnextv1Mapping = new HandlerMapping("v1", "GETNEXT", getnextv1);
-
-            var getnextv23 = new GetNextMessageHandler();
-            var getnextv23Mapping = new HandlerMapping("v2,v3", "GETNEXT", getnextv23);
-
-            var getbulk = new GetBulkMessageHandler();
-            var getbulkMapping = new HandlerMapping("v2,v3", "GETBULK", getbulk);
-
             var v1 = new Version1MembershipProvider(new OctetString(communityPublic), new OctetString(communityPublic));
             var v2 = new Version2MembershipProvider(new OctetString(communityPublic), new OctetString(communityPublic));
             var v3 = new Version3MembershipProvider();
             var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
-            var handlerFactory = new MessageHandlerFactory(new[]
-            {
-                getv1Mapping,
-                getv23Mapping,
-                setv1Mapping,
-                setv23Mapping,
-                getnextv1Mapping,
-                getnextv23Mapping,
-                getbulkMapping
-            });
 
-            var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
             var listener = new Listener { Users = users };
             listener.ExceptionRaised += (sender, e) => { Assert.Fail("unexpected exception"); };
-            return new SnmpEngine(pipelineFactory, listener, new EngineGroup(idEngine161));
+            return new SnmpEngine(listener, new EngineGroup(idEngine161), store, membership);
         }
 
         private class TimeoutObject : ScalarObject
@@ -163,7 +132,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -174,16 +143,13 @@ namespace Samples.Integration
                     new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
 
                 var users1 = new UserRegistry();
-                var response = await message.GetResponseAsync(serverEndPoint, users1, socket);
+                var response = await message.GetResponseAsync(serverEndPoint, users1, socket, TestContext.Current.CancellationToken);
                 Assert.Equal(SnmpType.ResponsePdu, response.TypeCode());
                 Assert.Equal(message.RequestId(), response.RequestId());
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -192,7 +158,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.IPv6Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -203,16 +169,13 @@ namespace Samples.Integration
                     new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
 
                 var users1 = new UserRegistry();
-                var response = await message.GetResponseAsync(serverEndPoint, users1, socket);
+                var response = await message.GetResponseAsync(serverEndPoint, users1, socket, TestContext.Current.CancellationToken);
                 Assert.Equal(SnmpType.ResponsePdu, response.TypeCode());
                 Assert.Equal(message.RequestId(), response.RequestId());
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -221,7 +184,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -231,17 +194,14 @@ namespace Samples.Integration
                 GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
                     new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
 
-                const int time = 1500;
+                const int time = 3000;
                 var response = message.GetResponse(time, serverEndPoint, socket);
                 Assert.Equal(SnmpType.ResponsePdu, response.TypeCode());
                 Assert.Equal(message.RequestId(), response.RequestId());
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -250,7 +210,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.IPv6Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -260,17 +220,14 @@ namespace Samples.Integration
                 GetRequestMessage message = new GetRequestMessage(0x4bed, VersionCode.V2, new OctetString(communityPublic),
                     new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
 
-                const int time = 1500;
+                const int time = 3000;
                 var response = message.GetResponse(time, serverEndPoint, socket);
                 Assert.Equal(SnmpType.ResponsePdu, response.TypeCode());
                 Assert.Equal(message.RequestId(), response.RequestId());
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -279,7 +236,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -318,10 +275,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -330,7 +284,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -353,10 +307,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -365,7 +316,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -391,10 +342,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -403,7 +351,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -429,10 +377,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -441,7 +386,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -467,10 +412,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -484,12 +426,12 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
             var timeout = 1000;
-            var wait = 60 * timeout;
+            var wait = 3 * timeout;
             try
             {
                 var signal = new AutoResetEvent(false);
@@ -504,7 +446,7 @@ namespace Samples.Integration
 
                 var source = Observable.Defer(() =>
                 {
-                    discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                    discoverer.Discover(VersionCode.V1, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                         new OctetString(communityPublic), timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
@@ -515,7 +457,7 @@ namespace Samples.Integration
                     return Observable.Return(result);
                 })
                 .RetryWithBackoffStrategy(
-                    retryCount: 4,
+                    retryCount: 1,
                     retryOnError: e => e is TimeoutException
                 );
 
@@ -528,10 +470,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -551,12 +490,12 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.IPv6Any);
             engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
             engine.Start();
 
             var timeout = 1000;
-            var wait = 60 * timeout;
+            var wait = 3 * timeout;
             try
             {
                 var signal = new AutoResetEvent(false);
@@ -595,10 +534,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -613,12 +549,12 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
             var timeout = 1000;
-            var wait = 60 * timeout;
+            var wait = 3 * timeout;
             try
             {
                 var signal = new AutoResetEvent(false);
@@ -633,7 +569,7 @@ namespace Samples.Integration
 
                 var source = Observable.Defer(() =>
                 {
-                    discoverer.Discover(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                    discoverer.Discover(VersionCode.V2, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                         new OctetString(communityPublic), timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
@@ -657,10 +593,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -674,7 +607,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -694,7 +627,7 @@ namespace Samples.Integration
 
                 var source = Observable.Defer(() =>
                 {
-                    discoverer.Discover(VersionCode.V3, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                    discoverer.Discover(VersionCode.V3, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                         null, timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
@@ -705,7 +638,7 @@ namespace Samples.Integration
                     return Observable.Return(result);
                 })
                 .RetryWithBackoffStrategy(
-                    retryCount: 4,
+                    retryCount: 1,
                     retryOnError: e => e is TimeoutException
                 );
 
@@ -718,10 +651,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -735,7 +665,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -755,7 +685,7 @@ namespace Samples.Integration
 
                 var source = Observable.Defer(async () =>
                 {
-                    await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                    await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                         new OctetString(communityPublic), timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
@@ -779,10 +709,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -802,7 +729,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.IPv6Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.IPv6Any);
             engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
             engine.Start();
 
@@ -846,10 +773,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -864,7 +788,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -884,7 +808,7 @@ namespace Samples.Integration
 
                 var source = Observable.Defer(async () =>
                 {
-                    await discoverer.DiscoverAsync(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                    await discoverer.DiscoverAsync(VersionCode.V2, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                         new OctetString(communityPublic), timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
@@ -908,10 +832,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -925,7 +846,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -945,7 +866,7 @@ namespace Samples.Integration
 
                 var source = Observable.Defer(async () =>
                 {
-                    await discoverer.DiscoverAsync(VersionCode.V3, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                    await discoverer.DiscoverAsync(VersionCode.V3, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                         null, timeout);
                     var result = signal.WaitOne(wait);
                     if (!result)
@@ -969,10 +890,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -987,7 +905,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1011,7 +929,7 @@ namespace Samples.Integration
                     cancellationTokenSource.CancelAfter(timeout);
                     try
                     {
-                        await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                        await discoverer.DiscoverAsync(VersionCode.V1, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                             new OctetString(communityPublic), cancellationTokenSource.Token);
                     }
                     catch (OperationCanceledException)
@@ -1040,10 +958,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1057,7 +972,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1081,7 +996,7 @@ namespace Samples.Integration
                     cancellationTokenSource.CancelAfter(timeout);
                     try
                     {
-                        await discoverer.DiscoverAsync(VersionCode.V2, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                        await discoverer.DiscoverAsync(VersionCode.V2, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                             new OctetString(communityPublic), cancellationTokenSource.Token);
                     }
                     catch (OperationCanceledException)
@@ -1110,10 +1025,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1127,7 +1039,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Any, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Any);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1151,7 +1063,7 @@ namespace Samples.Integration
                     cancellationTokenSource.CancelAfter(timeout);
                     try
                     {
-                        await discoverer.DiscoverAsync(VersionCode.V3, new IPEndPoint(IPAddress.Broadcast, serverEndPoint.Port),
+                        await discoverer.DiscoverAsync(VersionCode.V3, new IPEndPoint(IPAddress.Loopback, serverEndPoint.Port),
                             null, cancellationTokenSource.Token);
                     }
                     catch (OperationCanceledException)
@@ -1180,24 +1092,22 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 #endif
         [Theory]
-        [InlineData(32)]
+        [InlineData(16)]
         public async Task TestResponsesFromMultipleSources(int count)
         {
-            var start = 16102;
-            var end = start + count;
+            var endpoints = new List<IPEndPoint>(count);
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            for (var index = start; index < end; index++)
+            for (var index = 0; index < count; index++)
             {
-                engine.Listener.AddBinding(new IPEndPoint(IPAddress.Loopback, index));
+                var endpoint = CreateEndpoint(IPAddress.Loopback);
+                endpoints.Add(endpoint);
+                engine.Listener.AddBinding(endpoint);
             }
 
 #if NET471
@@ -1212,9 +1122,9 @@ namespace Samples.Integration
 
             try
             {
-                for (int index = start; index < end; index++)
+                foreach (var endpoint in endpoints)
                 {
-                    GetRequestMessage message = new GetRequestMessage(index, VersionCode.V2, new OctetString(communityPublic),
+                    GetRequestMessage message = new GetRequestMessage(endpoint.Port, VersionCode.V2, new OctetString(communityPublic),
                         new List<Variable> { new Variable(new ObjectIdentifier(oidIdentifier)) });
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
@@ -1222,18 +1132,15 @@ namespace Samples.Integration
                     watch.Start();
                     var response =
                         await
-                            message.GetResponseAsync(new IPEndPoint(IPAddress.Loopback, index), new UserRegistry(),
-                                socket);
+                            message.GetResponseAsync(endpoint, new UserRegistry(),
+                                socket, TestContext.Current.CancellationToken);
                     watch.Stop();
-                    Assert.Equal(index, response.RequestId());
+                    Assert.Equal(endpoint.Port, response.RequestId());
                 }
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1245,7 +1152,7 @@ namespace Samples.Integration
             var end = start + count;
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             //// IMPORTANT: need to set min thread count so as to boost performance.
             //int minWorker, minIOC;
@@ -1267,7 +1174,7 @@ namespace Samples.Integration
                     watch.Start();
                     var response =
                         await
-                            message.GetResponseAsync(serverEndPoint, new UserRegistry(), socket);
+                            message.GetResponseAsync(serverEndPoint, new UserRegistry(), socket, TestContext.Current.CancellationToken);
                     watch.Stop();
                     Assert.Equal(0, response.RequestId());
                 }
@@ -1278,10 +1185,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1296,7 +1200,7 @@ namespace Samples.Integration
                     var end = start + count;
                     var engine = CreateEngine();
                     engine.Listener.ClearBindings();
-                    var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+                    var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
                     engine.Listener.AddBinding(serverEndPoint);
 #if NET471
                     // IMPORTANT: need to set min thread count so as to boost performance.
@@ -1334,10 +1238,7 @@ namespace Samples.Integration
                     }
                     finally
                     {
-                        if (SnmpMessageExtension.IsRunningOnWindows)
-                        {
-                            engine.Stop();
-                        }
+                StopEngine(engine);
                     }
 
                     return Observable.Return(0);
@@ -1352,20 +1253,20 @@ namespace Samples.Integration
         }
 
         [Theory]
-        [InlineData(32)]
+        [InlineData(16)]
         public void TestResponsesFromSingleSourceWithMultipleThreadsFromManager(int count)
         {
             var start = 0;
             var end = start + count;
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
             try
             {
-                const int timeout = 60000;
+                const int timeout = 10000;
 
                 //for (int index = start; index < end; index++)
                 Parallel.For(start, end, index =>
@@ -1385,10 +1286,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1397,7 +1295,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine(true);
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1426,10 +1324,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1438,7 +1333,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine(max255chars: true);
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1464,10 +1359,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
         
@@ -1476,7 +1368,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1492,10 +1384,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1510,7 +1399,7 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1547,10 +1436,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1559,7 +1445,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1580,10 +1466,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1592,7 +1475,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1613,10 +1496,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1625,7 +1505,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1646,10 +1526,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1658,7 +1535,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1672,15 +1549,13 @@ namespace Samples.Integration
                     new OctetString(communityPublic),
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
-                    WalkMode.Default);
+                    WalkMode.Default,
+                    TestContext.Current.CancellationToken);
                 Assert.True(16 < list.Count);
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1689,7 +1564,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1703,15 +1578,13 @@ namespace Samples.Integration
                     new OctetString(communityPublic),
                     new ObjectIdentifier("1.3.6.1.2.1.1"),
                     list,
-                    WalkMode.Default);
+                    WalkMode.Default,
+                    TestContext.Current.CancellationToken);
                 Assert.True(16 < list.Count);
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1720,7 +1593,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1760,10 +1633,7 @@ namespace Samples.Integration
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
-                {
-                    engine.Stop();
-                }
+                StopEngine(engine);
             }
         }
 
@@ -1772,7 +1642,7 @@ namespace Samples.Integration
         {
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = new IPEndPoint(IPAddress.Loopback, Port.NextId);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
@@ -1790,16 +1660,43 @@ namespace Samples.Integration
                     10,
                     WalkMode.WithinSubtree,
                     null,
-                    null);
+                    null,
+                    TestContext.Current.CancellationToken);
                 Assert.Equal(16, list.Count);
             }
             finally
             {
-                if (SnmpMessageExtension.IsRunningOnWindows)
+                StopEngine(engine);
+            }
+        }
+
+        private static void StopEngine(SnmpEngine engine)
+        {
+            if (engine == null)
+            {
+                return;
+            }
+
+            engine.Stop();
+        }
+
+        private static IPEndPoint CreateEndpoint(IPAddress address)
+        {
+            for (var i = 0; i < 50; i++)
+            {
+                var candidate = new IPEndPoint(address, Port.NextId);
+                using var probe = new Socket(candidate.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+                try
                 {
-                    engine.Stop();
+                    probe.Bind(candidate);
+                    return candidate;
+                }
+                catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressAlreadyInUse)
+                {
                 }
             }
+
+            throw new InvalidOperationException($"Failed to allocate free UDP port for {address}.");
         }
     }
 

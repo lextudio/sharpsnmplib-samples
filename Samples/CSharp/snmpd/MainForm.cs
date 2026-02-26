@@ -66,45 +66,12 @@ namespace Samples.Agent
                 users.Add(new OctetString("aes256"), new AES256PrivacyProvider(new OctetString("privacyphrase"), new MD5AuthenticationProvider(new OctetString("authentication"))));
             }
 
-            var getv1 = new GetV1MessageHandler();
-            var getv1Mapping = new HandlerMapping("v1", "GET", getv1);
-
-            var getv23 = new GetMessageHandler();
-            var getv23Mapping = new HandlerMapping("v2,v3", "GET", getv23);
-
-            var setv1 = new SetV1MessageHandler();
-            var setv1Mapping = new HandlerMapping("v1", "SET", setv1);
-
-            var setv23 = new SetMessageHandler();
-            var setv23Mapping = new HandlerMapping("v2,v3", "SET", setv23);
-            
-            var getnextv1 = new GetNextV1MessageHandler();
-            var getnextv1Mapping = new HandlerMapping("v1", "GETNEXT", getnextv1);
-
-            var getnextv23 = new GetNextMessageHandler();
-            var getnextv23Mapping = new HandlerMapping("v2,v3", "GETNEXT", getnextv23);
-
-            var getbulk = new GetBulkMessageHandler();
-            var getbulkMapping = new HandlerMapping("v2,v3", "GETBULK", getbulk);
-            
             var v1 = new Version1MembershipProvider(new OctetString("public"), new OctetString("public"));
             var v2 = new Version2MembershipProvider(new OctetString("public"), new OctetString("public"));
             var v3 = new Version3MembershipProvider();
             var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
-            var handlerFactory = new MessageHandlerFactory(new[]
-            {
-                getv1Mapping, 
-                getv23Mapping, 
-                setv1Mapping,
-                setv23Mapping,
-                getnextv1Mapping,
-                getnextv23Mapping,
-                getbulkMapping
-            });
-
-            var pipelineFactory = new SnmpApplicationFactory(new RollingLogger(), store, membership, handlerFactory);
-            _engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine));
-            _engine.ExceptionRaised += (sender, e) => MessageBox.Show(e.Exception.ToString());
+            _engine = new SnmpEngine(new Listener { Users = users }, new EngineGroup(idEngine), store, membership);
+            _engine.Listener.ExceptionRaised += (sender, e) => MessageBox.Show(e.Exception.ToString());
 
             InitializeComponent();
             if (PlatformSupport.Platform == PlatformType.Windows)

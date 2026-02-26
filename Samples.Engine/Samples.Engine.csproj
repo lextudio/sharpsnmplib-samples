@@ -2,25 +2,46 @@
   <PropertyGroup>
     <AssemblyName>Samples.Engine</AssemblyName>
     <RootNamespace>Lextm.SharpSnmpLib</RootNamespace>
-    <TargetFrameworks>net8.0;net471</TargetFrameworks>
+    <!-- Detect SDK version and multi-target to net10.0 and net11.0 when supported -->
+    <ParsedSdkVersion>$([System.Text.RegularExpressions.Regex]::Replace($(NETCoreSdkVersion), '-.*', ''))</ParsedSdkVersion>
+    <IsNet100Supported Condition="'$(ParsedSdkVersion)' &gt;= '10.0'">true</IsNet100Supported>
+    <IsNet110Supported Condition="'$(ParsedSdkVersion)' &gt;= '11.0'">true</IsNet110Supported>
+    <TargetFrameworks Condition="'$(IsNet100Supported)' == 'true'">net10.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(IsNet110Supported)' == 'true'">$(TargetFrameworks);net11.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
     <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net471' ">win</RuntimeIdentifier>
     <AndroidUseIntermediateDesignerFile>False</AndroidUseIntermediateDesignerFile>
+    <!-- Suppress platform-specific API warnings (MIB objects use APIs unavailable on all platforms) -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Lextm.SharpSnmpLib" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
-    <PackageReference Include="System.Memory" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-    <PackageReference Include="System.ComponentModel.TypeConverter" />
-    <PackageReference Include="System.Net.NetworkInformation" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" />
-    <PackageReference Include="System.Threading.Thread" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)'=='net471'">
-    <Reference Include="System.Configuration" />
+  
+  <!-- Exclude legacy handler pipeline implementation (middleware-only runtime). -->
+  <ItemGroup>
+    <Compile Remove="Pipeline/SnmpApplication.cs" />
+    <Compile Remove="Pipeline/SnmpApplicationFactory.cs" />
+    <Compile Remove="Pipeline/IAssemblyLoader.cs" />
+    <Compile Remove="Pipeline/DefaultTypeResolver.cs" />
+    <Compile Remove="Pipeline/IMessageHandler.cs" />
+    <Compile Remove="Pipeline/HandlerMapping.cs" />
+    <Compile Remove="Pipeline/MessageHandlerFactory.cs" />
+    <Compile Remove="Pipeline/NullMessageHandler.cs" />
+    <Compile Remove="Pipeline/GetV1MessageHandler.cs" />
+    <Compile Remove="Pipeline/GetMessageHandler.cs" />
+    <Compile Remove="Pipeline/SetV1MessageHandler.cs" />
+    <Compile Remove="Pipeline/SetMessageHandler.cs" />
+    <Compile Remove="Pipeline/GetNextV1MessageHandler.cs" />
+    <Compile Remove="Pipeline/GetNextMessageHandler.cs" />
+    <Compile Remove="Pipeline/GetBulkMessageHandler.cs" />
+    <Compile Remove="Pipeline/TrapV1MessageHandler.cs" />
+    <Compile Remove="Pipeline/TrapV2MessageHandler.cs" />
+    <Compile Remove="Pipeline/InformRequestMessageHandler.cs" />
+    <Compile Remove="Pipeline/XunitConsoleLoggerProvider.cs" />
   </ItemGroup>
 </Project>

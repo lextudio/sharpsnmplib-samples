@@ -98,27 +98,22 @@ namespace SnmpTrapD
                 users.Add(new OctetString("usr-sha512-aes256"), new AES256PrivacyProvider(new OctetString("privkey1"), new SHA512AuthenticationProvider(new OctetString("authkey1"))));
             }
 
-            var trapv1 = new TrapV1MessageHandler();
-            trapv1.MessageReceived += WatcherTrapV1Received;
-            var trapv1Mapping = new HandlerMapping("v1", "TRAPV1", trapv1);
-
-            var trapv2 = new TrapV2MessageHandler();
-            trapv2.MessageReceived += WatcherTrapV2Received;
-            var trapv2Mapping = new HandlerMapping("v2,v3", "TRAPV2", trapv2);
-
-            var inform = new InformRequestMessageHandler();
-            inform.MessageReceived += WatcherInformRequestReceived;
-            var informMapping = new HandlerMapping("v2,v3", "INFORM", inform);
-
             var store = new ObjectStore();
             var v1 = new Version1MembershipProvider(new OctetString("public"), new OctetString("public"));
             var v2 = new Version2MembershipProvider(new OctetString("public"), new OctetString("public"));
             var v3 = new Version3MembershipProvider();
             var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
-            var handlerFactory = new MessageHandlerFactory(new[] { trapv1Mapping, trapv2Mapping, informMapping });
+            var pipeline = new SnmpPipelineBuilder()
+                .UseContextFactory(users, new EngineGroup(idEngine))
+                .UseAuthentication(membership)
+                .UseMessageHandler(
+                    store,
+                    trapV1Received: args => WatcherTrapV1Received(null, args),
+                    trapV2Received: args => WatcherTrapV2Received(null, args),
+                    informReceived: args => WatcherInformRequestReceived(null, args))
+                .Build();
 
-            var pipelineFactory = new SnmpApplicationFactory(store, membership, handlerFactory);
-            using (var engine = new SnmpEngine(pipelineFactory, new Listener { Users = users }, new EngineGroup(idEngine)))
+            using (var engine = new SnmpEngine(new Listener { Users = users }, pipeline))
             {
                 engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, port));
                 engine.Listener.ExceptionRaised += (sender, e) => Console.WriteLine($"Exception occurred: {e.Exception}");

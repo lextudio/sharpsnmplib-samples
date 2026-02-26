@@ -26,30 +26,79 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Threading.Tasks;
+using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
 
 namespace Samples.Pipeline
 {
     /// <summary>
     /// SNMP engine, who is the core of an SNMP entity (manager or agent).
+    /// Like ASP.NET Core's <c>WebApplication</c>, the engine hosts a middleware pipeline
+    /// and dispatches each incoming message through it.
     /// </summary>
     public sealed class SnmpEngine : IDisposable
     {
-        private readonly SnmpApplicationFactory _factory;
-        private readonly EngineGroup _group;
+        private readonly Func<SnmpMessageContext, Task> _pipeline;
         private bool _disposed;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SnmpEngine"/> class.
+        /// Initializes a new instance of the <see cref="SnmpEngine"/> class
+        /// with a pre-built middleware pipeline.
         /// </summary>
-        /// <param name="factory">The factory.</param>
+        /// <param name="listener">The listener (transport layer).</param>
+        /// <param name="pipeline">The compiled middleware pipeline.</param>
+        public SnmpEngine(Listener listener, Func<SnmpMessageContext, Task> pipeline)
+        {
+            Listener = listener ?? throw new ArgumentNullException(nameof(listener));
+            _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SnmpEngine"/> class.
+        /// Builds the default middleware pipeline (context factory → authentication → request processing).
+        /// </summary>
         /// <param name="listener">The listener.</param>
         /// <param name="group">Engine core group.</param>
-        public SnmpEngine(SnmpApplicationFactory factory, Listener listener, EngineGroup group)
+        /// <param name="store">The object store (MIB).</param>
+        /// <param name="membership">The membership provider. If <c>null</c>, a default
+        /// provider accepting community "public" for v1/v2c and USM for v3 is used.</param>
+        /// <param name="trapV1Received">Optional callback for trap v1 messages.</param>
+        /// <param name="trapV2Received">Optional callback for trap v2 messages.</param>
+        /// <param name="informReceived">Optional callback for inform messages.</param>
+        public SnmpEngine(
+            Listener listener,
+            EngineGroup group,
+            ObjectStore store,
+            IMembershipProvider membership = null,
+            Action<TrapV1MessageReceivedEventArgs> trapV1Received = null,
+            Action<TrapV2MessageReceivedEventArgs> trapV2Received = null,
+            Action<InformRequestMessageReceivedEventArgs> informReceived = null)
         {
-            _factory = factory;
-            Listener = listener;
-            _group = group;
+            Listener = listener ?? throw new ArgumentNullException(nameof(listener));
+
+            if (group == null)
+            {
+                throw new ArgumentNullException(nameof(group));
+            }
+            
+            if (store == null)
+            {
+                throw new ArgumentNullException(nameof(store));
+            }
+
+            membership ??= new ComposedMembershipProvider(new IMembershipProvider[]
+            {
+                new Version1MembershipProvider(new OctetString("public"), new OctetString("public")),
+                new Version2MembershipProvider(new OctetString("public"), new OctetString("public")),
+                new Version3MembershipProvider()
+            });
+
+            _pipeline = new SnmpPipelineBuilder()
+                .UseContextFactory(listener.Users, group)
+                .UseAuthentication(membership)
+                .UseMessageHandler(store, trapV1Received, trapV2Received, informReceived)
+                .Build();
         }
         
         /// <summary>
@@ -99,12 +148,21 @@ namespace Samples.Pipeline
         /// <value>The listener.</value>
         public Listener Listener { get; private set; }
 
-        private void ListenerMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void ListenerMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            var request = e.Message;
-            var context = SnmpContextFactory.Create(request, e.Sender, Listener.Users, _group, e.Binding);
-            var application = _factory.Create(context);
-            application.Process();
+            var context = new SnmpMessageContext(e.Message, e.Sender, e.Binding);
+            try
+            {
+                await _pipeline(context);
+            }
+            catch (Exception)
+            {
+                // Swallow exceptions to prevent crashing the listener.
+            }
+
+            // Send the response after the pipeline completes (like Kestrel writing
+            // the HTTP response after all middleware has run).
+            context.SnmpContext?.SendResponse();
         }
 
         /// <summary>

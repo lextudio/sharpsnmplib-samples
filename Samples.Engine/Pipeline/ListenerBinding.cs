@@ -73,21 +73,9 @@ namespace Samples.Pipeline
                 _active = Inactive;
                 if (_socket != null)
                 {
-                    try
-                    {
-                        _socket.Shutdown (SocketShutdown.Both);    // Note that closing the socket releases the _socket.ReceiveFrom call.
-                    }
-                    catch (SocketException ex)
-                    {
-                        // This exception is thrown in .NET Core <=2.1.4 on non-Windows systems.
-                        // However, the shutdown call is necessary to release the socket binding.
-                        if (!SnmpMessageExtension.IsRunningOnWindows && ex.SocketErrorCode == SocketError.NotConnected)
-                        {
-                        }
-                    }
-
-                    _socket.Dispose();
+                    var socket = _socket;
                     _socket = null;
+                    CloseSocketAsync(socket);
                 }
             }
         }
@@ -258,22 +246,34 @@ namespace Samples.Pipeline
                 return;
             }
 
-            try
+            var socket = _socket;
+            _socket = null;
+            if (socket != null)
             {
-                _socket.Shutdown(SocketShutdown
-                    .Both); // Note that closing the socket releases the _socket.ReceiveFrom call.
+                CloseSocketAsync(socket);
             }
-            catch (SocketException ex)
+        }
+
+        private static void CloseSocketAsync(Socket socket)
+        {
+            _ = Task.Run(() =>
             {
-                // This exception is thrown in .NET Core <=2.1.4 on non-Windows systems.
-                // However, the shutdown call is necessary to release the socket binding.
-                if (!SnmpMessageExtension.IsRunningOnWindows && ex.SocketErrorCode == SocketError.NotConnected)
+                try
+                {
+                    socket.Close(0);
+                }
+                catch (Exception)
                 {
                 }
-            }
 
-            _socket.Dispose();
-            _socket = null;
+                try
+                {
+                    socket.Dispose();
+                }
+                catch (Exception)
+                {
+                }
+            });
         }
 
 #if ASYNC
