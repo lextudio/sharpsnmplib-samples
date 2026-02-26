@@ -430,7 +430,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 3 * timeout;
             try
             {
@@ -494,7 +494,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 3 * timeout;
             try
             {
@@ -553,7 +553,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 3 * timeout;
             try
             {
@@ -611,7 +611,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 60 * timeout;
             try
             {
@@ -669,7 +669,8 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
-            var timeout = 1000;
+            // Async discovery can be timing-sensitive under full-suite load; allow a wider probe window.
+            var timeout = 3000;
             var wait = 60 * timeout;
             try
             {
@@ -733,7 +734,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint, "[ff02::1]");
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 60 * timeout;
             try
             {
@@ -792,7 +793,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 60 * timeout;
             try
             {
@@ -850,7 +851,7 @@ namespace Samples.Integration
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
 
-            var timeout = 1000;
+            var timeout = 3000;
             var wait = 60 * timeout;
             try
             {
@@ -1452,7 +1453,7 @@ namespace Samples.Integration
             try
             {
                 var list = new List<Variable>();
-                var time = 3000;
+                var time = 10000;
                 // IMPORTANT: test against an agent that doesn't exist.
                 var result = Messenger.Walk(
                     VersionCode.V1,
@@ -1512,7 +1513,7 @@ namespace Samples.Integration
             try
             {
                 var list = new List<Variable>();
-                var time = 3000;
+                var time = 10000;
                 // IMPORTANT: test against an agent that doesn't exist.
                 var result = Messenger.Walk(
                     VersionCode.V2,

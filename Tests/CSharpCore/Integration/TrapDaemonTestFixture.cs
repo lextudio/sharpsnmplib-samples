@@ -125,7 +125,7 @@ namespace Samples.Integration
                     0);
                 await trap.SendAsync(daemonEndPoint, TestContext.Current.CancellationToken);
 
-                Assert.True(manualEvent.Wait(MaxTimeout), "Timed out waiting for TrapV2 v3 handler");
+                Assert.True(manualEvent.Wait(MaxTimeout, TestContext.Current.CancellationToken), "Timed out waiting for TrapV2 v3 handler");
                 Assert.Equal(1, count);
             }
             finally
@@ -181,7 +181,7 @@ namespace Samples.Integration
                     0);
                 await trap.SendAsync(daemonEndPoint, TestContext.Current.CancellationToken);
 
-                Assert.True(manualEvent.Wait(MaxTimeout), "Timed out waiting for NoEngineId pipeline");
+                Assert.True(manualEvent.Wait(MaxTimeout, TestContext.Current.CancellationToken), "Timed out waiting for NoEngineId pipeline");
                 Assert.Equal(0, count);
                 Assert.Equal(new Counter32(1), group.UnknownEngineId.Data);
             }
@@ -238,7 +238,7 @@ namespace Samples.Integration
                     0);
                 await trap.SendAsync(daemonEndPoint, TestContext.Current.CancellationToken);
 
-                Assert.True(manualEvent.Wait(MaxTimeout), "Timed out waiting for WrongEngineId pipeline");
+                Assert.True(manualEvent.Wait(MaxTimeout, TestContext.Current.CancellationToken), "Timed out waiting for WrongEngineId pipeline");
                 Assert.Equal(0, count);
                 Assert.Equal(new Counter32(1), group.UnknownEngineId.Data);
             }
@@ -291,7 +291,7 @@ namespace Samples.Integration
                     null,
                     TestContext.Current.CancellationToken);
 
-                Assert.True(manualEvent.Wait(MaxTimeout), "Timed out waiting for InformV2 handler");
+                Assert.True(manualEvent.Wait(MaxTimeout, TestContext.Current.CancellationToken), "Timed out waiting for InformV2 handler");
                 Assert.Equal(1, count);
             }
             finally
@@ -345,7 +345,7 @@ namespace Samples.Integration
                     report,
                     TestContext.Current.CancellationToken);
 
-                Assert.True(manualEvent.Wait(MaxTimeout), "Timed out waiting for InformV3 handler");
+                Assert.True(manualEvent.Wait(MaxTimeout, TestContext.Current.CancellationToken), "Timed out waiting for InformV3 handler");
                 Assert.Equal(1, count);
             }
             finally
@@ -401,7 +401,7 @@ namespace Samples.Integration
                     report,
                     TestContext.Current.CancellationToken);
 
-                Assert.True(manualEvent.Wait(MaxTimeout), "Timed out waiting for InformV3DES handler");
+                Assert.True(manualEvent.Wait(MaxTimeout, TestContext.Current.CancellationToken), "Timed out waiting for InformV3DES handler");
                 Assert.Equal(1, count);
             }
             finally
