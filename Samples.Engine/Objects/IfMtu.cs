@@ -54,14 +54,29 @@ namespace Samples.Objects
             }
             else
             {
-                try
-                {
-                    _data = new Integer32(networkInterface.GetIPProperties().GetIPv6Properties().Mtu);
-                }
-				catch (NotImplementedException)
-				{
-					_data = new Integer32(0);
-				}
+                _data = new Integer32(GetIpv6Mtu(networkInterface));
+            }
+        }
+
+        private static int GetIpv6Mtu(NetworkInterface networkInterface)
+        {
+            try
+            {
+                return networkInterface.Supports(NetworkInterfaceComponent.IPv6)
+                    ? networkInterface.GetIPProperties().GetIPv6Properties().Mtu
+                    : 0;
+            }
+            catch (NetworkInformationException)
+            {
+                return 0;
+            }
+            catch (NotImplementedException)
+            {
+                return 0;
+            }
+            catch (PlatformNotSupportedException)
+            {
+                return 0;
             }
         }
 

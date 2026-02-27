@@ -65,6 +65,25 @@ jobs:
           8.0.x
           9.0.x
           10.0.x
+    - name: Ensure IPv6 Enabled
+      shell: pwsh
+      run: |
+        $bindings = Get-NetAdapterBinding -ComponentID ms_tcpip6 -ErrorAction SilentlyContinue
+        if (-not $bindings) {
+          Write-Warning "No IPv6 adapter bindings were detected on this runner."
+          exit 0
+        }
+
+        $disabled = $bindings | Where-Object { -not $_.Enabled }
+        if ($disabled) {
+          foreach ($binding in $disabled) {
+            Write-Host "Enabling IPv6 for adapter '$($binding.Name)'..."
+            Enable-NetAdapterBinding -Name $binding.Name -ComponentID ms_tcpip6 -ErrorAction Continue
+          }
+        }
+
+        Write-Host "IPv6 adapter binding status:"
+        Get-NetAdapterBinding -ComponentID ms_tcpip6 | Format-Table -AutoSize
     - name: Build
       shell: cmd
       run: build.release.bat
