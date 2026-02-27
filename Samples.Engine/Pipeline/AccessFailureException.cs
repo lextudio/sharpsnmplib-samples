@@ -63,7 +63,7 @@ namespace Samples.Pipeline
             : base(message, inner) 
         {
         }
-#if NET471_OR_GREATER
+
         /// <summary>
         /// Creates a <see cref="AccessFailureException"/> instance.
         /// </summary>
@@ -73,7 +73,7 @@ namespace Samples.Pipeline
             : base(info, context)
         {
         }
-#endif
+
         /// <summary>
         /// Returns a <see cref="String"/> that represents this <see cref="AccessFailureException"/>.
         /// </summary>

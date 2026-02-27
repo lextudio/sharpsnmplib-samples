@@ -48,10 +48,8 @@ namespace Samples.Objects
         {
             NetworkChange.NetworkAddressChanged +=
                 (sender, args) => LoadElements();
-#if NET471_OR_GREATER
             NetworkChange.NetworkAvailabilityChanged +=
                 (sender, args) => LoadElements();
-#endif                
             LoadElements();
         }
 

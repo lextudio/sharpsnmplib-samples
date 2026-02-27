@@ -29,13 +29,9 @@ namespace Samples.Objects
     /// </summary>
     public sealed class SysDescr : ScalarObject
     {
-#if NET471_OR_GREATER
         private readonly OctetString _description =
             new OctetString(string.Format(CultureInfo.InvariantCulture, "#SNMP Agent on {0}", Environment.OSVersion));
-#else
-        private readonly OctetString _description =
-            new OctetString("#SNMP Agent on .NET Standard");
-#endif
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SysDescr"/> class.
         /// </summary>

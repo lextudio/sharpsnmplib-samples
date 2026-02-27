@@ -14,13 +14,8 @@ namespace SNMPv2_MIB
 {
     partial class sysDescr
     {
-#if NET471_OR_GREATER
         private readonly OctetString _data =
             new OctetString(string.Format(CultureInfo.InvariantCulture, "#SNMP Agent on {0}", Environment.OSVersion));
-#else
-        private readonly OctetString _data =
-            new OctetString("#SNMP Agent on .NET Standard");
-#endif
 
         void OnCreate()
         {
@@ -63,11 +58,7 @@ namespace SNMPv2_MIB
     }
     partial class sysContact
     {
-#if NET471_OR_GREATER
-        private OctetString _data = new OctetString(Environment.UserName);
-#else
         private OctetString _data = new OctetString("UNKNOWN");
-#endif
 
         void OnCreate()
         {
@@ -104,11 +95,7 @@ namespace SNMPv2_MIB
     }
     partial class sysName
     {
-#if NET471_OR_GREATER
-        private OctetString _data = new OctetString(Environment.MachineName);
-#else
         private OctetString _data = new OctetString("UNKNOWN");
-#endif
 
         void OnCreate()
         {

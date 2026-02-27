@@ -28,11 +28,8 @@ namespace Samples.Objects
     /// </summary>
     public sealed class SysContact : ScalarObject
     {
-#if NET471_OR_GREATER
         private OctetString _contact = new OctetString(Environment.UserName);
-#else
-        private OctetString _contact = new OctetString("UNKNOWN");
-#endif
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SysContact"/> class.
         /// </summary>
