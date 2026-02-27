@@ -11,7 +11,6 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\SharpSnmpLib\sharpsnmplib.snk</AssemblyOriginatorKeyFile>
     <AssemblyOriginatorKeyMode>File</AssemblyOriginatorKeyMode>
-    <RuntimeIdentifier Condition=" '$(TargetFramework)' == 'net471' ">win</RuntimeIdentifier>
     <AndroidUseIntermediateDesignerFile>False</AndroidUseIntermediateDesignerFile>
     <!-- Suppress platform-specific API warnings (MIB objects use APIs unavailable on all platforms) -->
     <NoWarn>$(NoWarn);CA1416</NoWarn>

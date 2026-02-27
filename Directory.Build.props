@@ -3,4 +3,8 @@
     <!-- Enable central package management -->
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
+
+  <Target Name="BlockNetFrameworkBuild" BeforeTargets="GetReferenceAssemblyPaths;PrepareForBuild" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Error Text=".NET Framework (net4x) targets are no longer supported in sharpsnmplib-samples. Use CSharpCore/.NET 10+ projects instead." />
+  </Target>
 </Project>
