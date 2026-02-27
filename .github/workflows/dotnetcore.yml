@@ -25,7 +25,7 @@ jobs:
         pwsh -file release.ps1 Release
     - name: Test
       shell: pwsh
-      run: dotnet test --project Tests/CSharpCore/Tests.NetStandard.csproj --configuration Release --no-build /p:AltCover=true /p:AltCoverStrongNameKey=../../SharpSnmpLib/sharpsnmplib.snk /p:AltCoverAssemblyFilter='^(xunit)|(AltCover)|(SharpSnmpLib\.Tests)'
+      run: dotnet test --project Tests/CSharpCore/Tests.NetStandard.csproj --configuration Release --no-build
 
   linux:
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
         pwsh -file release.ps1 Release
     - name: Test
       shell: pwsh
-      run: dotnet test --project Tests/CSharpCore/Tests.NetStandard.csproj --configuration Release --no-build /p:AltCover=true /p:AltCoverStrongNameKey=../../SharpSnmpLib/sharpsnmplib.snk /p:AltCoverAssemblyFilter='^(xunit)|(AltCover)|(SharpSnmpLib\.Tests)'
+      run: dotnet test --project Tests/CSharpCore/Tests.NetStandard.csproj --configuration Release --no-build
 
   windows:
 
@@ -89,12 +89,4 @@ jobs:
       run: build.release.bat
     - name: Test
       shell: pwsh
-      run: |
-        dotnet test --project Tests/CSharpCore/Tests.NetStandard.csproj --configuration Release --no-build /p:AltCover=true /p:AltCoverStrongNameKey=../../SharpSnmpLib/sharpsnmplib.snk /p:AltCoverAssemblyFilter='^(xunit)|(AltCover)|(SharpSnmpLib\.Tests)'
-        dotnet tool install --global dotnet-reportgenerator-globaltool
-        reportgenerator -reports:${{ github.workspace }}\Tests\CSharpCore\coverage.net8.0.xml -targetdir:${{ github.workspace }}\TestResults -reporttypes:lcov
-    - name: Publish coverage report to coveralls.io
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: ${{ github.workspace }}\TestResults\lcov.info
+      run: dotnet test --project Tests/CSharpCore/Tests.NetStandard.csproj --configuration Release --no-build
