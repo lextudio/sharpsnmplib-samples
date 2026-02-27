@@ -58,7 +58,10 @@ namespace BytesViewer
 
                 var pdu = scope.Nodes.Add(string.Format("pdu type {0}", message.Scope.Pdu.TypeCode));
                 pdu.Nodes.Add(string.Format("request id {0}", message.Scope.Pdu.RequestId));
-                pdu.Nodes.Add(string.Format("error status {0}", message.Scope.Pdu.ErrorStatus.ToErrorCode()));
+                var errorStatus = message.Scope.Pdu.ErrorStatus.TryToErrorCode(out var code)
+                    ? code.ToString()
+                    : string.Format("unknown({0})", message.Scope.Pdu.ErrorStatus.ToInt32());
+                pdu.Nodes.Add(string.Format("error status {0}", errorStatus));
                 pdu.Nodes.Add(string.Format("error index {0}", message.Scope.Pdu.ErrorIndex));
                 var variables = pdu.Nodes.Add(string.Format("variable count {0}", message.Scope.Pdu.Variables.Count));
                 foreach (var variable in message.Scope.Pdu.Variables)
