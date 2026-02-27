@@ -1622,11 +1622,8 @@ namespace Samples.Integration
         }
 
         /// <summary>
-        /// Reproduces https://github.com/lextudio/sharpsnmplib/issues/697
-        /// When a Walk encounters an ErrorCode.TooBig response, HasNextAsync treats it
-        /// as success (only NoSuchName is considered failure). The TooBig response contains
-        /// the original request OID, causing the walk to retry the same OID forever.
-        /// This test verifies that the walk does not enter an infinite loop.
+        /// Regression guard for https://github.com/lextudio/sharpsnmplib/issues/697 (v1).
+        /// WalkAsync should stop cleanly when the agent returns TooBig.
         /// </summary>
         [Fact]
         public async Task TestWalkAsync_TooBigResponse()
@@ -1639,71 +1636,27 @@ namespace Samples.Integration
 
             try
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-                // Manually simulate the walk loop with per-step logging to diagnose
-                // whether the library's HasNextAsync logic causes an infinite loop.
-                var seedOid = new ObjectIdentifier("1.3.6.1.2.1.1");
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 var list = new List<Variable>();
-                var maxIterations = 25; // enough to see the loop if it happens
-                ObjectIdentifier previousOid = default;
-                bool hasPreviousOid = false;
-                int repeatedOidCount = 0;
+                var watch = Stopwatch.StartNew();
+                var result = await Messenger.WalkAsync(
+                    VersionCode.V1,
+                    serverEndPoint,
+                    new OctetString(communityPublic),
+                    new ObjectIdentifier("1.3.6.1.2.1.1"),
+                    list,
+                    WalkMode.WithinSubtree,
+                    cts.Token);
+                watch.Stop();
 
-                for (int i = 0; i < maxIterations; i++)
+                Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"WalkAsync took too long: {watch.Elapsed}");
+                Assert.NotEmpty(list);
+                for (var i = 1; i < list.Count; i++)
                 {
-                    var msg = new GetNextRequestMessage(
-                        Messenger.NextRequestId,
-                        VersionCode.V1,
-                        new OctetString(communityPublic),
-                        new List<Variable> { new Variable(seedOid) });
-
-                    ISnmpMessage response;
-                    try
-                    {
-                        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        response = await msg.GetResponseAsync(serverEndPoint, socket, cts.Token);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[Step {i}] GetNext({seedOid}) -> EXCEPTION: {ex.GetType().Name}: {ex.Message}");
-                        break;
-                    }
-
-                    var pdu = response.Pdu();
-                    var errorCode = pdu.ErrorStatus.ToErrorCode();
-                    var resultVar = pdu.Variables[0];
-                    Console.WriteLine($"[Step {i}] GetNext({seedOid}) -> Error={errorCode}, OID={resultVar.Id}, Type={resultVar.Data.TypeCode}");
-
-                    if (errorCode == ErrorCode.NoSuchName)
-                    {
-                        Console.WriteLine($"  Walk stops: NoSuchName");
-                        break;
-                    }
-
-                    // Detect repeated OID (the infinite loop condition from issue #697)
-                    if (hasPreviousOid && resultVar.Id == previousOid)
-                    {
-                        repeatedOidCount++;
-                        Console.WriteLine($"  ** REPEATED OID detected (count={repeatedOidCount}) **");
-                        if (repeatedOidCount >= 3)
-                        {
-                            Console.WriteLine($"  Infinite loop confirmed after {repeatedOidCount} repetitions!");
-                            Assert.Fail($"Walk entered an infinite loop on ErrorCode.{errorCode} response at OID {resultVar.Id} (issue #697)");
-                        }
-                    }
-                    else
-                    {
-                        repeatedOidCount = 0;
-                    }
-
-                    previousOid = resultVar.Id;
-                    hasPreviousOid = true;
-                    seedOid = resultVar.Id;
-                    list.Add(resultVar);
+                    Assert.True(list[i].Id > list[i - 1].Id, $"OID did not advance: {list[i - 1].Id} -> {list[i].Id}");
                 }
 
-                Console.WriteLine($"[TestWalkAsync_TooBigResponse] Collected {list.Count} variables");
+                _ = result;
             }
             finally
             {
@@ -1712,7 +1665,8 @@ namespace Samples.Integration
         }
 
         /// <summary>
-        /// Same as <see cref="TestWalkAsync_TooBigResponse"/> but for SNMP v2c.
+        /// Regression guard for https://github.com/lextudio/sharpsnmplib/issues/697 (v2c).
+        /// WalkAsync should stop cleanly when the agent returns TooBig.
         /// </summary>
         [Fact]
         public async Task TestWalkAsync_V2_TooBigResponse()
@@ -1725,76 +1679,27 @@ namespace Samples.Integration
 
             try
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-
-                // Manual GetNext loop to reproduce issue #697 for v2c.
-                var seedOid = new ObjectIdentifier("1.3.6.1.2.1.1");
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 var list = new List<Variable>();
-                var maxIterations = 25;
-                ObjectIdentifier previousOid = default;
-                bool hasPreviousOid = false;
-                int repeatedOidCount = 0;
+                var watch = Stopwatch.StartNew();
+                var result = await Messenger.WalkAsync(
+                    VersionCode.V2,
+                    serverEndPoint,
+                    new OctetString(communityPublic),
+                    new ObjectIdentifier("1.3.6.1.2.1.1"),
+                    list,
+                    WalkMode.WithinSubtree,
+                    cts.Token);
+                watch.Stop();
 
-                for (int i = 0; i < maxIterations; i++)
+                Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"WalkAsync took too long: {watch.Elapsed}");
+                Assert.NotEmpty(list);
+                for (var i = 1; i < list.Count; i++)
                 {
-                    var msg = new GetNextRequestMessage(
-                        Messenger.NextRequestId,
-                        VersionCode.V2,
-                        new OctetString(communityPublic),
-                        new List<Variable> { new Variable(seedOid) });
-
-                    ISnmpMessage response;
-                    try
-                    {
-                        using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        response = await msg.GetResponseAsync(serverEndPoint, socket, cts.Token);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[V2 Step {i}] GetNext({seedOid}) -> EXCEPTION: {ex.GetType().Name}: {ex.Message}");
-                        break;
-                    }
-
-                    var pdu = response.Pdu();
-                    var errorCode = pdu.ErrorStatus.ToErrorCode();
-                    var resultVar = pdu.Variables[0];
-                    Console.WriteLine($"[V2 Step {i}] GetNext({seedOid}) -> Error={errorCode}, OID={resultVar.Id}, Type={resultVar.Data.TypeCode}");
-
-                    if (errorCode == ErrorCode.NoSuchName)
-                    {
-                        Console.WriteLine($"  Walk stops: NoSuchName");
-                        break;
-                    }
-
-                    if (resultVar.Data.TypeCode == SnmpType.EndOfMibView)
-                    {
-                        Console.WriteLine($"  Walk stops: EndOfMibView");
-                        break;
-                    }
-
-                    // Detect repeated OID (the infinite loop condition from issue #697)
-                    if (hasPreviousOid && resultVar.Id == previousOid)
-                    {
-                        repeatedOidCount++;
-                        Console.WriteLine($"  ** REPEATED OID detected (count={repeatedOidCount}) **");
-                        if (repeatedOidCount >= 3)
-                        {
-                            Console.WriteLine($"  Infinite loop confirmed after {repeatedOidCount} repetitions!");
-                            Assert.Fail($"Walk entered an infinite loop on ErrorCode.{errorCode} response at OID {resultVar.Id} (issue #697)");
-                        }
-                    }
-                    else
-                    {
-                        repeatedOidCount = 0;
-                    }
-
-                    previousOid = resultVar.Id;
-                    hasPreviousOid = true;
-                    seedOid = resultVar.Id;
-                    list.Add(resultVar);
+                    Assert.True(list[i].Id > list[i - 1].Id, $"OID did not advance: {list[i - 1].Id} -> {list[i].Id}");
                 }
 
-                Console.WriteLine($"[TestWalkAsync_V2_TooBigResponse] Collected {list.Count} variables");
+                _ = result;
             }
             finally
             {
