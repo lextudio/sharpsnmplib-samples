@@ -19,13 +19,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-  <PackageReference Include="Lextm.SharpSnmpLib" />
+    <PackageReference Include="Lextm.SharpSnmpLib" />
     <PackageReference Include="Mono.Options.Core" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists($(MibSourceGenerator))" />
-    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
+    <ProjectReference Include="..\..\Samples.Engine\Samples.Engine.csproj" />
   </ItemGroup>
 
   <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->

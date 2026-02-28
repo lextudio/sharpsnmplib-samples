@@ -49,12 +49,20 @@ namespace Samples.Pipeline
     /// </remarks>
     public sealed class TcpTransportListener : ITransportListener, IListenerBinding, IDisposable
     {
+        private enum FrameEncoding
+        {
+            Unknown = 0,
+            Rfc3430LengthPrefix = 1,
+            Asn1SequenceLength = 2
+        }
+
         private readonly IPEndPoint _endpoint;
         private readonly Channel<SnmpDatagram> _channel;
         private Socket? _listenSocket;
         private CancellationTokenSource? _cts;
         private Task? _acceptTask;
         private readonly ConcurrentDictionary<SocketAddress, Socket> _clientSockets = new();
+        private readonly ConcurrentDictionary<SocketAddress, FrameEncoding> _clientFrameEncodings = new();
         private bool _disposed;
 
         /// <summary>
@@ -250,6 +258,7 @@ namespace Samples.Pipeline
             var clientAddress = remoteEndPoint.Serialize();
 
             _clientSockets.TryAdd(clientAddress, client);
+            _clientFrameEncodings.TryAdd(clientAddress, FrameEncoding.Unknown);
 
             var pipe = new Pipe(new PipeOptions(
                 pool: MemoryPool<byte>.Shared,
@@ -269,6 +278,7 @@ namespace Samples.Pipeline
             finally
             {
                 _clientSockets.TryRemove(clientAddress, out _);
+                _clientFrameEncodings.TryRemove(clientAddress, out _);
                 try { client.Close(0); } catch { }
                 try { client.Dispose(); } catch { }
             }
@@ -328,8 +338,10 @@ namespace Samples.Pipeline
                     var result = await reader.ReadAsync(ct).ConfigureAwait(false);
                     var buffer = result.Buffer;
 
-                    while (TryReadFrame(ref buffer, out var frame))
+                    while (TryReadFrame(ref buffer, out var frame, out var encoding))
                     {
+                        _clientFrameEncodings.AddOrUpdate(senderAddress, encoding, (_, _) => encoding);
+
                         // Copy the frame into a pooled buffer for the channel consumer.
                         var length = (int)frame.Length;
                         var pooled = ArrayPool<byte>.Shared.Rent(length);
@@ -369,34 +381,112 @@ namespace Samples.Pipeline
         /// <returns><c>true</c> if a complete frame was read; <c>false</c> if more data is needed.</returns>
         private static bool TryReadFrame(
             ref ReadOnlySequence<byte> buffer,
-            out ReadOnlySequence<byte> frame)
+            out ReadOnlySequence<byte> frame,
+            out FrameEncoding encoding)
         {
             frame = default;
+            encoding = FrameEncoding.Unknown;
 
-            if (buffer.Length < 4)
+            if (buffer.Length < 2)
             {
                 return false;
             }
 
-            // Read 4-byte length prefix.
-            Span<byte> lengthBytes = stackalloc byte[4];
-            buffer.Slice(0, 4).CopyTo(lengthBytes);
-            int messageLength = BinaryPrimitives.ReadInt32BigEndian(lengthBytes);
+            // First try RFC 3430 framing (4-byte big-endian message length).
+            if (buffer.Length >= 4)
+            {
+                Span<byte> lengthBytes = stackalloc byte[4];
+                buffer.Slice(0, 4).CopyTo(lengthBytes);
+                int messageLength = BinaryPrimitives.ReadInt32BigEndian(lengthBytes);
 
-            if (messageLength <= 0 || messageLength > MaxMessageSize)
+                if (messageLength > 0 && messageLength <= MaxMessageSize)
+                {
+                    if (buffer.Length < 4 + messageLength)
+                    {
+                        return false; // Incomplete frame; need more data.
+                    }
+
+                    frame = buffer.Slice(4, messageLength);
+                    buffer = buffer.Slice(4 + messageLength);
+                    encoding = FrameEncoding.Rfc3430LengthPrefix;
+                    return true;
+                }
+            }
+
+            // Fallback: accept BER-definite-length top-level SEQUENCE (used by some tools over TCP).
+            if (!TryReadAsn1SequenceLength(buffer, out var totalLength))
             {
                 // Invalid frame — discard the connection's remaining data.
                 buffer = buffer.Slice(buffer.End);
                 return false;
             }
 
-            if (buffer.Length < 4 + messageLength)
+            if (buffer.Length < totalLength)
             {
                 return false; // Incomplete frame; need more data.
             }
 
-            frame = buffer.Slice(4, messageLength);
-            buffer = buffer.Slice(4 + messageLength);
+            frame = buffer.Slice(0, totalLength);
+            buffer = buffer.Slice(totalLength);
+            encoding = FrameEncoding.Asn1SequenceLength;
+            return true;
+        }
+
+        private static bool TryReadAsn1SequenceLength(ReadOnlySequence<byte> buffer, out int totalLength)
+        {
+            totalLength = 0;
+
+            if (buffer.Length < 2)
+            {
+                return false;
+            }
+
+            Span<byte> header = stackalloc byte[6];
+            int toCopy = (int)Math.Min(buffer.Length, header.Length);
+            buffer.Slice(0, toCopy).CopyTo(header);
+
+            if (header[0] != 0x30)
+            {
+                return false;
+            }
+
+            byte lengthByte = header[1];
+            if ((lengthByte & 0x80) == 0)
+            {
+                int contentLength = lengthByte;
+                if (contentLength <= 0 || contentLength > MaxMessageSize)
+                {
+                    return false;
+                }
+
+                totalLength = 2 + contentLength;
+                return true;
+            }
+
+            int lengthOfLength = lengthByte & 0x7F;
+            if (lengthOfLength == 0 || lengthOfLength > 4)
+            {
+                return false;
+            }
+
+            int headerLength = 2 + lengthOfLength;
+            if (buffer.Length < headerLength)
+            {
+                return false;
+            }
+
+            int contentLengthLong = 0;
+            for (int i = 0; i < lengthOfLength; i++)
+            {
+                contentLengthLong = (contentLengthLong << 8) | header[2 + i];
+            }
+
+            if (contentLengthLong <= 0 || contentLengthLong > MaxMessageSize)
+            {
+                return false;
+            }
+
+            totalLength = headerLength + contentLengthLong;
             return true;
         }
 
@@ -430,12 +520,17 @@ namespace Samples.Pipeline
             }
 
             var messageBytes = response.ToBytes();
-            var lengthPrefix = new byte[4];
-            BinaryPrimitives.WriteInt32BigEndian(lengthPrefix, messageBytes.Length);
 
             try
             {
-                clientSocket.Send(lengthPrefix, SocketFlags.None);
+                if (!_clientFrameEncodings.TryGetValue(receiverAddress, out var encoding) ||
+                    encoding == FrameEncoding.Rfc3430LengthPrefix)
+                {
+                    var lengthPrefix = new byte[4];
+                    BinaryPrimitives.WriteInt32BigEndian(lengthPrefix, messageBytes.Length);
+                    clientSocket.Send(lengthPrefix, SocketFlags.None);
+                }
+
                 clientSocket.Send(messageBytes, SocketFlags.None);
             }
             catch (SocketException) { }
@@ -469,12 +564,17 @@ namespace Samples.Pipeline
             }
 
             var messageBytes = response.ToBytes();
-            var lengthPrefix = new byte[4];
-            BinaryPrimitives.WriteInt32BigEndian(lengthPrefix, messageBytes.Length);
 
             try
             {
-                await clientSocket.SendAsync(lengthPrefix, SocketFlags.None).ConfigureAwait(false);
+                if (!_clientFrameEncodings.TryGetValue(receiverAddress, out var encoding) ||
+                    encoding == FrameEncoding.Rfc3430LengthPrefix)
+                {
+                    var lengthPrefix = new byte[4];
+                    BinaryPrimitives.WriteInt32BigEndian(lengthPrefix, messageBytes.Length);
+                    await clientSocket.SendAsync(lengthPrefix, SocketFlags.None).ConfigureAwait(false);
+                }
+
                 await clientSocket.SendAsync(messageBytes, SocketFlags.None).ConfigureAwait(false);
             }
             catch (SocketException) { }
@@ -501,13 +601,17 @@ namespace Samples.Pipeline
                 return; // Client disconnected.
             }
 
-            var lengthPrefix = new byte[4];
-            BinaryPrimitives.WriteInt32BigEndian(lengthPrefix, response.Length);
-
             try
             {
-                await clientSocket.SendAsync(lengthPrefix, SocketFlags.None, cancellationToken)
-                    .ConfigureAwait(false);
+                if (!_clientFrameEncodings.TryGetValue(receiver, out var encoding) ||
+                    encoding == FrameEncoding.Rfc3430LengthPrefix)
+                {
+                    var lengthPrefix = new byte[4];
+                    BinaryPrimitives.WriteInt32BigEndian(lengthPrefix, response.Length);
+                    await clientSocket.SendAsync(lengthPrefix, SocketFlags.None, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
                 await clientSocket.SendAsync(response, SocketFlags.None, cancellationToken)
                     .ConfigureAwait(false);
             }

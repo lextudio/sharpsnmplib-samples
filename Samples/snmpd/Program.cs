@@ -23,8 +23,6 @@ using Mono.Options;
 // when MibSourceGenerator is detected
 #if USE_SOURCE_GENERATOR
 using SNMPv2_MIB;
-#else
-using IP_MIB;
 #endif
 
 namespace SnmpD
@@ -35,12 +33,16 @@ namespace SnmpD
         {
             // Default port value
             int port = 161;
+            int? tcpPort = null;
+            bool enableTcp = false;
             bool showHelp = false;
             
             // Parse command line options
             var options = new OptionSet
             {
                 { "p|port=", "SNMP agent port number (default: 161)", (int p) => port = p },
+                { "t|tcp", "Enable SNMP over TCP (uses --port by default)", t => enableTcp = t != null },
+                { "tcp-port=", "SNMP over TCP port number (implies --tcp)", (int p) => { tcpPort = p; enableTcp = true; } },
                 { "h|help", "Show this help message and exit", h => showHelp = h != null }
             };
             
@@ -142,11 +144,19 @@ namespace SnmpD
             var membership = new ComposedMembershipProvider(new IMembershipProvider[] { v1, v2, v3 });
             using var engine = new SnmpEngine(new Listener { Users = users }, new EngineGroup(idEngine161), store, membership);
             engine.Listener.AddBinding(new IPEndPoint(IPAddress.Any, port));
+            if (enableTcp)
+            {
+                engine.Listener.AddTcpBinding(new IPEndPoint(IPAddress.Any, tcpPort ?? port));
+            }
             engine.Listener.ExceptionRaised += Engine_ExceptionRaised;
             engine.Listener.MessageReceived += RequestReceived;
             engine.Start();
             Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
-            Console.WriteLine($"SNMP agent listening on port {port}");
+            Console.WriteLine($"SNMP/UDP agent listening on port {port}");
+            if (enableTcp)
+            {
+                Console.WriteLine($"SNMP/TCP agent listening on port {tcpPort ?? port}");
+            }
 
             Console.WriteLine("Press Ctrl+C to stop . . . ");
             var cancellationTokenSource = new CancellationTokenSource();
