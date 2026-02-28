@@ -18,9 +18,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\sharpsnmplib-13.0\SharpSnmpLib\SharpSnmpLib.csproj" />
+    <PackageReference Include="Lextm.SharpSnmpLib" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="DotNetSnmp.Asn1.SyntaxObjects" />
