@@ -26,11 +26,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lextm.SharpSnmpLib.Messaging;
 using Lextm.SharpSnmpLib.Security;
+using Lextm.SharpSnmpLib.Transport;
 
 namespace Samples.Pipeline
 {
     /// <summary>
-    /// Listener that manages one or more <see cref="UdpTransportListener"/> instances
+    /// Listener that manages one or more transport listener instances (UDP and/or TCP)
     /// and dispatches parsed SNMP messages through events.
     /// </summary>
     /// <remarks>
@@ -55,6 +56,7 @@ namespace Samples.Pipeline
         public Listener()
         {
             Bindings = new List<UdpTransportListener>();
+            TcpBindings = new List<TcpTransportListener>();
         }
 
         /// <summary>
@@ -94,6 +96,16 @@ namespace Samples.Pipeline
                     }
 
                     Bindings.Clear();
+                }
+
+                if (TcpBindings != null)
+                {
+                    foreach (var binding in TcpBindings)
+                    {
+                        binding.Dispose();
+                    }
+
+                    TcpBindings.Clear();
                 }
             }
 
@@ -157,6 +169,11 @@ namespace Samples.Pipeline
                 binding.Stop();
             }
 
+            foreach (var binding in TcpBindings)
+            {
+                binding.Stop();
+            }
+
             // Wait for dispatch tasks to drain.
             if (_dispatchTasks != null)
             {
@@ -194,11 +211,17 @@ namespace Samples.Pipeline
             }
 
             _cts = new CancellationTokenSource();
-            _dispatchTasks = new List<Task>(Bindings.Count);
+            _dispatchTasks = new List<Task>(Bindings.Count + TcpBindings.Count);
 
             try
             {
                 foreach (var binding in Bindings)
+                {
+                    binding.Start();
+                    _dispatchTasks.Add(Task.Run(() => DispatchLoopAsync(binding, _cts.Token)));
+                }
+
+                foreach (var binding in TcpBindings)
                 {
                     binding.Start();
                     _dispatchTasks.Add(Task.Run(() => DispatchLoopAsync(binding, _cts.Token)));
@@ -216,9 +239,14 @@ namespace Samples.Pipeline
         }
 
         /// <summary>
-        /// Gets the transport listener bindings.
+        /// Gets the UDP transport listener bindings.
         /// </summary>
         internal IList<UdpTransportListener> Bindings { get; }
+
+        /// <summary>
+        /// Gets the TCP transport listener bindings.
+        /// </summary>
+        internal IList<TcpTransportListener> TcpBindings { get; }
 
         /// <summary>
         /// Occurs when an exception is raised.
@@ -284,7 +312,59 @@ namespace Samples.Pipeline
         }
 
         /// <summary>
-        /// Clears the bindings.
+        /// Adds a TCP binding.
+        /// </summary>
+        /// <param name="endpoint">The endpoint.</param>
+        public void AddTcpBinding(IPEndPoint endpoint)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(GetType().FullName);
+            }
+
+            if (Active)
+            {
+                throw new InvalidOperationException("Must be called when Active == false");
+            }
+
+            if (TcpBindings.Any(existing => existing.Endpoint.Equals(endpoint)))
+            {
+                return;
+            }
+
+            var binding = new TcpTransportListener(endpoint);
+            TcpBindings.Add(binding);
+        }
+
+        /// <summary>
+        /// Removes a TCP binding.
+        /// </summary>
+        /// <param name="endpoint">The endpoint.</param>
+        public void RemoveTcpBinding(IPEndPoint endpoint)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(GetType().FullName);
+            }
+
+            if (Active)
+            {
+                throw new InvalidOperationException("Must be called when Active == false");
+            }
+
+            for (var i = 0; i < TcpBindings.Count; i++)
+            {
+                if (TcpBindings[i].Endpoint.Equals(endpoint))
+                {
+                    TcpBindings[i].Dispose();
+                    TcpBindings.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clears the bindings (both UDP and TCP).
         /// </summary>
         public void ClearBindings()
         {
@@ -300,6 +380,14 @@ namespace Samples.Pipeline
             }
 
             Bindings.Clear();
+
+            foreach (var binding in TcpBindings)
+            {
+                binding.Stop();
+                binding.Dispose();
+            }
+
+            TcpBindings.Clear();
         }
 
         /// <summary>
@@ -307,11 +395,15 @@ namespace Samples.Pipeline
         /// and fires the <see cref="MessageReceived"/> event. This is the bridge between
         /// the channel-based transport layer and the event-based engine layer.
         /// </summary>
-        private async Task DispatchLoopAsync(UdpTransportListener transport, CancellationToken ct)
+        private async Task DispatchLoopAsync(IListenerBinding transport, CancellationToken ct)
         {
+            // Both UdpTransportListener and TcpTransportListener implement
+            // ITransportListener (for DatagramReader) and IListenerBinding (for SendResponse).
+            var transportListener = (ITransportListener)transport;
+
             try
             {
-                await foreach (var datagram in transport.DatagramReader.ReadAllAsync(ct).ConfigureAwait(false))
+                await foreach (var datagram in transportListener.DatagramReader.ReadAllAsync(ct).ConfigureAwait(false))
                 {
                     try
                     {
