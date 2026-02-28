@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Samples.Engine\Samples.Engine.csproj" />
+    <ProjectReference Include="..\..\Samples.Engine\Samples.Engine.csproj" />
   </ItemGroup>
 
 </Project>
