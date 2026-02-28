@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Samples/CSharpCore/snmpd/bin/Debug/net8.0/snmpd.dll",
+            "program": "${workspaceFolder}/Samples/snmpd/bin/Debug/net8.0/snmpd.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Samples/CSharpCore/snmpd",
+            "cwd": "${workspaceFolder}/Samples/snmpd",
             "console": "internalConsole",
             "stopAtEntry": false,
             "justMyCode": false
@@ -21,7 +21,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Samples/CSharpCore/snmpget/bin/Debug/net8.0/snmpget.dll",
+            "program": "${workspaceFolder}/Samples/snmpget/bin/Debug/net8.0/snmpget.dll",
             "args": [
                 "-v=3",
                 "-l=authPriv",
@@ -35,7 +35,7 @@
                 "1.3.6.1.2.1.1.1.0",
                 "1.3.6.1.2.1.1.2.0"
             ],
-            "cwd": "${workspaceFolder}/Samples/CSharpCore/snmpget",
+            "cwd": "${workspaceFolder}/Samples/snmpget",
             "console": "internalConsole",
             "stopAtEntry": false,
             "justMyCode": false

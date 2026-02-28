@@ -16,9 +16,21 @@
     <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Lextm.SharpSnmpLib" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\sharpsnmplib-13.0\SharpSnmpLib\SharpSnmpLib.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="DotNetSnmp.Asn1.SyntaxObjects" />
+    <Using Include="DotNetSnmp.Common.Definitions" />
+    <Using Include="DotNetSnmp.Protocol.V1" />
+    <Using Include="DotNetSnmp.Protocol.V2" />
+    <Using Include="DotNetSnmp.Protocol.V3" />
+    <Using Include="DotNetSnmp.Asn1.Serialization.IAsnSerializable" Alias="ISnmpData" />
+    <Using Include="DotNetSnmp.Protocol.V3.Security.Authentication.IAuthenticationProvider" Alias="IAuthenticationProvider" />
+    <Using Include="DotNetSnmp.Protocol.V3.Security.Privacy.IPrivacyProvider" Alias="IPrivacyProvider" />
   </ItemGroup>
   
   <!-- Exclude legacy handler pipeline implementation (middleware-only runtime). -->

@@ -697,13 +697,13 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = CreateEndpoint(IPAddress.Any);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
+            Thread.Sleep(100); // Give engine a moment to fully initialize
 
-            // Async discovery can be timing-sensitive under full-suite load; allow a wider probe window.
-            var timeout = 3000;
-            var wait = 60 * timeout;
+            var timeout = 5000;
+            var wait = 3 * timeout; // Short wait: AgentFound fires during DiscoverAsync, so signal is already set or won't be
             try
             {
                 var signal = new AutoResetEvent(false);
@@ -738,7 +738,7 @@ namespace Samples.Integration
                     Assert.True(result);
                     ending.Set();
                 });
-                Assert.True(ending.WaitOne(MaxTimeout));
+                Assert.True(ending.WaitOne(MaxTimeout), "Discovery did not complete within maximum timeout");
             }
             finally
             {
@@ -821,12 +821,13 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = CreateEndpoint(IPAddress.Any);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
+            Thread.Sleep(100); // Give engine a moment to fully initialize
 
-            var timeout = 3000;
-            var wait = 60 * timeout;
+            var timeout = 5000;
+            var wait = 3 * timeout; // Short wait: AgentFound fires during DiscoverAsync, so signal is already set or won't be
             try
             {
                 var signal = new AutoResetEvent(false);
@@ -861,7 +862,7 @@ namespace Samples.Integration
                     Assert.True(result);
                     ending.Set();
                 });
-                Assert.True(ending.WaitOne(MaxTimeout));
+                Assert.True(ending.WaitOne(MaxTimeout), "Discovery did not complete within maximum timeout");
             }
             finally
             {
@@ -879,12 +880,13 @@ namespace Samples.Integration
 
             var engine = CreateEngine();
             engine.Listener.ClearBindings();
-            var serverEndPoint = CreateEndpoint(IPAddress.Any);
+            var serverEndPoint = CreateEndpoint(IPAddress.Loopback);
             engine.Listener.AddBinding(serverEndPoint);
             engine.Start();
+            Thread.Sleep(100); // Give engine a moment to fully initialize
 
-            var timeout = 3000;
-            var wait = 60 * timeout;
+            var timeout = 5000;
+            var wait = 3 * timeout; // Short wait: AgentFound fires during DiscoverAsync, so signal is already set or won't be
             try
             {
                 var signal = new AutoResetEvent(false);
