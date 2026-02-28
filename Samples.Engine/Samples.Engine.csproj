@@ -33,26 +33,4 @@
     <Using Include="DotNetSnmp.Protocol.V3.Security.Privacy.IPrivacyProvider" Alias="IPrivacyProvider" />
   </ItemGroup>
   
-  <!-- Exclude legacy handler pipeline implementation (middleware-only runtime). -->
-  <ItemGroup>
-    <Compile Remove="Pipeline/SnmpApplication.cs" />
-    <Compile Remove="Pipeline/SnmpApplicationFactory.cs" />
-    <Compile Remove="Pipeline/IAssemblyLoader.cs" />
-    <Compile Remove="Pipeline/DefaultTypeResolver.cs" />
-    <Compile Remove="Pipeline/IMessageHandler.cs" />
-    <Compile Remove="Pipeline/HandlerMapping.cs" />
-    <Compile Remove="Pipeline/MessageHandlerFactory.cs" />
-    <Compile Remove="Pipeline/NullMessageHandler.cs" />
-    <Compile Remove="Pipeline/GetV1MessageHandler.cs" />
-    <Compile Remove="Pipeline/GetMessageHandler.cs" />
-    <Compile Remove="Pipeline/SetV1MessageHandler.cs" />
-    <Compile Remove="Pipeline/SetMessageHandler.cs" />
-    <Compile Remove="Pipeline/GetNextV1MessageHandler.cs" />
-    <Compile Remove="Pipeline/GetNextMessageHandler.cs" />
-    <Compile Remove="Pipeline/GetBulkMessageHandler.cs" />
-    <Compile Remove="Pipeline/TrapV1MessageHandler.cs" />
-    <Compile Remove="Pipeline/TrapV2MessageHandler.cs" />
-    <Compile Remove="Pipeline/InformRequestMessageHandler.cs" />
-    <Compile Remove="Pipeline/XunitConsoleLoggerProvider.cs" />
-  </ItemGroup>
 </Project>

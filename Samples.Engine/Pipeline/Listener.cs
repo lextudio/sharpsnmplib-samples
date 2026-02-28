@@ -1,15 +1,16 @@
 // Listener class.
-// Copyright (C) 2008-2010 Malcolm Crowe, Lex Li, and other contributors.
-// 
+// Copyright (C) 2008-2018 Malcolm Crowe, Lex Li, and other contributors.
+// Copyright (C) 2018-2026 LeXtudio Inc.
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this
 // software and associated documentation files (the "Software"), to deal in the Software
 // without restriction, including without limitation the rights to use, copy, modify, merge,
 // publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 // to whom the Software is furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
 // PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
@@ -17,48 +18,43 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
-/*
- * Created by SharpDevelop.
- * User: lextm
- * Date: 2008/4/23
- * Time: 19:40
- * 
- * To change this template use Tools | Options | Coding | Edit Standard Headers.
- */
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Lextm.SharpSnmpLib.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Lextm.SharpSnmpLib.Messaging;
+using Lextm.SharpSnmpLib.Security;
 
 namespace Samples.Pipeline
 {
     /// <summary>
-    /// Listener class.
+    /// Listener that manages one or more <see cref="UdpTransportListener"/> instances
+    /// and dispatches parsed SNMP messages through events.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This is the high-performance replacement for the legacy listener. Internally it
+    /// reads <see cref="Lextm.SharpSnmpLib.Transport.SnmpDatagram"/> values from each
+    /// transport listener's channel, parses them with <see cref="MessageFactory"/>,
+    /// and fires <see cref="MessageReceived"/> / <see cref="ExceptionRaised"/> events
+    /// consumed by <see cref="SnmpEngine"/>.
+    /// </para>
+    /// </remarks>
     public sealed class Listener : IDisposable
     {
-        private UserRegistry _users;
+        private UserRegistry? _users;
+        private CancellationTokenSource? _cts;
+        private List<Task>? _dispatchTasks;
         private bool _disposed;
-
-        /// <summary>
-        /// Error message for non IP v4 OS.
-        /// </summary>
-        public const string ErrorIPv4NotSupported = "cannot use IP v4 as the OS does not support it";
-
-        /// <summary>
-        /// Error message for non IP v6 OS.
-        /// </summary>
-        public const string ErrorIPv6NotSupported = "cannot use IP v6 as the OS does not support it";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Listener"/> class.
         /// </summary>
         public Listener()
         {
-            Bindings = new List<ListenerBinding>();
+            Bindings = new List<UdpTransportListener>();
         }
 
         /// <summary>
@@ -79,10 +75,6 @@ namespace Samples.Pipeline
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="T:System.ComponentModel.Component"/> and optionally releases the managed resources.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         private void Dispose(bool disposing)
         {
             if (_disposed)
@@ -92,6 +84,8 @@ namespace Samples.Pipeline
 
             if (disposing)
             {
+                Stop();
+
                 if (Bindings != null)
                 {
                     foreach (var binding in Bindings)
@@ -100,7 +94,6 @@ namespace Samples.Pipeline
                     }
 
                     Bindings.Clear();
-                    Bindings = null;
                 }
             }
 
@@ -120,7 +113,7 @@ namespace Samples.Pipeline
                     throw new ObjectDisposedException(GetType().FullName);
                 }
 
-                return _users ?? (_users = new UserRegistry());
+                return _users ??= new UserRegistry();
             }
 
             set
@@ -135,7 +128,7 @@ namespace Samples.Pipeline
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Listener"/> is active.
+        /// Gets a value indicating whether this <see cref="Listener"/> is active.
         /// </summary>
         /// <value><c>true</c> if active; otherwise, <c>false</c>.</value>
         public bool Active { get; private set; }
@@ -155,11 +148,32 @@ namespace Samples.Pipeline
                 return;
             }
 
+            // Cancel dispatch loops first.
+            _cts?.Cancel();
+
+            // Stop all transport listeners (closes sockets, unblocks receive loops).
             foreach (var binding in Bindings)
             {
                 binding.Stop();
             }
 
+            // Wait for dispatch tasks to drain.
+            if (_dispatchTasks != null)
+            {
+                try
+                {
+                    Task.WaitAll(_dispatchTasks.ToArray(), TimeSpan.FromSeconds(5));
+                }
+                catch (AggregateException)
+                {
+                    // Swallow — tasks may have been cancelled.
+                }
+
+                _dispatchTasks = null;
+            }
+
+            _cts?.Dispose();
+            _cts = null;
             Active = false;
         }
 
@@ -179,14 +193,20 @@ namespace Samples.Pipeline
                 return;
             }
 
+            _cts = new CancellationTokenSource();
+            _dispatchTasks = new List<Task>(Bindings.Count);
+
             try
             {
                 foreach (var binding in Bindings)
                 {
                     binding.Start();
+                    _dispatchTasks.Add(Task.Run(() => DispatchLoopAsync(binding, _cts.Token)));
                 }
             }
+#pragma warning disable CS0618 // Type or member is obsolete
             catch (PortInUseException)
+#pragma warning restore CS0618
             {
                 Stop(); // stop all started bindings.
                 throw;
@@ -196,59 +216,26 @@ namespace Samples.Pipeline
         }
 
         /// <summary>
-        /// Starts this instance.
+        /// Gets the transport listener bindings.
         /// </summary>
-        /// <exception cref="PortInUseException"/>
-        public async Task StartAsync()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
-
-            if (Active)
-            {
-                return;
-            }
-
-            try
-            {
-                foreach (var binding in Bindings)
-                {
-                    await binding.StartAsync();
-                }
-            }
-            catch (PortInUseException)
-            {
-                Stop(); // stop all started bindings.
-                throw;
-            }
-
-            Active = true;
-        }
-
-        /// <summary>
-        /// Gets or sets the bindings.
-        /// </summary>
-        /// <value>The bindings.</value>
-        internal IList<ListenerBinding> Bindings { get; set; }
+        internal IList<UdpTransportListener> Bindings { get; }
 
         /// <summary>
         /// Occurs when an exception is raised.
         /// </summary>
-        public event EventHandler<ExceptionRaisedEventArgs> ExceptionRaised;
+        public event EventHandler<ExceptionRaisedEventArgs>? ExceptionRaised;
 
         /// <summary>
         /// Occurs when a message is received.
         /// </summary>
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<MessageReceivedEventArgs>? MessageReceived;
 
         /// <summary>
-        /// Adds the binding.
+        /// Adds a UDP binding.
         /// </summary>
         /// <param name="endpoint">The endpoint.</param>
-        /// <param name="multicastAddress">The multicast address.</param>
-        public void AddBinding(IPEndPoint endpoint, string multicastAddress = null)
+        /// <param name="multicastAddress">Optional multicast address.</param>
+        public void AddBinding(IPEndPoint endpoint, string? multicastAddress = null)
         {
             if (_disposed)
             {
@@ -260,20 +247,12 @@ namespace Samples.Pipeline
                 throw new InvalidOperationException("Must be called when Active == false");
             }
 
-            if (Bindings.Any(existed => existed.Endpoint.Equals(endpoint)))
+            if (Bindings.Any(existing => existing.Endpoint.Equals(endpoint)))
             {
                 return;
             }
 
-            var binding = new ListenerBinding(Users, endpoint, multicastAddress);
-            binding.ExceptionRaised += (o, args) =>
-            {
-                ExceptionRaised?.Invoke(o, args);
-            };
-            binding.MessageReceived += (o, args) =>
-            {
-                MessageReceived?.Invoke(o, args);
-            };
+            var binding = new UdpTransportListener(endpoint, multicastAddress);
             Bindings.Add(binding);
         }
 
@@ -297,7 +276,9 @@ namespace Samples.Pipeline
             {
                 if (Bindings[i].Endpoint.Equals(endpoint))
                 {
+                    Bindings[i].Dispose();
                     Bindings.RemoveAt(i);
+                    break;
                 }
             }
         }
@@ -319,6 +300,55 @@ namespace Samples.Pipeline
             }
 
             Bindings.Clear();
+        }
+
+        /// <summary>
+        /// Reads datagrams from a transport listener's channel, parses SNMP messages,
+        /// and fires the <see cref="MessageReceived"/> event. This is the bridge between
+        /// the channel-based transport layer and the event-based engine layer.
+        /// </summary>
+        private async Task DispatchLoopAsync(UdpTransportListener transport, CancellationToken ct)
+        {
+            try
+            {
+                await foreach (var datagram in transport.DatagramReader.ReadAllAsync(ct).ConfigureAwait(false))
+                {
+                    try
+                    {
+                        var messages = MessageFactory.ParseMessages(datagram.Buffer, 0, datagram.Length, Users);
+                        if (messages == null)
+                        {
+                            continue;
+                        }
+
+                        var sender = datagram.GetSenderEndPoint();
+                        foreach (var message in messages)
+                        {
+                            MessageReceived?.Invoke(this, new MessageReceivedEventArgs(sender, message, transport));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        var bytes = new byte[datagram.Length];
+                        Array.Copy(datagram.Buffer, bytes, datagram.Length);
+                        var exception = new MessageFactoryException("Invalid message bytes found. Use tracing to analyze the bytes.", ex);
+                        exception.SetBytes(bytes);
+                        ExceptionRaised?.Invoke(this, new ExceptionRaisedEventArgs(exception));
+                    }
+                    finally
+                    {
+                        datagram.ReturnBuffer();
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Normal shutdown.
+            }
+            catch (Exception ex)
+            {
+                ExceptionRaised?.Invoke(this, new ExceptionRaisedEventArgs(ex));
+            }
         }
     }
 }
