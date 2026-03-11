@@ -323,10 +323,10 @@ namespace IP_MIB
     {
         public ipAdEntAddr(System.Net.IPAddress address) : this(address.ToString())
         {
-            _data = new IP(address.ToString());
+            _data = new IP(address);
         }
 
-        private ISnmpData _data = new IP("127.0.0.1");
+        private ISnmpData _data = new IP(System.Net.IPAddress.Loopback);
 
         void OnCreate(string index)
         {
@@ -363,10 +363,10 @@ namespace IP_MIB
     {
         public ipAdEntNetMask(System.Net.IPAddress address, System.Net.IPAddress mask) : this(address.ToString())
         {
-            _data = new IP(mask.ToString());
+            _data = new IP(mask);
         }
 
-        private ISnmpData _data = new IP("127.0.0.1");
+        private ISnmpData _data = new IP(System.Net.IPAddress.Loopback);
 
         void OnCreate(string index)
         {
@@ -460,9 +460,9 @@ namespace IP_MIB
         public ipNetToMediaNetAddress(NetworkInterface ni, params string[] indexes)
             : this(indexes)
         {
-            _data = new IP(indexes[1].ToString());
+            _data = new IP(System.Net.IPAddress.Parse(indexes[1]));
         }
-        private ISnmpData _data = new IP("127.0.0.1");
+        private ISnmpData _data = new IP(System.Net.IPAddress.Loopback);
 
         public override ISnmpData Data
         {

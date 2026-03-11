@@ -3344,10 +3344,10 @@ namespace IP_MIB
         public ipAdEntAddr(MibHelper.Ipv4AddressRow row)
             : this(row.Index)
         {
-            _data = new IP(row.Address.ToString());
+            _data = new IP(row.Address);
         }
 
-        private ISnmpData _data = new IP("127.0.0.1"); // TODO: remove initial assignment if you want to do it in constructors.
+        private ISnmpData _data = new IP(IPAddress.Loopback); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
         {
@@ -3388,10 +3388,10 @@ namespace IP_MIB
         public ipAdEntNetMask(MibHelper.Ipv4AddressRow row)
             : this(row.Index)
         {
-            _data = new IP(row.NetMask.ToString());
+            _data = new IP(row.NetMask);
         }
 
-        private ISnmpData _data = new IP("127.0.0.1"); // TODO: remove initial assignment if you want to do it in constructors.
+        private ISnmpData _data = new IP(IPAddress.Loopback); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
         {
@@ -3526,10 +3526,10 @@ namespace IP_MIB
         public ipNetToMediaNetAddress(MibHelper.Ipv4AddressRow row)
             : this(row.IfIndex.ToString(), row.Index)
         {
-            _data = new IP(row.Address.ToString());
+            _data = new IP(row.Address);
         }
 
-        private ISnmpData _data = new IP("127.0.0.1"); // TODO: remove initial assignment if you want to do it in constructors.
+        private ISnmpData _data = new IP(IPAddress.Loopback); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
         {
