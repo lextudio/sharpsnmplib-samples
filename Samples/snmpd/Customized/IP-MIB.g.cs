@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using Lextm.SharpSnmpLib;
 using Samples.Pipeline;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
+using SnmpD;
 // using Lextm.SharpSnmpPro.Mib; // TODO: Uncomment if syntax validation is required.
 
 namespace IP_MIB
@@ -3314,12 +3316,37 @@ namespace IP_MIB
     {
         void OnCreate()
         {
-            // TODO: Add table entries here
+            NetworkChange.NetworkAddressChanged +=
+                (sender, args) => LoadElements();
+
+            NetworkChange.NetworkAvailabilityChanged +=
+                (sender, args) => LoadElements();
+
+            LoadElements();
+        }
+
+        private void LoadElements()
+        {
+            _elements.Clear();
+            foreach (var row in MibHelper.GetIpv4AddressRows())
+            {
+                _elements.Add(new ipAdEntAddr(row));
+                _elements.Add(new ipAdEntIfIndex(row));
+                _elements.Add(new ipAdEntNetMask(row));
+                _elements.Add(new ipAdEntBcastAddr(row));
+                _elements.Add(new ipAdEntReasmMaxSize(row));
+            }
         }
     }
 
     partial class ipAdEntAddr
     {
+        public ipAdEntAddr(MibHelper.Ipv4AddressRow row)
+            : this(row.Index)
+        {
+            _data = new IP(row.Address.ToString());
+        }
+
         private ISnmpData _data = new IP("127.0.0.1"); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3336,6 +3363,12 @@ namespace IP_MIB
 
     partial class ipAdEntIfIndex
     {
+        public ipAdEntIfIndex(MibHelper.Ipv4AddressRow row)
+            : this(row.Index)
+        {
+            _data = new Integer32(row.IfIndex);
+        }
+
         private ISnmpData _data = new Integer32(0); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3352,6 +3385,12 @@ namespace IP_MIB
 
     partial class ipAdEntNetMask
     {
+        public ipAdEntNetMask(MibHelper.Ipv4AddressRow row)
+            : this(row.Index)
+        {
+            _data = new IP(row.NetMask.ToString());
+        }
+
         private ISnmpData _data = new IP("127.0.0.1"); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3368,6 +3407,12 @@ namespace IP_MIB
 
     partial class ipAdEntBcastAddr
     {
+        public ipAdEntBcastAddr(MibHelper.Ipv4AddressRow row)
+            : this(row.Index)
+        {
+            _data = new Integer32(row.BroadcastBit);
+        }
+
         private ISnmpData _data = new Integer32(0); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3384,6 +3429,12 @@ namespace IP_MIB
 
     partial class ipAdEntReasmMaxSize
     {
+        public ipAdEntReasmMaxSize(MibHelper.Ipv4AddressRow row)
+            : this(row.Index)
+        {
+            _data = new Integer32(row.ReasmMaxSize);
+        }
+
         private ISnmpData _data = new Integer32(0); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
