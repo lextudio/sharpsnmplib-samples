@@ -84,6 +84,7 @@ namespace SnmpD
             store.Add(new IfNumber());
             store.Add(new IfTable());
 
+            store.Add(new IP_MIB.ipAddrTable());
             // store.Add(new IpNetToMediaTable());
             // //store.Add(new EntPhysicalTable());
             // // store.Add(new Counter64Test());

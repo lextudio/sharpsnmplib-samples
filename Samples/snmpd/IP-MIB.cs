@@ -321,11 +321,15 @@ namespace IP_MIB
 
     partial class ipAdEntAddr
     {
+        public ipAdEntAddr(System.Net.IPAddress address) : this(address.ToString())
+        {
+            _data = new IP(address.ToString());
+        }
+
         private ISnmpData _data = new IP("127.0.0.1");
 
         void OnCreate(string index)
         {
-            // TODO: initialization here
         }
 
         public override ISnmpData Data
@@ -337,11 +341,15 @@ namespace IP_MIB
 
     partial class ipAdEntIfIndex
     {
+        public ipAdEntIfIndex(System.Net.IPAddress address, int ifIndex) : this(address.ToString())
+        {
+            _data = new Integer32(ifIndex);
+        }
+
         private ISnmpData _data = new Integer32(0);
 
         void OnCreate(string index)
         {
-            // TODO: initialization here
         }
 
         public override ISnmpData Data
@@ -353,11 +361,15 @@ namespace IP_MIB
 
     partial class ipAdEntNetMask
     {
+        public ipAdEntNetMask(System.Net.IPAddress address, System.Net.IPAddress mask) : this(address.ToString())
+        {
+            _data = new IP(mask.ToString());
+        }
+
         private ISnmpData _data = new IP("127.0.0.1");
 
         void OnCreate(string index)
         {
-            // TODO: initialization here
         }
 
         public override ISnmpData Data
@@ -369,11 +381,15 @@ namespace IP_MIB
 
     partial class ipAdEntBcastAddr
     {
+        public ipAdEntBcastAddr(System.Net.IPAddress address) : this(address.ToString())
+        {
+            _data = new Integer32(1);
+        }
+
         private ISnmpData _data = new Integer32(0);
 
         void OnCreate(string index)
         {
-            // TODO: initialization here
         }
 
         public override ISnmpData Data
@@ -385,11 +401,15 @@ namespace IP_MIB
 
     partial class ipAdEntReasmMaxSize
     {
+        public ipAdEntReasmMaxSize(System.Net.IPAddress address) : this(address.ToString())
+        {
+            _data = new Integer32(65535);
+        }
+
         private ISnmpData _data = new Integer32(0);
 
         void OnCreate(string index)
         {
-            // TODO: initialization here
         }
 
         public override ISnmpData Data
@@ -905,7 +925,34 @@ namespace IP_MIB
     partial class ipAddrTable
     {
         public void OnCreate()
-        {}
+        {
+            NetworkChange.NetworkAddressChanged += (sender, args) => LoadElements();
+            NetworkChange.NetworkAvailabilityChanged += (sender, args) => LoadElements();
+            LoadElements();
+        }
+
+        private void LoadElements()
+        {
+            _elements.Clear();
+            int ifIndex = 0;
+            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                ifIndex++;
+                foreach (var ua in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ua.Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                        continue;
+
+                    var address = ua.Address;
+                    var mask = ua.IPv4Mask ?? System.Net.IPAddress.Any;
+                    _elements.Add(new ipAdEntAddr(address));
+                    _elements.Add(new ipAdEntIfIndex(address, ifIndex));
+                    _elements.Add(new ipAdEntNetMask(address, mask));
+                    _elements.Add(new ipAdEntBcastAddr(address));
+                    _elements.Add(new ipAdEntReasmMaxSize(address));
+                }
+            }
+        }
     }
 
     partial class ipNetToMediaTable

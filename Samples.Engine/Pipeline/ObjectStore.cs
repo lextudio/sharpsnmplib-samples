@@ -48,7 +48,11 @@ namespace Samples.Pipeline
         /// <returns></returns>
         public virtual ScalarObject GetNextObject(ObjectIdentifier id)
         {
-            return List.Select(o => o.MatchGetNext(id)).FirstOrDefault(result => result != null);
+            return List
+                .Select(o => o.MatchGetNext(id))
+                .Where(result => result != null)
+                .OrderBy(result => result.Id)
+                .FirstOrDefault();
         }
 
         /// <summary>

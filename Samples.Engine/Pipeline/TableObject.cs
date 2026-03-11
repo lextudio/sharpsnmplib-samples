@@ -59,7 +59,11 @@ namespace Samples.Pipeline
         /// <returns><c>null</c> if it does not match.</returns>
         public override ScalarObject MatchGetNext(ObjectIdentifier id)
         {
-            return Objects.Select(o => o.MatchGetNext(id)).FirstOrDefault(result => result != null);
+            return Objects
+                .Select(o => o.MatchGetNext(id))
+                .Where(result => result != null)
+                .OrderBy(result => result.Id)
+                .FirstOrDefault();
         }
 
         /// <summary>

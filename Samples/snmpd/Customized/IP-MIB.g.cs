@@ -3453,12 +3453,36 @@ namespace IP_MIB
     {
         void OnCreate()
         {
-            // TODO: Add table entries here
+            NetworkChange.NetworkAddressChanged +=
+                (sender, args) => LoadElements();
+
+            NetworkChange.NetworkAvailabilityChanged +=
+                (sender, args) => LoadElements();
+
+            LoadElements();
+        }
+
+        private void LoadElements()
+        {
+            _elements.Clear();
+            foreach (var row in MibHelper.GetIpv4AddressRows())
+            {
+                _elements.Add(new ipNetToMediaIfIndex(row));
+                _elements.Add(new ipNetToMediaPhysAddress(row));
+                _elements.Add(new ipNetToMediaNetAddress(row));
+                _elements.Add(new ipNetToMediaType(row));
+            }
         }
     }
 
     partial class ipNetToMediaIfIndex
     {
+        public ipNetToMediaIfIndex(MibHelper.Ipv4AddressRow row)
+            : this(row.IfIndex.ToString(), row.Index)
+        {
+            _data = new Integer32(row.IfIndex);
+        }
+
         private ISnmpData _data = new Integer32(0); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3476,6 +3500,12 @@ namespace IP_MIB
 
     partial class ipNetToMediaPhysAddress
     {
+        public ipNetToMediaPhysAddress(MibHelper.Ipv4AddressRow row)
+            : this(row.IfIndex.ToString(), row.Index)
+        {
+            _data = new OctetString(row.Interface.GetPhysicalAddress().GetAddressBytes());
+        }
+
         private ISnmpData _data = OctetString.Empty; // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3493,6 +3523,12 @@ namespace IP_MIB
 
     partial class ipNetToMediaNetAddress
     {
+        public ipNetToMediaNetAddress(MibHelper.Ipv4AddressRow row)
+            : this(row.IfIndex.ToString(), row.Index)
+        {
+            _data = new IP(row.Address.ToString());
+        }
+
         private ISnmpData _data = new IP("127.0.0.1"); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
@@ -3510,6 +3546,12 @@ namespace IP_MIB
 
     partial class ipNetToMediaType
     {
+        public ipNetToMediaType(MibHelper.Ipv4AddressRow row)
+            : this(row.IfIndex.ToString(), row.Index)
+        {
+            _data = new Integer32(3);
+        }
+
         private ISnmpData _data = new Integer32(0); // TODO: remove initial assignment if you want to do it in constructors.
 
         void OnCreate()
