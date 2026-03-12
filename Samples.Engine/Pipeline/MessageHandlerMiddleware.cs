@@ -348,11 +348,21 @@ namespace Samples.Pipeline
             {
                 index++;
                 var obj = _store.GetObject(variable.Id);
+                var createdForSet = false;
+                if (obj == null && _store.TryCreateObject(variable, out var createdObject))
+                {
+                    obj = createdObject;
+                    createdForSet = true;
+                }
                 if (obj != null)
                 {
                     try
                     {
                         obj.Data = variable.Data;
+                        if (createdForSet)
+                        {
+                            messageContext.ProcessingNote = $"set-created oid={variable.Id} object={obj.GetType().FullName} valueType={variable.Data.TypeCode}";
+                        }
                     }
                     catch (AccessFailureException)
                     {
@@ -401,11 +411,21 @@ namespace Samples.Pipeline
             {
                 index++;
                 var obj = _store.GetObject(variable.Id);
+                var createdForSet = false;
+                if (obj == null && _store.TryCreateObject(variable, out var createdObject))
+                {
+                    obj = createdObject;
+                    createdForSet = true;
+                }
                 if (obj != null)
                 {
                     try
                     {
                         obj.Data = variable.Data;
+                        if (createdForSet)
+                        {
+                            messageContext.ProcessingNote = $"set-created oid={variable.Id} object={obj.GetType().FullName} valueType={variable.Data.TypeCode}";
+                        }
                     }
                     catch (AccessFailureException)
                     {

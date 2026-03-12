@@ -4,13 +4,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using Lextm.SharpSnmpLib;
+using SnmpD;
 using Samples.Pipeline;
 // using Lextm.SharpSnmpPro.Mib; // TODO: Uncomment if syntax validation is required.
 
 namespace IP_MIB
 {
+    public sealed class IpNetToMediaCustomRow
+    {
+        public required int IfIndex { get; set; }
+        public required IPAddress Address { get; set; }
+        public required byte[] PhysicalAddress { get; set; }
+        public required int Type { get; set; }
+    }
 
     partial class ipForwarding
     {
@@ -422,10 +431,19 @@ namespace IP_MIB
 
     partial class ipNetToMediaIfIndex
     {
+        private readonly IpNetToMediaCustomRow _customRow;
+
         public ipNetToMediaIfIndex(NetworkInterface ni, params string[] indexes)
             : this(indexes)
         {
             _data = new Integer32(int.Parse(indexes[0]));
+        }
+
+        public ipNetToMediaIfIndex(IpNetToMediaCustomRow row)
+            : this(row.IfIndex.ToString(), row.Address.ToString())
+        {
+            _customRow = row;
+            _data = new Integer32(row.IfIndex);
         }
 
         private ISnmpData _data;
@@ -434,50 +452,107 @@ namespace IP_MIB
         {
             get { return _data; }
             // TODO: Use ObjectRegistryBase.Verify("IP-MIB", "ipNetToMediaIfIndex", value) to validate data
-            set { _data = value; }
+            set
+            {
+                if (_customRow != null && value is Integer32 intValue && intValue.ToInt32() != _customRow.IfIndex)
+                {
+                    throw new ArgumentException(ErrorCode.InconsistentValue.ToString());
+                }
+
+                _data = value;
+            }
         }
     }
 
     partial class ipNetToMediaPhysAddress
     {
+        private readonly IpNetToMediaCustomRow _customRow;
+
         public ipNetToMediaPhysAddress(NetworkInterface ni, params string[] indexes)
             : this(indexes)
         {
             _data = new OctetString(ni.GetPhysicalAddress().GetAddressBytes());
         }
+
+        public ipNetToMediaPhysAddress(IpNetToMediaCustomRow row)
+            : this(row.IfIndex.ToString(), row.Address.ToString())
+        {
+            _customRow = row;
+            _data = new OctetString(row.PhysicalAddress);
+        }
+
         private ISnmpData _data;
 
         public override ISnmpData Data
         {
             get { return _data; }
             // TODO: Use ObjectRegistryBase.Verify("IP-MIB", "ipNetToMediaPhysAddress", value) to validate data
-            set { _data = value; }
+            set
+            {
+                if (_customRow != null && value is OctetString octetString)
+                {
+                    _customRow.PhysicalAddress = octetString.ToBytes();
+                }
+
+                _data = value;
+            }
         }
     }
 
     partial class ipNetToMediaNetAddress
     {
+        private readonly IpNetToMediaCustomRow _customRow;
+
         public ipNetToMediaNetAddress(NetworkInterface ni, params string[] indexes)
             : this(indexes)
         {
             _data = new IP(System.Net.IPAddress.Parse(indexes[1]));
         }
+
+        public ipNetToMediaNetAddress(IpNetToMediaCustomRow row)
+            : this(row.IfIndex.ToString(), row.Address.ToString())
+        {
+            _customRow = row;
+            _data = new IP(row.Address);
+        }
+
         private ISnmpData _data = new IP(System.Net.IPAddress.Loopback);
 
         public override ISnmpData Data
         {
             get { return _data; }
             // TODO: Use ObjectRegistryBase.Verify("IP-MIB", "ipNetToMediaNetAddress", value) to validate data
-            set { _data = value; }
+            set
+            {
+                if (_customRow != null && value is IP ipAddress)
+                {
+                    var requested = IPAddress.Parse(ipAddress.ToString());
+                    if (!requested.Equals(_customRow.Address))
+                    {
+                        throw new ArgumentException(ErrorCode.InconsistentValue.ToString());
+                    }
+                }
+
+                _data = value;
+            }
         }
     }
 
     partial class ipNetToMediaType
     {
+        private readonly IpNetToMediaCustomRow _customRow;
+
         public ipNetToMediaType(NetworkInterface ni, params string[] indexes)
             : this(indexes)
         {
             _data = new Integer32(3);
+        }
+
+        public ipNetToMediaType(IpNetToMediaCustomRow row)
+            : this(row.IfIndex.ToString(), row.Address.ToString())
+        {
+            _customRow = row;
+            _data = new Integer32(row.Type);
         }
 
         private ISnmpData _data;
@@ -486,7 +561,21 @@ namespace IP_MIB
         {
             get { return _data; }
             // TODO: Use ObjectRegistryBase.Verify("IP-MIB", "ipNetToMediaType", value) to validate data
-            set { _data = value; }
+            set
+            {
+                if (_customRow != null && value is Integer32 intValue)
+                {
+                    var numeric = intValue.ToInt32();
+                    if (numeric < 1 || numeric > 4)
+                    {
+                        throw new ArgumentException(ErrorCode.WrongValue.ToString());
+                    }
+
+                    _customRow.Type = numeric;
+                }
+
+                _data = value;
+            }
         }
     }
 
@@ -957,9 +1046,11 @@ namespace IP_MIB
 
     partial class ipNetToMediaTable
     {
+        private readonly Dictionary<string, IpNetToMediaCustomRow> _customRows = new Dictionary<string, IpNetToMediaCustomRow>(StringComparer.Ordinal);
+        private readonly object _syncRoot = new object();
+
         public void OnCreate()
         {
-            // TODO: add rows and columns here.
             NetworkChange.NetworkAddressChanged +=
                 (sender, args) => LoadElements();
 
@@ -971,32 +1062,130 @@ namespace IP_MIB
 
         private void LoadElements()
         {
-            _elements.Clear();
-            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-            var columnTypes = new[]
-                {
-                    typeof(ipNetToMediaIfIndex),
-                    typeof(ipNetToMediaPhysAddress),
-                    typeof(ipNetToMediaNetAddress),
-                    typeof(ipNetToMediaType),
-                };
-            foreach (var type in columnTypes)
+            lock (_syncRoot)
             {
-                for (int i = 0; i < interfaces.Length; i++)
+                _elements.Clear();
+                var liveRows = MibHelper.GetIpv4AddressRows();
+                var liveKeys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var row in liveRows)
                 {
-                    var addresses = interfaces[i].GetIPProperties().UnicastAddresses;
-                    for (int j = 0; j < addresses.Count; j++)
-                    {
-                        var address = addresses[j].Address;
-                        if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
-                        {
-                            continue;
-                        }
+                    AddRowObjects(row);
+                    liveKeys.Add(BuildKey(row.IfIndex, row.Address));
+                }
 
-                        _elements.Add((ScalarObject)Activator.CreateInstance(type, [interfaces[i], (i + 1).ToString(), address.ToString()]));
-                    }
+                foreach (var row in _customRows.Values
+                    .Where(row => !liveKeys.Contains(BuildKey(row.IfIndex, row.Address)))
+                    .OrderBy(row => row.IfIndex)
+                    .ThenBy(row => row.Address.ToString(), StringComparer.Ordinal))
+                {
+                    AddRowObjects(row);
                 }
             }
+        }
+
+        public bool TryCreateForSet(Variable variable)
+        {
+            if (!TryParseRowKey(variable.Id, out var ifIndex, out var address))
+            {
+                return false;
+            }
+
+            lock (_syncRoot)
+            {
+                var key = BuildKey(ifIndex, address);
+                if (!_customRows.ContainsKey(key) && !MibHelper.GetIpv4AddressRows().Any(row => row.IfIndex == ifIndex && row.Address.Equals(address)))
+                {
+                    _customRows[key] = new IpNetToMediaCustomRow
+                    {
+                        IfIndex = ifIndex,
+                        Address = address,
+                        PhysicalAddress = Array.Empty<byte>(),
+                        Type = 3,
+                    };
+                }
+
+                _elements.Clear();
+                LoadElements();
+                return true;
+            }
+        }
+
+        private void AddRowObjects(MibHelper.Ipv4AddressRow row)
+        {
+            _elements.Add(new ipNetToMediaIfIndex(row.Interface, row.IfIndex.ToString(), row.Address.ToString()));
+            _elements.Add(new ipNetToMediaPhysAddress(row.Interface, row.IfIndex.ToString(), row.Address.ToString()));
+            _elements.Add(new ipNetToMediaNetAddress(row.Interface, row.IfIndex.ToString(), row.Address.ToString()));
+            _elements.Add(new ipNetToMediaType(row.Interface, row.IfIndex.ToString(), row.Address.ToString()));
+        }
+
+        private void AddRowObjects(IpNetToMediaCustomRow row)
+        {
+            _elements.Add(new ipNetToMediaIfIndex(row));
+            _elements.Add(new ipNetToMediaPhysAddress(row));
+            _elements.Add(new ipNetToMediaNetAddress(row));
+            _elements.Add(new ipNetToMediaType(row));
+        }
+
+        private static bool TryParseRowKey(ObjectIdentifier id, out int ifIndex, out IPAddress address)
+        {
+            ifIndex = 0;
+            address = IPAddress.Any;
+
+            var parts = id.ToString().Split('.');
+            if (parts.Length != 15)
+            {
+                return false;
+            }
+
+            if (!parts[0].Equals("1", StringComparison.Ordinal) ||
+                !parts[1].Equals("3", StringComparison.Ordinal) ||
+                !parts[2].Equals("6", StringComparison.Ordinal) ||
+                !parts[3].Equals("1", StringComparison.Ordinal) ||
+                !parts[4].Equals("2", StringComparison.Ordinal) ||
+                !parts[5].Equals("1", StringComparison.Ordinal) ||
+                !parts[6].Equals("4", StringComparison.Ordinal) ||
+                !parts[7].Equals("22", StringComparison.Ordinal) ||
+                !parts[8].Equals("1", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            if (!int.TryParse(parts[9], out var column) || column < 1 || column > 4)
+            {
+                return false;
+            }
+
+            if (!int.TryParse(parts[10], out ifIndex) || ifIndex <= 0)
+            {
+                return false;
+            }
+
+            if (!TryParseIpv4Address(parts[11], parts[12], parts[13], parts[14], out address))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool TryParseIpv4Address(string p1, string p2, string p3, string p4, out IPAddress address)
+        {
+            address = IPAddress.Any;
+            if (!byte.TryParse(p1, out var b1) ||
+                !byte.TryParse(p2, out var b2) ||
+                !byte.TryParse(p3, out var b3) ||
+                !byte.TryParse(p4, out var b4))
+            {
+                return false;
+            }
+
+            address = new IPAddress([b1, b2, b3, b4]);
+            return true;
+        }
+
+        private static string BuildKey(int ifIndex, IPAddress address)
+        {
+            return $"{ifIndex}:{address}";
         }
     }
 }

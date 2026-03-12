@@ -79,7 +79,9 @@ namespace SnmpD
 #endif
 
             store.Add(new IP_MIB.ipAddrTable());
-            // store.Add(new IpNetToMediaTable());
+            var ipNetToMediaTable = new IP_MIB.ipNetToMediaTable();
+            store.Add(ipNetToMediaTable);
+            store.RegisterMissingSetHandler(ipNetToMediaTable.TryCreateForSet);
             // //store.Add(new EntPhysicalTable());
             // // store.Add(new Counter64Test());
             // store.Add(new CompDescr());

@@ -17,6 +17,7 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 // DEALINGS IN THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lextm.SharpSnmpLib;
@@ -30,6 +31,7 @@ namespace Samples.Pipeline
     {
         /// <summary>The internal list of objects holding the data.</summary>
         protected readonly IList<ISnmpObject> List = new List<ISnmpObject>();
+        private readonly IList<Func<Variable, bool>> _missingSetHandlers = new List<Func<Variable, bool>>();
 
         /// <summary>
         /// Gets the object.
@@ -39,6 +41,52 @@ namespace Samples.Pipeline
         public virtual ScalarObject GetObject(ObjectIdentifier id)
         {
             return List.Select(o => o.MatchGet(id)).FirstOrDefault(result => result != null);
+        }
+
+        /// <summary>
+        /// Registers a callback that can materialize missing writable objects for a SET request.
+        /// </summary>
+        /// <param name="handler">The handler.</param>
+        public virtual void RegisterMissingSetHandler(Func<Variable, bool> handler)
+        {
+            if (handler is null)
+            {
+                throw new ArgumentNullException(nameof(handler));
+            }
+
+            _missingSetHandlers.Add(handler);
+        }
+
+        /// <summary>
+        /// Attempts to materialize a missing object for a SET request.
+        /// </summary>
+        /// <param name="variable">The requested variable.</param>
+        /// <param name="createdObject">The created object if successful.</param>
+        /// <returns><c>true</c> if the object became available.</returns>
+        public virtual bool TryCreateObject(Variable variable, out ScalarObject createdObject)
+        {
+            createdObject = GetObject(variable.Id);
+            if (createdObject != null)
+            {
+                return true;
+            }
+
+            foreach (var handler in _missingSetHandlers)
+            {
+                if (!handler(variable))
+                {
+                    continue;
+                }
+
+                createdObject = GetObject(variable.Id);
+                if (createdObject != null)
+                {
+                    return true;
+                }
+            }
+
+            createdObject = null;
+            return false;
         }
 
         /// <summary>
