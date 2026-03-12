@@ -61,5 +61,10 @@ namespace Samples.Pipeline
         /// This is the version-specific context (NormalSnmpContext or SecureSnmpContext).
         /// </summary>
         public ISnmpContext SnmpContext { get; set; }
+
+        /// <summary>
+        /// Gets or sets a short processing note captured by middleware for diagnostics.
+        /// </summary>
+        public string ProcessingNote { get; set; }
     }
 }

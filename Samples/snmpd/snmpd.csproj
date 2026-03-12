@@ -9,13 +9,10 @@
     <TargetFrameworks Condition="'$(IsNet100Supported)' == 'true'">net10.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(IsNet110Supported)' == 'true'">$(TargetFrameworks);net11.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
+    <UseMibSourceGenerator Condition="'$(UseMibSourceGenerator)' == ''">false</UseMibSourceGenerator>
+    <DefineConstants Condition="'$(UseMibSourceGenerator)' == 'true'">$(DefineConstants);USE_MIB_SOURCE_GENERATOR</DefineConstants>
+    <MibSourceGeneratorOutput Condition="'$(UseMibSourceGenerator)' == 'true'">..\..\extensions\MibSourceGenerator\bin\$(Configuration)\net8.0</MibSourceGeneratorOutput>
 
-    <MibSourceGenerator>..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj</MibSourceGenerator>
-  </PropertyGroup>
-  
-  <!-- Define USE_SOURCE_GENERATOR when MibSourceGenerator is available -->
-  <PropertyGroup Condition="Exists($(MibSourceGenerator))">
-    <DefineConstants>$(DefineConstants);USE_SOURCE_GENERATOR</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,26 +21,44 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists($(MibSourceGenerator))" />
     <ProjectReference Include="..\..\Samples.Engine\Samples.Engine.csproj" />
   </ItemGroup>
 
-  <!-- Include .mibs files as AdditionalFiles to make them visible to the source generator -->
+  <ItemGroup Condition="'$(UseMibSourceGenerator)' == 'true'">
+    <ProjectReference Include="..\..\extensions\MibSourceGenerator\MibSourceGenerator.csproj"
+                      ReferenceOutputAssembly="false" />
+    <Analyzer Include="$(MibSourceGeneratorOutput)\MibSourceGenerator.dll" />
+    <Analyzer Include="$(MibSourceGeneratorOutput)\SharpSnmpPro.Mib.dll" />
+    <Analyzer Include="$(MibSourceGeneratorOutput)\SharpSnmpPro.Mib.Extensions.dll" />
+    <Analyzer Include="$(MibSourceGeneratorOutput)\SharpSnmpLib.dll" />
+    <Analyzer Include="$(MibSourceGeneratorOutput)\Antlr4.Runtime.Standard.dll" />
+    <Analyzer Include="$(MibSourceGeneratorOutput)\System.Configuration.ConfigurationManager.dll"
+              Condition="Exists('$(MibSourceGeneratorOutput)\System.Configuration.ConfigurationManager.dll')" />
+  </ItemGroup>
+
+  <!-- Include MIB source lists as AdditionalFiles for optional source generation. -->
+  <ItemGroup Condition="'$(UseMibSourceGenerator)' == 'true'">
+    <AdditionalFiles Include="Mibs\.sourcegen.mibs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseMibSourceGenerator)' != 'true'">
+    <AdditionalFiles Include="Mibs\.mibs" />
+  </ItemGroup>
+
   <ItemGroup>
-    <AdditionalFiles Include="Mibs\*.mibs" />
     <AdditionalFiles Include="Customized\.customized" />
     <AdditionalFiles Include="Mibs\*.txt" />
   </ItemGroup>
 
-  <!-- Exclude all MIB implementation files when MibSourceGenerator is not available -->
-  <ItemGroup Condition="!Exists($(MibSourceGenerator))">
-    <Compile Remove="Customized\*.g.cs" />
+  <ItemGroup Condition="'$(UseMibSourceGenerator)' != 'true'">
+    <Compile Remove="Customized\IF-MIB.g.cs" />
+    <Compile Remove="Customized\IP-MIB.g.cs" />
+    <Compile Remove="Customized\SNMPv2-MIB.g.cs" />
   </ItemGroup>
 
-  <!-- Exclude manual MIB implementation files when MibSourceGenerator is available -->
-  <ItemGroup Condition="Exists($(MibSourceGenerator))">
-    <Compile Remove="IP-MIB.cs" />
-    <Compile Remove="IP-MIB.Generated.cs" />
+  <ItemGroup Condition="'$(UseMibSourceGenerator)' == 'true'">
+    <Compile Remove="Customized\IP-MIB.g.cs" />
+    <Compile Remove="Customized\SNMPv2-MIB.g.cs" />
   </ItemGroup>
 
 </Project>

@@ -7,9 +7,9 @@ using System.Net.Sockets;
 
 namespace SnmpD
 {
-    internal static class MibHelper
+    public static class MibHelper
     {
-        internal sealed class InterfaceRow
+        public sealed class InterfaceRow
         {
             public required NetworkInterface Interface { get; init; }
             public required int IfIndex { get; init; }
@@ -36,7 +36,7 @@ namespace SnmpD
             public required string SpecificOid { get; init; }
         }
 
-        internal sealed class Ipv4AddressRow
+        public sealed class Ipv4AddressRow
         {
             public required NetworkInterface Interface { get; init; }
             public required string Index { get; init; }

@@ -26,6 +26,7 @@
  * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lextm.SharpSnmpLib;
 using Lextm.SharpSnmpLib.Messaging;
@@ -150,19 +151,31 @@ namespace Samples.Pipeline
 
         private async void ListenerMessageReceived(object sender, MessageReceivedEventArgs e)
         {
+            var started = Stopwatch.StartNew();
             var context = new SnmpMessageContext(e.Message, e.Sender, e.Binding);
+            Exception? exception = null;
             try
             {
                 await _pipeline(context);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Swallow exceptions to prevent crashing the listener.
+                exception = ex;
             }
 
             // Send the response after the pipeline completes (like Kestrel writing
             // the HTTP response after all middleware has run).
             context.SnmpContext?.SendResponse();
+            started.Stop();
+            RequestProcessed?.Invoke(this, new RequestProcessedEventArgs(
+                e.Message,
+                context.SnmpContext?.Response,
+                e.Sender,
+                e.Binding,
+                started.Elapsed,
+                exception,
+                context.ProcessingNote));
         }
 
         /// <summary>
@@ -225,5 +238,10 @@ namespace Samples.Pipeline
         /// Occurs when an exception is raised.
         /// </summary>
         public event EventHandler<ExceptionRaisedEventArgs> ExceptionRaised;
+
+        /// <summary>
+        /// Occurs after a request has been processed and any response has been sent.
+        /// </summary>
+        public event EventHandler<RequestProcessedEventArgs>? RequestProcessed;
     }
 }

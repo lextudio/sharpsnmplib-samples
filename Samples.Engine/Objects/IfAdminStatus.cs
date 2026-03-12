@@ -27,6 +27,8 @@
  */
 
 using System.Net.NetworkInformation;
+using System.Collections.Concurrent;
+using System;
 using Lextm.SharpSnmpLib;
 using Samples.Pipeline;
 
@@ -37,7 +39,9 @@ namespace Samples.Objects
     /// </summary>
     internal sealed class IfAdminStatus : ScalarObject
     {
+        private static readonly ConcurrentDictionary<string, int> Values = new(StringComparer.Ordinal);
         private readonly NetworkInterface _networkInterface;
+        private readonly string _interfaceKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IfAdminStatus"/> class.
@@ -48,6 +52,9 @@ namespace Samples.Objects
             : base("1.3.6.1.2.1.2.2.1.7.{0}", index.ToString())
         {
             _networkInterface = networkInterface;
+            _interfaceKey = string.IsNullOrWhiteSpace(networkInterface.Id)
+                ? index.ToString()
+                : networkInterface.Id;
         }
 
         /// <summary>
@@ -59,8 +66,37 @@ namespace Samples.Objects
         /// <exception cref="AccessFailureException"></exception>
         public override ISnmpData Data
         {
-            get { return new Integer32((int)_networkInterface.OperationalStatus); }
-            set { throw new AccessFailureException(); }
+            get { return new Integer32(Values.GetOrAdd(_interfaceKey, _ => GetDefaultAdminStatus(_networkInterface.OperationalStatus))); }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                if (value.TypeCode != SnmpType.Integer32)
+                {
+                    throw new ArgumentException("Invalid data type.", nameof(value));
+                }
+
+                var requested = ((Integer32)value).ToInt32();
+                if (requested is < 1 or > 3)
+                {
+                    throw new ArgumentException(nameof(ErrorCode.WrongValue));
+                }
+
+                Values[_interfaceKey] = requested;
+            }
+        }
+
+        private static int GetDefaultAdminStatus(OperationalStatus status)
+        {
+            return status switch
+            {
+                OperationalStatus.Up => 1,
+                OperationalStatus.Testing => 3,
+                _ => 2,
+            };
         }
     }
 }

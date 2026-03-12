@@ -14,16 +14,12 @@ using Lextm.SharpSnmpLib.Security;
 using System;
 using System.Net;
 using Listener = Samples.Pipeline.Listener;
-using MessageReceivedEventArgs = Samples.Pipeline.MessageReceivedEventArgs;
+using RequestProcessedEventArgs = Samples.Pipeline.RequestProcessedEventArgs;
 using System.Threading;
 using System.Threading.Tasks;
 using Mono.Options;
-
-// USE_SOURCE_GENERATOR conditional symbol is automatically defined in the project file
-// when MibSourceGenerator is detected
-#if USE_SOURCE_GENERATOR
-using SNMPv2_MIB;
-#endif
+using System.Globalization;
+using System.Linq;
 
 namespace SnmpD
 {
@@ -66,11 +62,6 @@ namespace SnmpD
             var idEngine161 = ByteTool.Convert("80004fb805636c6f75644dab22cc");
             var store = new ObjectStore();
 
-#if USE_SOURCE_GENERATOR
-            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterSNMPv2_MIB(store);
-            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIF_MIB(store);
-            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIP_MIB(store);
-#else
             store.Add(new SysDescr());
             store.Add(new SysObjectId());
             store.Add(new SysUpTime());
@@ -80,9 +71,12 @@ namespace SnmpD
             store.Add(new SysServices());
             store.Add(new SysORLastChange());
             store.Add(new SysORTable());
-
+#if USE_MIB_SOURCE_GENERATOR
+            Lextm.SharpSnmpPro.Mib.ModuleRegister.RegisterIF_MIB(store);
+#else
             store.Add(new IfNumber());
             store.Add(new IfTable());
+#endif
 
             store.Add(new IP_MIB.ipAddrTable());
             // store.Add(new IpNetToMediaTable());
@@ -90,7 +84,6 @@ namespace SnmpD
             // // store.Add(new Counter64Test());
             // store.Add(new CompDescr());
             // store.Add(new PowerVoltage());
-#endif
 
             var users = new UserRegistry();
             users.Add(new OctetString("usr-none-none"), DefaultPrivacyProvider.DefaultPair);
@@ -148,7 +141,7 @@ namespace SnmpD
                 engine.Listener.AddTcpBinding(new IPEndPoint(IPAddress.Any, tcpPort ?? port));
             }
             engine.Listener.ExceptionRaised += Engine_ExceptionRaised;
-            engine.Listener.MessageReceived += RequestReceived;
+            engine.RequestProcessed += RequestProcessed;
             engine.Start();
             Console.WriteLine("#SNMP is available at https://sharpsnmp.com");
             Console.WriteLine($"SNMP/UDP agent listening on port {port}");
@@ -157,6 +150,7 @@ namespace SnmpD
                 Console.WriteLine($"SNMP/TCP agent listening on port {tcpPort ?? port}");
             }
 
+            Console.WriteLine("#Fields: date time c-ip c-port s-ip s-port transport version principal pdu req-oids status error-index res-oids duration-ms note exception");
             Console.WriteLine("Press Ctrl+C to stop . . . ");
             var cancellationTokenSource = new CancellationTokenSource();
             AppDomain.CurrentDomain.ProcessExit += (s, e) => cancellationTokenSource.Cancel();
@@ -170,9 +164,114 @@ namespace SnmpD
             Console.WriteLine("Exception occurred: {0}", e.Exception);
         }
 
-        private static void RequestReceived(object sender, MessageReceivedEventArgs e)
+        private static void RequestProcessed(object? sender, RequestProcessedEventArgs e)
         {
-            Console.WriteLine("Message version {0}: {1}", e.Message.Version, e.Message);
+            try
+            {
+                Console.WriteLine(FormatRequestLogLine(e));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    "{0} {1} - - - - - {2} - - - - {3} {4} logging-failed:{5}",
+                    DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                    DateTimeOffset.UtcNow.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture),
+                    InferTransportName(e.Binding),
+                    Math.Round(e.Duration.TotalMilliseconds, 3).ToString("0.###", CultureInfo.InvariantCulture),
+                    e.Exception is null ? "-" : SanitizeLogField($"{e.Exception.GetType().Name}:{e.Exception.Message}"),
+                    SanitizeLogField($"{ex.GetType().Name}:{ex.Message}"));
+            }
+        }
+
+        private static string FormatRequestLogLine(RequestProcessedEventArgs e)
+        {
+            var timestamp = DateTimeOffset.UtcNow;
+            var request = e.Request;
+            var response = e.Response;
+            var remote = e.Sender;
+            var local = e.Binding.Endpoint;
+            var exception = e.Exception?.GetType().Name + ":" + e.Exception?.Message;
+            var note = string.IsNullOrWhiteSpace(e.ProcessingNote) ? "-" : SanitizeLogField(e.ProcessingNote);
+            var requestScope = GetScopeWithPdu(request);
+            var responseScope = response is null ? null : GetScopeWithPdu(response);
+            var requestVariables = requestScope?.VariableBindings ?? [];
+            var responseVariables = responseScope?.VariableBindings ?? [];
+            var errorStatus = responseScope?.Pdu.ErrorStatus.ToString() ?? "-";
+            var errorIndex = responseScope is null ? "-" : responseScope.Pdu.ErrorIndex.ToString(CultureInfo.InvariantCulture);
+
+            return string.Join(' ', new[]
+            {
+                timestamp.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                timestamp.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture),
+                remote.Address.ToString(),
+                remote.Port.ToString(CultureInfo.InvariantCulture),
+                local.Address.ToString(),
+                local.Port.ToString(CultureInfo.InvariantCulture),
+                InferTransportName(e.Binding),
+                request.Version.ToString(),
+                FormatPrincipal(request),
+                FormatPduType(requestScope),
+                FormatOidList(requestVariables),
+                errorStatus,
+                errorIndex,
+                FormatOidList(responseVariables),
+                Math.Round(e.Duration.TotalMilliseconds, 3).ToString("0.###", CultureInfo.InvariantCulture),
+                note,
+                string.IsNullOrWhiteSpace(exception) ? "-" : SanitizeLogField(exception),
+            });
+        }
+
+        private static string InferTransportName(IListenerBinding binding)
+        {
+            var typeName = binding.GetType().Name;
+            return typeName.Contains("Tcp", StringComparison.OrdinalIgnoreCase) ? "tcp" : "udp";
+        }
+
+        private static string FormatPrincipal(ISnmpMessage message)
+        {
+            try
+            {
+                var principal = message.Parameters.UserName.ToString();
+                return string.IsNullOrWhiteSpace(principal) ? "-" : SanitizeLogField(principal);
+            }
+            catch
+            {
+                return "-";
+            }
+        }
+
+        private static DotNetSnmp.Common.Definitions.IScope? GetScopeWithPdu(ISnmpMessage message)
+        {
+            var scope = message.Scope;
+            return scope?.Pdu is null ? null : scope;
+        }
+
+        private static string FormatPduType(DotNetSnmp.Common.Definitions.IScope? scope)
+        {
+            return scope?.Pdu.TypeCode.ToString() ?? "-";
+        }
+
+        private static string FormatOidList(System.Collections.Generic.IEnumerable<Variable> variables)
+        {
+            if (variables == null)
+            {
+                return "-";
+            }
+
+            var oids = variables.Select(variable => variable.Id.ToString()).ToArray();
+            if (oids.Length == 0)
+            {
+                return "-";
+            }
+
+            return SanitizeLogField(string.Join(',', oids));
+        }
+
+        private static string SanitizeLogField(string value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? "-"
+                : value.Replace(' ', '_');
         }
         
         private static void ShowHelp(OptionSet options)

@@ -104,11 +104,11 @@ namespace Samples.Pipeline
                 case SnmpType.SetRequestPdu:
                     if (request.Version == VersionCode.V1)
                     {
-                        HandleSetV1(snmpContext);
+                        HandleSetV1(snmpContext, context);
                     }
                     else
                     {
-                        HandleSet(snmpContext);
+                        HandleSet(snmpContext, context);
                     }
 
                     break;
@@ -331,7 +331,7 @@ namespace Samples.Pipeline
             context.GenerateResponse(result);
         }
 
-        private void HandleSet(ISnmpContext context)
+        private void HandleSet(ISnmpContext context, SnmpMessageContext messageContext)
         {
             context.CopyRequest(ErrorCode.InconsistentName, int.MaxValue);
             if (context.TooBig)
@@ -356,10 +356,12 @@ namespace Samples.Pipeline
                     }
                     catch (AccessFailureException)
                     {
+                        messageContext.ProcessingNote = $"set-noaccess oid={variable.Id} object={obj.GetType().FullName} valueType={variable.Data.TypeCode}";
                         status = ErrorCode.NoAccess;
                     }
                     catch (ArgumentException ex)
                     {
+                        messageContext.ProcessingNote = $"set-argument oid={variable.Id} object={obj.GetType().FullName} error={ex.Message}";
                         if (!Enum.TryParse(ex.Message, out status) || status == ErrorCode.NoError)
                         {
                             status = ErrorCode.WrongType;
@@ -367,11 +369,13 @@ namespace Samples.Pipeline
                     }
                     catch (Exception)
                     {
+                        messageContext.ProcessingNote = $"set-exception oid={variable.Id} object={obj.GetType().FullName}";
                         status = ErrorCode.GenError;
                     }
                 }
                 else
                 {
+                    messageContext.ProcessingNote = $"set-miss oid={variable.Id}";
                     status = ErrorCode.NotWritable;
                 }
 
@@ -387,7 +391,7 @@ namespace Samples.Pipeline
             context.GenerateResponse(result);
         }
 
-        private void HandleSetV1(ISnmpContext context)
+        private void HandleSetV1(ISnmpContext context, SnmpMessageContext messageContext)
         {
             var index = 0;
             var status = ErrorCode.NoError;
@@ -405,19 +409,23 @@ namespace Samples.Pipeline
                     }
                     catch (AccessFailureException)
                     {
+                        messageContext.ProcessingNote = $"set-noaccess oid={variable.Id} object={obj.GetType().FullName} valueType={variable.Data.TypeCode}";
                         status = ErrorCode.NoSuchName;
                     }
                     catch (ArgumentException)
                     {
+                        messageContext.ProcessingNote = $"set-argument oid={variable.Id} object={obj.GetType().FullName}";
                         status = ErrorCode.BadValue;
                     }
                     catch (Exception)
                     {
+                        messageContext.ProcessingNote = $"set-exception oid={variable.Id} object={obj.GetType().FullName}";
                         status = ErrorCode.GenError;
                     }
                 }
                 else
                 {
+                    messageContext.ProcessingNote = $"set-miss oid={variable.Id}";
                     status = ErrorCode.NoSuchName;
                 }
 
