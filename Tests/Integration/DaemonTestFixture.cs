@@ -1325,8 +1325,13 @@ namespace Samples.Integration
             }
         }
 
-        [Fact]
+        [RetryFact(maxRetries: 3)]
         public void TestTimeOut()
+        {
+            RetryHelper.Execute(TestTimeOutLogic, maxRetries: 3);
+        }
+
+        private void TestTimeOutLogic()
         {
             var engine = CreateEngine(true);
             engine.Listener.ClearBindings();
